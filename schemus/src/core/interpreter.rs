@@ -79,6 +79,10 @@ impl Interpreter {
                 continue;
             }
 
+            if self.current_expression == "EOF" {
+                break;
+            }
+
             expression = reader::read(&mut self.current_expression);
             let result = self.eval(&expression);
 
@@ -136,7 +140,7 @@ fn read_line_from_file(interpreter: &mut Interpreter) -> String {
 
         line
     } else {
-        String::from("schemus: END_OF_PROGRAM")
+        String::from("EOF")
     }
 }
 
