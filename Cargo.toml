@@ -3,4 +3,5 @@
 members = [
     "schemus",
     "schemus-native",
+    "schemus-web"
 ]
