@@ -69,6 +69,9 @@ jobs:
           name: wasm-pkg
           path: ./dist/pkg
 
+      - name: Remove vicious .gitignore
+        run: rm ./dist/pkg/.gitignore
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
