@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  WORK_DIR: ./schemus-web
+  WORK_DIR: schemus-web
   WEB_PAGE_SOURCE: schemus-web.html
   WEB_PAGE: index.html
 
