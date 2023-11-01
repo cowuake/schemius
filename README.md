@@ -4,6 +4,10 @@ A "toy" intepreter for the Scheme programming language aiming to be compliant wi
 
 > The project is in a very early stage of development, so beware and come back later for solid features and decent R7RS compliance: the project has been prematurely made public simply because [a certain guy](https://github.com/dunklecat) was a bit impatient :)
 
+## Try out now
+
+Schemus can be found at https://cowuake.github.io/schemus/, although it is not currently tuned for fruition via web browsers.
+
 ## License
 
 Licensed under either of
