@@ -67,7 +67,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: wasm-pkg
-          path: ./dist
+          path: ./dist/pkg
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
