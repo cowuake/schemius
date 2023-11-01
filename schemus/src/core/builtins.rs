@@ -822,8 +822,9 @@ fn r_environment_bindings(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOu
     let mut bindings = env_guard.get_bindings().clone();
     bindings.sort_by(|a, b| (a.0).cmp(b.0));
 
+    // TODO: Consider building up lists and using the display procedure on them
     for binding in bindings {
-        print!("({}, {})", binding.0, binding.1);
+        println!("({}, {})", binding.0, binding.1);
     }
 
     Ok(SExpr::Unspecified)
