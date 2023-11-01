@@ -25,8 +25,10 @@ jobs:
       - name: Install wasm-pack
         run: cargo install wasm-pack
 
-      - name: Build WASM package
+      - name: Add Rust WASM target
         run: rustup target add wasm32-unknown-unknown
+
+      - name: Build WASM package
         run: wasm-pack build --release --target web
         working-directory: $WORK_DIR
 
