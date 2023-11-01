@@ -1,0 +1,73 @@
+name: Deploy Schemus web client
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  WORK_DIR: ./schemus-web
+  WEB_PAGE_SOURCE: schemus-web.html
+  WEB_PAGE: index.html
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install rustup
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Build WASM package
+        run: rustup target add wasm32-unknown-unknown
+        run: wasm-pack build --release --target web
+        working-directory: $WORK_DIR
+
+      - name: Upload web page artifact
+        run: cp $WEB_PAGE_SOURCE $WEB_PAGE
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-page
+          path: ./$WEB_PAGE
+          if-no-files-found: error
+        working-directory: $WORK_DIR
+
+      - name: Upload WASM package artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wasm-pkg
+          path: ./pkg
+          if-no-files-found: error
+        working-directory: $WORK_DIR
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Download web page artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: web-page
+          path: ./dist
+
+      - name: Download WASM package artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: wasm-pkg
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
