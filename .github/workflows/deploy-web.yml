@@ -40,17 +40,15 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: web-page
-          path: ./$WEB_PAGE
+          path: $WORK_DIR/$WEB_PAGE
           if-no-files-found: error
-        working-directory: $WORK_DIR
 
       - name: Upload WASM package artifact
         uses: actions/upload-artifact@v3
         with:
           name: wasm-pkg
-          path: ./pkg
+          path: $WORK_DIR/pkg
           if-no-files-found: error
-        working-directory: $WORK_DIR
 
   deploy:
     name: Deploy
