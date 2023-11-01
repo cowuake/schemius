@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  WORK_DIR: schemus-web
+  WORK_DIR: ./schemus-web
   WEB_PAGE_SOURCE: schemus-web.html
   WEB_PAGE: index.html
 
@@ -30,24 +30,24 @@ jobs:
 
       - name: Build WASM package
         run: wasm-pack build --release --target web
-        working-directory: $WORK_DIR
+        working-directory: ${{ env.WORK_DIR }}
 
       - name: Generate final web page
         run: cp $WEB_PAGE_SOURCE $WEB_PAGE
-        working-directory: $WORK_DIR
+        working-directory: ${{ env.WORK_DIR }}
 
       - name: Upload web page artifact
         uses: actions/upload-artifact@v3
         with:
           name: web-page
-          path: $WORK_DIR/$WEB_PAGE
+          path: ${{ env.WORK_DIR }}/${{ env.WEB_PAGE }}
           if-no-files-found: error
 
       - name: Upload WASM package artifact
         uses: actions/upload-artifact@v3
         with:
           name: wasm-pkg
-          path: $WORK_DIR/pkg
+          path: ${{ env.WORK_DIR }}/pkg
           if-no-files-found: error
 
   deploy:
