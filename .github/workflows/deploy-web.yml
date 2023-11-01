@@ -30,8 +30,11 @@ jobs:
         run: wasm-pack build --release --target web
         working-directory: $WORK_DIR
 
-      - name: Upload web page artifact
+      - name: Generate final web page
         run: cp $WEB_PAGE_SOURCE $WEB_PAGE
+        working-directory: $WORK_DIR
+
+      - name: Upload web page artifact
         uses: actions/upload-artifact@v3
         with:
           name: web-page
