@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc, time::Instant};
+use std::{cell::{RefCell, RefMut}, rc::Rc, time::Instant};
 
 use super::{environment::Environment, evaluator::eval, s_expression::*};
 
@@ -300,13 +300,11 @@ fn r_display(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 
     match eval(&args[0], env.clone()) {
         Ok(val) => match val {
-            SExpr::String(string) => print!("{}", string.borrow()), // Avoids double quotes
-            expr => print!("{}", expr),
+            SExpr::String(string) => Ok(SExpr::Symbol(string.borrow().to_string())), // Avoids double quotes
+            expr => Ok(SExpr::Symbol(format!("{}", expr)))
         },
-        Err(e) => return Err(e),
+        Err(e) => Err(e),
     }
-
-    Ok(SExpr::Unspecified)
 }
 
 fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
@@ -822,12 +820,11 @@ fn r_environment_bindings(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOu
     let mut bindings = env_guard.get_bindings().clone();
     bindings.sort_by(|a, b| (a.0).cmp(b.0));
 
-    // TODO: Consider building up lists and using the display procedure on them
-    for binding in bindings {
-        println!("({}, {})", binding.0, binding.1);
-    }
+    let mut output: String = "".to_owned();
+    bindings.iter().for_each(|b| output.push_str(format!("({}, {})\n", b.0, b.1).as_str()));
+    output.remove(output.len() - 1);
 
-    Ok(SExpr::Unspecified)
+    Ok(SExpr::Symbol(output))
 }
 
 fn r_time(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
@@ -836,9 +833,7 @@ fn r_time(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
     match r_eval(args, env.clone()) {
         Ok(_) => {
             let elapsed = then.elapsed();
-            print!("Elapsed time: {:?}", elapsed);
-
-            Ok(SExpr::Unspecified)
+            Ok(SExpr::Symbol(format!("{:?}", elapsed)))
         }
         Err(e) => Err(e),
     }
