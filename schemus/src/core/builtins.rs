@@ -85,9 +85,10 @@ fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
+    // TODO: Improve this mess!
     match args.len() {
         1 => Ok(SExpr::Ok),
-        2 => match &args[0] {
+        2.. => match &args[0] {
             SExpr::Symbol(name) => match eval(&args[1], env.clone()) {
                 Ok(val) => {
                     let value = match val {
@@ -106,7 +107,7 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 1.. => {
                     let lambda_name = &list.borrow()[0].to_string();
                     let mut lambda_args: Vec<SExpr> = vec![];
-                    let lambda_body = &args[1];
+                    let lambda_body = &mut args[1..].to_vec();
 
                     if list.borrow().len() > 1 {
                         for arg in (&list.borrow()[1..]).iter() {
@@ -114,7 +115,10 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                         }
                     }
 
-                    let lambda_proc = match r_lambda(vec![SExpr::List(Rc::new(RefCell::new(lambda_args))), lambda_body.clone()], env.clone()) {
+                    lambda_args = vec![SExpr::List(Rc::new(RefCell::new(lambda_args)))];
+                    lambda_args.append(lambda_body);
+
+                    let lambda_proc = match r_lambda(lambda_args, env.clone()) {
                         Ok(lambda) => lambda,
                         Err(e) => return Err(e),
                     };
@@ -128,7 +132,7 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
             },
             _ => Err(String::from("Exception: #<procedure define> cant take only a symbol and a list")),
         },
-        _ => Err(String::from("Exception: #<procedure define> can take only 1 or 2 arguments")),
+        _ => Err(String::from("Exception: #<procedure define> needs arguments")),
     }
 }
 
