@@ -34,7 +34,7 @@ pub const PRELUDE: &str = r#"
     (define (moo) (display "There is no cow level!"))
     (define (count-to n) (if (= n 0) 'Done! (count-to (- n 1))))
     (define (sum-to n) (if (= n 0) 0 (+ n (sum-to (- n 1)))))
-    (define (fact-pure n) (if (= n 0) 1 (* n (fact (- n 1)))))
+    (define (fact-pure n) (if (= n 0) 1 (* n (fact-pure (- n 1)))))
     (define fact (lambda (n) (define aux (lambda (n acc) (if (= n 0) acc (aux (- n 1) (* n acc))))) (aux n 1)))
     (define fact2 (lambda (n) (define aux (lambda (n acc) (cond ((= n 0) acc) ((> n 0) (aux (- n 1) (* n acc)))))) (aux n 1)))
     (define (evil n) (+ n (evil (- n 1))))
