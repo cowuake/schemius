@@ -38,6 +38,7 @@ pub const PRELUDE: &str = r#"
     (define fact (lambda (n) (define aux (lambda (n acc) (if (= n 0) acc (aux (- n 1) (* n acc))))) (aux n 1)))
     (define fact2 (lambda (n) (define aux (lambda (n acc) (cond ((= n 0) acc) ((> n 0) (aux (- n 1) (* n acc)))))) (aux n 1)))
     (define (evil n) (+ n (evil (- n 1))))
-    (define (fib n) (cond ((= n 1) 0) ((= n 2) 1) ((> n 1) (+ (fib (- n 1)) (fib (- n 2))))))
+    (define (fibonacci-pure n) (cond ((= n 1) 0) ((= n 2) 1) ((> n 1) (+ (fibonacci-pure (- n 1)) (fibonacci-pure (- n 2))))))
+    (define (fibonacci n) (define (aux n acc1 acc2) (cond ((= n 1) acc1) ((= n 2) acc2) ((> n 2) (aux (- n 1) acc2 (+ acc1 acc2))))) (aux n 0 1))
 )
 "#;
