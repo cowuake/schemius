@@ -1,4 +1,8 @@
-use std::{cell::{RefCell, RefMut}, rc::Rc, time::Instant};
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+    time::Instant,
+};
 
 use super::{environment::Environment, evaluator::eval, s_expression::*};
 
@@ -305,7 +309,7 @@ fn r_display(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
     match eval(&args[0], env.clone()) {
         Ok(val) => match val {
             SExpr::String(string) => Ok(SExpr::Symbol(string.borrow().to_string())), // Avoids double quotes
-            expr => Ok(SExpr::Symbol(format!("{}", expr)))
+            expr => Ok(SExpr::Symbol(format!("{}", expr))),
         },
         Err(e) => Err(e),
     }
