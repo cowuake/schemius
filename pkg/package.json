@@ -1,14 +1,14 @@
 {
-  "name": "schemus-web",
+  "name": "schemius-web",
   "version": "0.1.0",
   "license": "MIT OR Apache-2.0",
   "files": [
-    "schemus_web_bg.wasm",
-    "schemus_web.js",
-    "schemus_web.d.ts"
+    "schemius_web_bg.wasm",
+    "schemius_web.js",
+    "schemius_web.d.ts"
   ],
-  "module": "schemus_web.js",
-  "types": "schemus_web.d.ts",
+  "module": "schemius_web.js",
+  "types": "schemius_web.d.ts",
   "sideEffects": [
     "./snippets/*"
   ]
