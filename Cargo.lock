@@ -277,7 +277,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
 
 [[package]]
-name = "schemus"
+name = "schemius"
 version = "0.1.0"
 dependencies = [
  "lazy_static",
@@ -286,18 +286,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "schemus-native"
+name = "schemius-native"
 version = "0.1.0"
 dependencies = [
  "clap",
- "schemus",
+ "schemius",
 ]
 
 [[package]]
-name = "schemus-web"
+name = "schemius-web"
 version = "0.1.0"
 dependencies = [
- "schemus",
+ "schemius",
  "wasm-bindgen",
 ]
 

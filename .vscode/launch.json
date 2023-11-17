@@ -7,16 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'schemus'",
+            "name": "Debug unit tests in library 'schemius'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=schemus"
+                    "--package=schemius"
                 ],
                 "filter": {
-                    "name": "schemus",
+                    "name": "schemius",
                     "kind": "lib"
                 }
             },
@@ -26,15 +26,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'schemus'",
+            "name": "Debug executable 'schemius'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=schemus",
-                    "--package=schemus"
+                    "--bin=schemius",
+                    "--package=schemius"
                 ],
                 "filter": {
-                    "name": "schemus",
+                    "name": "schemius",
                     "kind": "bin"
                 }
             },
@@ -44,16 +44,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'schemus'",
+            "name": "Debug unit tests in executable 'schemius'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=schemus",
-                    "--package=schemus"
+                    "--bin=schemius",
+                    "--package=schemius"
                 ],
                 "filter": {
-                    "name": "schemus",
+                    "name": "schemius",
                     "kind": "bin"
                 }
             },

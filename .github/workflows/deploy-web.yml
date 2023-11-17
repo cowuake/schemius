@@ -1,4 +1,4 @@
-name: Deploy Schemus web client
+name: Deploy Schemius web client
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
 
 env:
-  WORK_DIR: ./schemus-web
-  WEB_PAGE_SOURCE: schemus-web.html
+  WORK_DIR: ./schemius-web
+  WEB_PAGE_SOURCE: schemius-web.html
   WEB_PAGE: index.html
 
 jobs:

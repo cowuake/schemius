@@ -1,4 +1,4 @@
-# Schemus
+# Schemius
 
 A "toy" intepreter for the Scheme programming language aiming to be compliant with the R7RS-small standard.
 
@@ -6,7 +6,7 @@ A "toy" intepreter for the Scheme programming language aiming to be compliant wi
 
 ## Try out now
 
-Schemus can be found at https://cowuake.github.io/schemus/, although it is not currently tuned for fruition via web browsers.
+Schemius can be found at https://cowuake.github.io/schemius/, although it is not currently tuned for fruition via web browsers.
 
 ## License
 

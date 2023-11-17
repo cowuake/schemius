@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    "schemus",
-    "schemus-native",
-    "schemus-web"
+    "schemius",
+    "schemius-native",
+    "schemius-web"
 ]

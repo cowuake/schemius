@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1" /> -->
+    <title>schemius</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal/js/jquery.terminal.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css"
+    />
+  </head>
+  <body>
+    <script type="module">
+      import init, { evaluate } from "./pkg/schemius_web.js";
+
+      init().then(() => {
+        $("body").terminal(function(expression)
+          {
+            this.echo(evaluate(expression))
+          },
+          {
+            greetings: `
+    ███████╗ ██████╗██╗  ██╗███████╗███╗   ███╗██╗██╗   ██╗███████╗
+    ██╔════╝██╔════╝██║  ██║██╔════╝████╗ ████║██║██║   ██║██╔════╝
+    ███████╗██║     ███████║█████╗  ██╔████╔██║██║██║   ██║███████╗
+    ╚════██║██║     ██╔══██║██╔══╝  ██║╚██╔╝██║██║██║   ██║╚════██║
+    ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
+    ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
+
+      Welcome to Schemius!
+        (environment-bindings)  -> Show bindings in current env
+        (fact 5000)             -> If you'd like to see a big number :)
+
+      Go through the code at https://github.com/cowuake/schemius
+
+          `,
+          }
+        );
+      });
+    </script>
+  </body>
+</html>

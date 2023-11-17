@@ -1,4 +1,4 @@
-use schemus::core::interpreter::Interpreter;
+use schemius::core::interpreter::Interpreter;
 use wasm_bindgen::prelude::*;
 
 // #[wasm_bindgen]

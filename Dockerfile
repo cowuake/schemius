@@ -1,8 +1,8 @@
 FROM rust:1.71.1-slim as builder
-WORKDIR /usr/src/schemus
+WORKDIR /usr/src/schemius
 COPY . .
-RUN cargo install --path ./schemus-native
+RUN cargo install --path ./schemius-native
 
 FROM debian:stable-slim
-COPY --from=builder /usr/local/cargo/bin/schemus /usr/local/bin/schemus
-ENTRYPOINT ["schemus"]
+COPY --from=builder /usr/local/cargo/bin/schemius /usr/local/bin/schemius
+ENTRYPOINT ["schemius"]
