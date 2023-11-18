@@ -1,3 +1,4 @@
+use std::borrow::BorrowMut;
 use std::fs::read_to_string;
 use std::io::{self, Write};
 
@@ -29,6 +30,8 @@ impl Interpreter {
 
     fn read(&mut self, next_line: &dyn Fn(&mut Interpreter) -> String) {
         loop {
+            // TODO: Handle the case of parentheses inside strings and all other similar cases
+            //      -> Only parenthes used as syntax elements should be considered here
             let lparens = self.current_expression.chars().filter(|c| c == &'(' || c == &'[').count();
             let rparens = self.current_expression.chars().filter(|c| c == &')' || c == &']').count();
 
@@ -106,7 +109,22 @@ impl Interpreter {
         }
     }
 
+    fn is_preliminarily_validated(&mut self, expression_string: &String) -> bool {
+        // TODO: Judge the validity of the approach and extend the function if it's worth
+        if (expression_string.trim().starts_with("(") && !expression_string.trim_end().ends_with(")")) ||
+        (expression_string.trim().starts_with("[") && !expression_string.trim_end().ends_with("]")) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     pub fn eval_expression(&mut self, expression_string: String) -> EvalOutput {
+        if !self.is_preliminarily_validated(&expression_string)
+        {
+            return Err("Exception: Invalid syntax.".to_string());
+        }
+
         let mut line = expression_string.clone();
         let expression: SExpr = reader::read(&mut line);
 
