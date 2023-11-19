@@ -1,8 +1,4 @@
-use std::{
-    cell::{RefCell, RefMut},
-    rc::Rc,
-    time::Instant,
-};
+use std::{cell::RefCell, rc::Rc, time::Instant};
 
 use super::{environment::Environment, evaluator::eval, s_expression::*};
 

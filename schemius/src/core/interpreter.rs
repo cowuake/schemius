@@ -1,4 +1,3 @@
-use std::borrow::BorrowMut;
 use std::fs::read_to_string;
 use std::io::{self, Write};
 
@@ -111,8 +110,9 @@ impl Interpreter {
 
     fn is_preliminarily_validated(&mut self, expression_string: &String) -> bool {
         // TODO: Judge the validity of the approach and extend the function if it's worth
-        if (expression_string.trim().starts_with("(") && !expression_string.trim_end().ends_with(")")) ||
-        (expression_string.trim().starts_with("[") && !expression_string.trim_end().ends_with("]")) {
+        if (expression_string.trim().starts_with("(") && !expression_string.trim_end().ends_with(")"))
+            || (expression_string.trim().starts_with("[") && !expression_string.trim_end().ends_with("]"))
+        {
             return false;
         } else {
             return true;
@@ -120,8 +120,7 @@ impl Interpreter {
     }
 
     pub fn eval_expression(&mut self, expression_string: String) -> EvalOutput {
-        if !self.is_preliminarily_validated(&expression_string)
-        {
+        if !self.is_preliminarily_validated(&expression_string) {
             return Err("Exception: Invalid syntax.".to_string());
         }
 
