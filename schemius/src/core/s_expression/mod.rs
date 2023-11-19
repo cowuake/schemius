@@ -1,14 +1,15 @@
 pub mod s_number;
 pub mod s_procedure;
+pub mod s_wrapper;
 
-use std::{cell::RefCell, fmt, rc::Rc};
+use std::fmt;
 
-pub use self::{s_number::*, s_procedure::*};
+pub use self::{s_number::*, s_procedure::*, s_wrapper::*};
 
-pub type List = Rc<RefCell<Vec<SExpr>>>;
-pub type Pair = Rc<RefCell<(Box<SExpr>, Box<SExpr>)>>;
-pub type SString = Rc<RefCell<String>>;
-pub type Vector = Rc<RefCell<Vec<SExpr>>>;
+pub type List = SWrapper<Vec<SExpr>>;
+pub type Pair = SWrapper<(Box<SExpr>, Box<SExpr>)>;
+pub type SString = SWrapper<String>;
+pub type Vector = SWrapper<Vec<SExpr>>;
 
 #[derive(Clone, Debug)]
 pub enum SExpr {
@@ -216,11 +217,10 @@ impl SExpr {
 
                 flattened.push(SExpr::Symbol(String::from(")")));
 
-                Ok(SExpr::List(Rc::new(RefCell::new(flattened.clone()))))
+                Ok(SExpr::List(SWrapper::new(flattened.clone())))
             }
             SExpr::Pair(pair) => {
-                SExpr::List(Rc::new(RefCell::new(vec![*pair.borrow().0.clone(), SExpr::Symbol(".".to_string()), *pair.borrow().1.clone()])))
-                    .flatten()
+                SExpr::List(SWrapper::new(vec![*pair.borrow().0.clone(), SExpr::Symbol(".".to_string()), *pair.borrow().1.clone()])).flatten()
             }
             other => Ok(other.clone()),
         }
@@ -270,7 +270,7 @@ impl SExpr {
                         None => break,
                     }
 
-                    let internal = SExpr::List(Rc::new(RefCell::new(unflattened.borrow()[(l_index + 1)..r_index].to_vec())));
+                    let internal = SExpr::List(SWrapper::new(unflattened.borrow()[(l_index + 1)..r_index].to_vec()));
                     unflattened.borrow_mut().splice(l_index..(r_index + 1), [internal]);
                 }
 

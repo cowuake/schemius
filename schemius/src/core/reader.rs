@@ -1,11 +1,9 @@
-use std::{cell::RefCell, rc::Rc};
-
 use lazy_static::lazy_static;
 use regex::Regex;
 
 use super::s_expression::{
     s_number::{NativeBigInt, NativeFloat, NativeInt, NativeRational, SNumber},
-    SExpr,
+    SExpr, SWrapper,
 };
 
 pub fn read(line: &mut String) -> SExpr {
@@ -45,14 +43,14 @@ fn advance(line: &mut String, string_token: &String) -> SExpr {
                     if new_list.len() == 3 && token != "]" {
                         if let SExpr::Symbol(sym) = &new_list[1] {
                             if sym.as_str() == "." {
-                                return SExpr::Pair(Rc::new(RefCell::new((Box::new(new_list[0].clone()), Box::new(new_list[2].clone())))));
+                                return SExpr::Pair(SWrapper::new((Box::new(new_list[0].clone()), Box::new(new_list[2].clone()))));
                             }
                         }
                     }
 
-                    return SExpr::List(Rc::new(RefCell::new(new_list)));
+                    return SExpr::List(SWrapper::new(new_list));
                 } else if opening_token == "#(" && token == ")" {
-                    return SExpr::Vector(Rc::new(RefCell::new(new_list)));
+                    return SExpr::Vector(SWrapper::new(new_list));
                 } else {
                     new_list.push(advance(line, &token));
                 }
@@ -68,7 +66,7 @@ fn parse_token(line: &mut String, token: &String) -> SExpr {
     } else if token == "#f" {
         return SExpr::Boolean(false);
     } else if token.starts_with('"') {
-        return SExpr::String(Rc::new(RefCell::new(token.get(1..token.len() - 1).unwrap().to_string())));
+        return SExpr::String(SWrapper::new(token.get(1..token.len() - 1).unwrap().to_string()));
     } else if token == "'" || token == "`" || token == "," || token == ",@" {
         let internal_token = init(line);
         let quoted = advance(line, &internal_token);
@@ -90,7 +88,7 @@ fn parse_token(line: &mut String, token: &String) -> SExpr {
 
         vec.push(SExpr::Symbol(string_token));
         vec.push(quoted);
-        return SExpr::List(Rc::new(RefCell::new(vec)));
+        return SExpr::List(SWrapper::new(vec));
     } else if token.starts_with(r#"#\"#) {
         if token.len() == 3 {
             return SExpr::Char(token.chars().last().unwrap());

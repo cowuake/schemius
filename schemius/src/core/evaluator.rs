@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    rc::Rc,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use super::{
     builtins::{Primitive, SpecialForm},
@@ -141,7 +137,7 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         new.push(SExpr::Procedure(Procedure::SpecialForm(SpecialForm::BEGIN)));
                                         body.iter().for_each(|x| new.push(x.clone()));
 
-                                        to_be_evaluated = SExpr::List(Rc::new(RefCell::new(new)));
+                                        to_be_evaluated = SExpr::List(SWrapper::new(new));
                                         environment = eval_env.clone();
                                         continue;
                                     }
