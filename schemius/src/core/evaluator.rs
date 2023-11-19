@@ -137,7 +137,7 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         new.push(SExpr::Procedure(Procedure::SpecialForm(SpecialForm::BEGIN)));
                                         body.iter().for_each(|x| new.push(x.clone()));
 
-                                        to_be_evaluated = SExpr::List(SWrapper::new(new));
+                                        to_be_evaluated = SExpr::List(SList::new(new));
                                         environment = eval_env.clone();
                                         continue;
                                     }
