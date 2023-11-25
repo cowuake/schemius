@@ -26,6 +26,15 @@ pub enum SExpr {
     Ok,
 }
 
+pub struct Bracket;
+
+impl Bracket {
+    pub const LEFT_ROUND: &str = "(";
+    pub const LEFT_SQUARE: &str = "[";
+    pub const RIGHT_ROUND: &str = ")";
+    pub const RIGHT_SQUARE: &str = "]";
+}
+
 impl fmt::Display for SExpr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -62,6 +71,22 @@ impl SExpr {
                 None => Ok(true),
             },
             _ => Ok(false),
+        }
+    }
+
+    fn is_left_bracket(&self) -> Result<bool, String> {
+        if self.is_symbol(Some(Bracket::LEFT_ROUND)).unwrap() || self.is_symbol(Some(Bracket::LEFT_SQUARE)).unwrap() {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    fn is_right_bracket(&self) -> Result<bool, String> {
+        if self.is_symbol(Some(Bracket::RIGHT_ROUND)).unwrap() || self.is_symbol(Some(Bracket::RIGHT_SQUARE)).unwrap() {
+            Ok(true)
+        } else {
+            Ok(false)
         }
     }
 
@@ -135,22 +160,20 @@ impl SExpr {
         }
     }
 
-    pub fn matching_parens(&self) -> Option<Vec<(usize, usize)>> {
+    pub fn matching_brackets(&self) -> Option<Vec<(usize, usize, usize)>> {
         match self {
             SExpr::List(list) => {
                 if !list.borrow().first().unwrap().is_symbol(Some("(")).unwrap() {
                     return None;
                 }
 
-                let mut mapping: Vec<(usize, usize)> = vec![];
+                let mut pairs: Vec<(usize, usize)> = vec![];
 
                 while let Some(right) = list
                     .borrow()
                     .iter()
                     .enumerate()
-                    .filter(|x| {
-                        (mapping.is_empty() || mapping.iter().all(|pair: &(usize, usize)| pair.1 != x.0)) && x.1.is_symbol(Some(")")).unwrap()
-                    })
+                    .filter(|x| (pairs.is_empty() || pairs.iter().all(|(_, right)| right != &x.0)) && x.1.is_symbol(Some(")")).unwrap())
                     .min_by(|x, y| (x.0).cmp(&y.0))
                     .map(|x| x.0)
                 {
@@ -158,15 +181,28 @@ impl SExpr {
                         .borrow()
                         .iter()
                         .enumerate()
-                        .filter(|x| (mapping.is_empty() || mapping.iter().all(|pair| pair.0 != x.0)) && x.1.is_symbol(Some("(")).unwrap())
+                        .filter(|x| (pairs.is_empty() || pairs.iter().all(|(left, _)| left != &x.0)) && x.1.is_symbol(Some("(")).unwrap())
                         .filter(|x| x.0 < right)
                         .max_by(|x, y| (x.0).cmp(&y.0))
                         .map(|x| x.0)
                     {
-                        Some(left) => mapping.push((left, right)),
+                        Some(left) => pairs.push((left, right)),
                         None => break,
                     }
                 }
+
+                let mut mapping: Vec<(usize, usize, usize)> = vec![];
+                pairs
+                    .iter()
+                    .map(|(left, right)| {
+                        if *left == 0 && *right == list.borrow().len() - 1 {
+                            (left, right, 0)
+                        } else {
+                            (left, right, pairs.iter().filter(|(l, r)| l < left && r > left).count())
+                        }
+                    })
+                    .for_each(|(left, right, level)| mapping.push((*left, *right, level)));
+
                 Some(mapping)
             }
             _ => None,

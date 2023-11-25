@@ -508,7 +508,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                     break;
                                 }
 
-                                let paren_map = SExpr::List(list.clone()).matching_parens();
+                                let paren_map = SExpr::List(list.clone()).matching_brackets();
                                 let unquote_is_splicing = unquotes[0].0;
                                 let unquote_index;
 
@@ -520,10 +520,10 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                                 let enclosing = match paren_map {
                                     Some(ref paren_map) => {
-                                        if !paren_map.iter().enumerate().any(|(_, (i, _))| *i == (unquote_index + 1)) {
+                                        if !paren_map.iter().enumerate().any(|(_, (i, _, _))| *i == (unquote_index + 1)) {
                                             None
                                         } else {
-                                            paren_map.iter().find_map(|(opening, closing)| Some((*opening, *closing)))
+                                            paren_map.iter().find_map(|(opening, closing, _)| Some((*opening, *closing)))
                                         }
                                     }
                                     None => None,
