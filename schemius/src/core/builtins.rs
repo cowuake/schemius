@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::{any, borrow::BorrowMut, time::Instant};
 
 use super::{environment::Environment, evaluator::eval, s_expression::*};
 
@@ -486,119 +486,123 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 Ok(expr) => match expr {
                     SExpr::List(list) => {
                         let quasiquotes = SExpr::List(list.clone()).find_symbol("quasiquote");
+                        let mapping = SExpr::List(list.clone()).matching_brackets().unwrap();
 
-                        if quasiquotes.is_none() {
-                            let unquotes = SExpr::List(list.clone()).find_symbol("unquote");
-                            let unquotes_splicing = SExpr::List(list.clone()).find_symbol("unquote-splicing");
-                            let mut unquotes =
-                                if unquotes.is_some() { unquotes.unwrap().iter().map(|x| (false, *x)).collect() } else { vec![] };
-                            let mut unquotes_splicing = if unquotes_splicing.is_some() {
-                                unquotes_splicing.unwrap().iter().map(|x| (true, *x)).collect()
-                            } else {
-                                vec![]
+                        let unquotes = SExpr::List(list.clone()).find_symbol("unquote");
+                        let unquotes_splicing = SExpr::List(list.clone()).find_symbol("unquote-splicing");
+                        let mut unquotes = if unquotes.is_some() { unquotes.unwrap().iter().map(|x| (false, *x)).collect() } else { vec![] };
+                        let mut unquotes_splicing =
+                            if unquotes_splicing.is_some() { unquotes_splicing.unwrap().iter().map(|x| (true, *x)).collect() } else { vec![] };
+
+                        unquotes.append(&mut unquotes_splicing);
+                        unquotes.sort_by(|x, y| x.1.cmp(&y.1));
+
+                        if quasiquotes.is_some() {
+                            let quasiquotes = quasiquotes.unwrap();
+
+                            unquotes.retain(|(_, index)| {
+                                !mapping.iter().any(|(left, right, level)| {
+                                    index > left && index < right && quasiquotes.iter().any(|quasi| *left == quasi + 1) && *level > 0
+                                })
+                            });
+                        }
+
+                        // After each and every unquoting indexes will be shifted by a certain offset
+                        let mut offset: i32 = 0;
+
+                        loop {
+                            if unquotes.is_empty() {
+                                break;
+                            }
+
+                            let paren_map = SExpr::List(list.clone()).matching_brackets();
+                            let unquote_is_splicing = unquotes[0].0;
+                            let unquote_index;
+
+                            let apply_offset = |source: i32, offset: i32| match offset {
+                                0.. => (source - offset) as usize,
+                                _ => (source + offset) as usize,
                             };
-                            unquotes.append(&mut unquotes_splicing);
-                            unquotes.sort_by(|x, y| x.1.cmp(&y.1));
+                            unquote_index = apply_offset(unquotes[0].1 as i32, offset);
 
-                            // After each and every unquoting indexes will be shifted by a certain offset
-                            let mut offset: i32 = 0;
-
-                            loop {
-                                if unquotes.is_empty() {
-                                    break;
-                                }
-
-                                let paren_map = SExpr::List(list.clone()).matching_brackets();
-                                let unquote_is_splicing = unquotes[0].0;
-                                let unquote_index;
-
-                                let apply_offset = |source: i32, offset: i32| match offset {
-                                    0.. => (source - offset) as usize,
-                                    _ => (source + offset) as usize,
-                                };
-                                unquote_index = apply_offset(unquotes[0].1 as i32, offset);
-
-                                let enclosing = match paren_map {
-                                    Some(ref paren_map) => {
-                                        if !paren_map.iter().enumerate().any(|(_, (i, _, _))| *i == (unquote_index + 1)) {
-                                            None
-                                        } else {
-                                            paren_map.iter().find_map(|(opening, closing, _)| Some((*opening, *closing)))
-                                        }
+                            let enclosing = match paren_map {
+                                Some(ref paren_map) => {
+                                    if !paren_map.iter().enumerate().any(|(_, (i, _, _))| *i == (unquote_index + 1)) {
+                                        None
+                                    } else {
+                                        paren_map.iter().find_map(|(opening, closing, _)| Some((*opening, *closing)))
                                     }
-                                    None => None,
-                                };
+                                }
+                                None => None,
+                            };
 
-                                let to_be_evaluated;
-                                let first_idx;
-                                let last_idx;
+                            let to_be_evaluated;
+                            let first_idx;
+                            let last_idx;
 
-                                match enclosing {
-                                    // Unquoting expression (list)
-                                    Some((lparen_idx, rparen_idx)) => {
-                                        // The final expression does not need enclosing parentheses
-                                        let raw_expr = list.borrow()[(lparen_idx + 1)..rparen_idx].to_vec();
+                            match enclosing {
+                                // Unquoting expression (list)
+                                Some((lparen_idx, rparen_idx)) => {
+                                    // The final expression does not need enclosing parentheses
+                                    let raw_expr = list.borrow()[(lparen_idx + 1)..rparen_idx].to_vec();
 
-                                        // The expression... Must be a non-self-evaluating one!
-                                        if raw_expr.len() == 1 {
-                                            let suspect = raw_expr.first().unwrap();
-                                            let mut incriminated = false;
+                                    // The expression... Must be a non-self-evaluating one!
+                                    if raw_expr.len() == 1 {
+                                        let suspect = raw_expr.first().unwrap();
+                                        let mut incriminated = false;
 
-                                            if let SExpr::Symbol(symbol) = suspect {
-                                                if !env.lock().unwrap().get(&symbol).unwrap().is_procedure().unwrap() {
-                                                    incriminated = true;
-                                                }
-                                            } else {
+                                        if let SExpr::Symbol(symbol) = suspect {
+                                            if !env.lock().unwrap().get(&symbol).unwrap().is_procedure().unwrap() {
                                                 incriminated = true;
                                             }
-
-                                            if incriminated {
-                                                return Err(format!("Exception: {} is not a procedure", raw_expr[0]));
-                                            }
+                                        } else {
+                                            incriminated = true;
                                         }
 
-                                        let expr = SExpr::List(SList::new(raw_expr));
-                                        to_be_evaluated = expr.unflatten().unwrap();
-                                        first_idx = lparen_idx - 2; // Index of the left parenthesis preceding the unquote symbol
-                                        last_idx = rparen_idx + 2; // Index of the right matching parenthesis + 1
+                                        if incriminated {
+                                            return Err(format!("Exception: {} is not a procedure", raw_expr[0]));
+                                        }
                                     }
-                                    // Unquoting symbol or atom
-                                    None => {
-                                        to_be_evaluated = list.borrow()[unquote_index + 1].clone();
-                                        first_idx = unquote_index - 1; // Index of the left parenthesis preceding the unquote symbol
-                                        last_idx = unquote_index + 3; // Index of the right parenthesis + 1
-                                    }
-                                };
 
-                                offset += (last_idx - first_idx - 1) as i32;
-                                let evaluated: Result<SExpr, String> = eval(&to_be_evaluated, env.clone());
-
-                                if !unquote_is_splicing {
-                                    list.borrow_mut().splice(first_idx..last_idx, evaluated);
-                                } else {
-                                    match evaluated {
-                                        Ok(ref res) => match res {
-                                            SExpr::List(internal) => {
-                                                offset -= (internal.borrow().len() - 1) as i32;
-
-                                                for i in (first_idx..last_idx).into_iter().rev() {
-                                                    list.borrow_mut().remove(i);
-                                                }
-
-                                                for i in (0..(internal.borrow().len())).into_iter().rev() {
-                                                    list.borrow_mut().splice(first_idx..first_idx, [internal.borrow()[i].clone()]);
-                                                }
-                                            }
-                                            other => {
-                                                return Err(format!("Exception: ,@ followed by non-list {} -> {}", to_be_evaluated, other))
-                                            }
-                                        },
-                                        Err(e) => return Err(e),
-                                    }
+                                    let expr = SExpr::List(SList::new(raw_expr));
+                                    to_be_evaluated = expr.unflatten().unwrap();
+                                    first_idx = lparen_idx - 2; // Index of the left parenthesis preceding the unquote symbol
+                                    last_idx = rparen_idx + 2; // Index of the right matching parenthesis + 1
                                 }
+                                // Unquoting symbol or atom
+                                None => {
+                                    to_be_evaluated = list.borrow()[unquote_index + 1].clone();
+                                    first_idx = unquote_index - 1; // Index of the left parenthesis preceding the unquote symbol
+                                    last_idx = unquote_index + 3; // Index of the right parenthesis + 1
+                                }
+                            };
 
-                                unquotes.remove(0);
+                            offset += (last_idx - first_idx - 1) as i32;
+                            let evaluated: Result<SExpr, String> = eval(&to_be_evaluated, env.clone());
+
+                            if !unquote_is_splicing {
+                                list.borrow_mut().splice(first_idx..last_idx, evaluated);
+                            } else {
+                                match evaluated {
+                                    Ok(ref res) => match res {
+                                        SExpr::List(internal) => {
+                                            offset -= (internal.borrow().len() - 1) as i32;
+
+                                            for i in (first_idx..last_idx).into_iter().rev() {
+                                                list.borrow_mut().remove(i);
+                                            }
+
+                                            for i in (0..(internal.borrow().len())).into_iter().rev() {
+                                                list.borrow_mut().splice(first_idx..first_idx, [internal.borrow()[i].clone()]);
+                                            }
+                                        }
+                                        other => return Err(format!("Exception: ,@ followed by non-list {} -> {}", to_be_evaluated, other)),
+                                    },
+                                    Err(e) => return Err(e),
+                                }
                             }
+
+                            unquotes.remove(0);
                         }
 
                         Ok(SExpr::List(list.clone()).unflatten().unwrap())
