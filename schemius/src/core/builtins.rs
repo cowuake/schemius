@@ -512,11 +512,11 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                 let unquote_is_splicing = unquotes[0].0;
                                 let unquote_index;
 
-                                if offset >= 0 {
-                                    unquote_index = (unquotes[0].1 as i32 - offset).abs() as usize;
-                                } else {
-                                    unquote_index = (unquotes[0].1 as i32 + offset).abs() as usize;
-                                }
+                                let apply_offset = |source: i32, offset: i32| match offset {
+                                    0.. => (source - offset) as usize,
+                                    _ => (source + offset) as usize,
+                                };
+                                unquote_index = apply_offset(unquotes[0].1 as i32, offset);
 
                                 let enclosing = match paren_map {
                                     Some(ref paren_map) => {
@@ -535,10 +535,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                                 match enclosing {
                                     // Unquoting expression (list)
-                                    Some(limits) => {
-                                        let lparen_idx = limits.0;
-                                        let rparen_idx = limits.1;
-
+                                    Some((lparen_idx, rparen_idx)) => {
                                         // The final expression does not need enclosing parentheses
                                         let raw_expr = list.borrow()[(lparen_idx + 1)..rparen_idx].to_vec();
 
