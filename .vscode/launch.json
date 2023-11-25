@@ -31,7 +31,7 @@
                 "args": [
                     "build",
                     "--bin=schemius",
-                    "--package=schemius"
+                    "--package=schemius-native"
                 ],
                 "filter": {
                     "name": "schemius",
