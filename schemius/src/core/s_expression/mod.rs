@@ -29,10 +29,10 @@ pub enum SExpr {
 pub struct Bracket;
 
 impl Bracket {
-    pub const LEFT_ROUND: &str = "(";
-    pub const LEFT_SQUARE: &str = "[";
-    pub const RIGHT_ROUND: &str = ")";
-    pub const RIGHT_SQUARE: &str = "]";
+    pub const LEFT_ROUND: &'static str = "(";
+    pub const LEFT_SQUARE: &'static str = "[";
+    pub const RIGHT_ROUND: &'static str = ")";
+    pub const RIGHT_SQUARE: &'static str = "]";
 }
 
 impl fmt::Display for SExpr {

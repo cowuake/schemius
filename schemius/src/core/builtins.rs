@@ -1,4 +1,4 @@
-use std::{any, borrow::BorrowMut, time::Instant};
+use std::time::Instant;
 
 use super::{environment::Environment, evaluator::eval, s_expression::*};
 
