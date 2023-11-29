@@ -51,7 +51,7 @@ macro_rules! impl_ref_op {
             fn $small(self, other: Self) -> Self::Output {
                 match self {
                     SNumber::Int(l) => match other {
-                        SNumber::Int(r) => if cmp::max(l.abs(), r.abs()) < $limit { SNumber::Int(l $op r) } else { SNumber::BigInt(NativeBigInt::from(*l) $op NativeBigInt::from(*r)) },
+                        SNumber::Int(r) => if cmp::max((if *l < 0 { l + 1 } else { l - 1 }).abs(), (if *r < 0 { r + 1 } else { r - 1 }).abs()) < $limit { SNumber::Int(l $op r) } else { SNumber::BigInt(NativeBigInt::from(*l) $op NativeBigInt::from(*r)) },
                         SNumber::BigInt(r) => SNumber::BigInt(l $op r),
                         SNumber::Rational(r) => SNumber::Rational(NativeRational::from(NativeBigInt::from(*l)) $op r),
                         SNumber::Float(r) => SNumber::Float(*l as NativeFloat $op r),
