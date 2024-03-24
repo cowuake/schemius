@@ -669,8 +669,7 @@ macro_rules! fn_compute_sum_prod {
                     }
 
                     Ok(SExpr::Number(res))
-                },
-                _ => Err(String::from("???")),
+                }
             }
         }
     )*}
@@ -701,7 +700,6 @@ macro_rules! fn_compute_diff_quot {
 
                     Ok(SExpr::Number(res))
                 }
-                _ => Err(String::from("???")),
             }
         }
     )*}
