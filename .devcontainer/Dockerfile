@@ -1,3 +1,3 @@
 FROM fedora:latest
 COPY . .
-RUN dnf update && chmod +x ./setup.sh && ./setup.sh
+RUN dnf update -y && chmod +x ./setup.sh && ./setup.sh
