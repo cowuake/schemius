@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+SCHEMIUS_DIR=/workspaces/schemius
+alias build-cli="cd $SCHEMIUS_DIR && cargo build --release"
+alias build-web="wasm-pack build --release --target web $SCHEMIUS_DIR/schemius-web/"
+alias format="cd $SCHEMIUS_DIR && cargo fmt"
+alias run-cli="build-cli && cargo run --release"
+alias test="cd $SCHEMIUS_DIR && cargo test"
