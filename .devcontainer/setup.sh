@@ -13,5 +13,8 @@ cargo install wasm-pack
 # Add Rust WASM target
 rustup target add wasm32-unknown-unknown
 
+# Install additional utilities
+sudo dnf install -y cloc
+
 # Add useful aliases to shell
 echo alias build-schemius-web="wasm-pack build --release --target web /workspaces/schemius/schemius-web/" > .bashrc
