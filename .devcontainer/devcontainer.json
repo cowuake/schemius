@@ -1,9 +1,13 @@
 {
-	"name": "Codespaces Rust DevEnv",
+    "name": "Codespaces Rust DevEnv",
     "dockerFile": "Dockerfile",
     "customizations": {
         "vscode": {
             "extensions": [
+                "github.copilot",
+                "github.copilot-chat",
+                "github.vscode-github-actions",
+                "github.vscode-pull-request-github",
                 "jdinhlife.gruvbox",
                 "ritwickdey.liveserver",
                 "rust-lang.rust-analyzer",
