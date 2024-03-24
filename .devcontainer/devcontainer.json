@@ -7,8 +7,8 @@
                 "jdinhlife.gruvbox",
                 "ritwickdey.liveserver",
                 "rust-lang.rust-analyzer",
-                "tuttieee.emacs-mcx",
-                "vscode-icons-team.vscode-icons"
+                "vscode-icons-team.vscode-icons",
+                "vscodevim.vim"
             ],
             "settings": {
                 "diffEditor.ignoreTrimWhitespace": true,
