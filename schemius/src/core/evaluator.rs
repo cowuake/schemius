@@ -46,21 +46,21 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                 let args = &list.borrow()[1..].to_vec();
 
                                 match proc {
-                                    Procedure::SpecialForm(special_form) => match special_form {
-                                        SpecialForm::QUOTE
-                                        | SpecialForm::QUASIQUOTE
-                                        | SpecialForm::DEFINE
-                                        | SpecialForm::SET
-                                        | SpecialForm::LET
-                                        | SpecialForm::LET_STAR
-                                        | SpecialForm::TIME => {
+                                    Procedure::SpecialForm(special_form) => {
+                                        if special_form == SpecialForm::QUOTE
+                                            || special_form == SpecialForm::QUASIQUOTE
+                                            || special_form == SpecialForm::DEFINE
+                                            || special_form == SpecialForm::SET
+                                            || special_form == SpecialForm::LET
+                                            || special_form == SpecialForm::LET_STAR
+                                            || special_form == SpecialForm::TIME
+                                        {
                                             let result = special_form(args.to_vec(), environment.clone());
                                             match result {
                                                 Ok(expression) => return Ok(expression),
                                                 Err(e) => return Err(e),
                                             }
-                                        }
-                                        special_form => {
+                                        } else {
                                             let result = special_form(args.to_vec(), environment.clone());
                                             match result {
                                                 Ok(expression) => {
@@ -70,18 +70,20 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                                 Err(e) => return Err(e),
                                             }
                                         }
-                                    },
-                                    Procedure::Primitive(primitive) => match primitive {
-                                        Primitive::CONS
-                                        | Primitive::DISPLAY
-                                        | Primitive::CAR
-                                        | Primitive::CDR
-                                        | Primitive::SET_CAR
-                                        | Primitive::FLATTEN => match primitive(args.to_vec(), environment.clone()) {
-                                            Ok(res) => return Ok(res),
-                                            Err(e) => return Err(e),
-                                        },
-                                        Primitive::APPLY => {
+                                    }
+                                    Procedure::Primitive(primitive) => {
+                                        if primitive == Primitive::CONS
+                                            || primitive == Primitive::DISPLAY
+                                            || primitive == Primitive::CAR
+                                            || primitive == Primitive::CDR
+                                            || primitive == Primitive::SET_CAR
+                                            || primitive == Primitive::FLATTEN
+                                        {
+                                            match primitive(args.to_vec(), environment.clone()) {
+                                                Ok(res) => return Ok(res),
+                                                Err(e) => return Err(e),
+                                            }
+                                        } else if primitive == Primitive::APPLY {
                                             let result = Primitive::APPLY(args.to_vec(), environment.clone());
                                             match result {
                                                 Ok(expr) => {
@@ -90,8 +92,7 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                                 }
                                                 Err(e) => return Err(e),
                                             }
-                                        }
-                                        procedure => {
+                                        } else {
                                             let mut expanded_args = vec![];
 
                                             for arg in args.iter() {
@@ -101,9 +102,9 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                                 }
                                             }
 
-                                            return procedure(expanded_args, environment.clone());
+                                            return primitive(expanded_args, environment.clone());
                                         }
-                                    },
+                                    }
                                     Procedure::Compound(ref arg_names, ref body, ref closure_env) => {
                                         if arg_names.len() != args.len() {
                                             return Err(String::from("Exception: found different lengths for arguments and their names"));
