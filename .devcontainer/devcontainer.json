@@ -1,0 +1,26 @@
+{
+	"name": "Codespaces Rust DevEnv",
+    "dockerFile": "Dockerfile",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "jdinhlife.gruvbox",
+                "rust-lang.rust-analyzer",
+                "vscode-icons-team.vscode-icons"
+            ],
+            "settings": {
+                "diffEditor.ignoreTrimWhitespace": true,
+                "editor.cursorBlinking": "phase",
+                "editor.cursorStyle": "block",
+                "editor.fontFamily": "'Source Code Pro', 'Cascadia Code'",
+                "editor.fontLigatures": true,
+                "editor.formatOnSave": true,
+                "editor.trimAutoWhitespace": true,
+                "terminal.integrated.shell.linux": "/usr/bin/bash",
+                "vsicons.dontShowNewVersionMessage": true,
+                "workbench.colorTheme": "Gruvbox Dark Soft",
+                "workbench.iconTheme": "vscode-icons"
+            }
+        }
+    }
+}
