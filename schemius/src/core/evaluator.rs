@@ -152,7 +152,7 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                     return Err(format!("Exception: wrong syntax {}", SExpr::List(list)));
                 }
             }
-            other => return Ok(other.clone()),
+            other => return Ok(other),
         }
     }
 }
