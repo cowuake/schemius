@@ -658,7 +658,7 @@ macro_rules! fn_compute_sum_prod {
         fn $fn(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
             match args.len() {
                 0 => Ok(SExpr::Number(SNumber::Int($neutral))),
-                1.. => {
+                _ => {
                     let mut res = SNumber::Int($neutral);
 
                     for arg in &args[0..] {
@@ -681,7 +681,7 @@ macro_rules! fn_compute_diff_quot {
         fn $fn(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
             match args.len() {
                 0 => Err(String::from("Exception: too few arguments")),
-                1.. => {
+                _ => {
                     let mut res = match &args[0] {
                             SExpr::Number(num) => num.clone(),
                             num => return Err(format!("Exception in {}: #<{}> is not a number", stringify!($op), num)),
