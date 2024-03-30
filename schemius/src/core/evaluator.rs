@@ -28,19 +28,19 @@ impl Evaluator {
     }
 }
 
-pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
-    let mut to_be_evaluated = arg.clone();
-    let mut environment = env.clone();
+pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
+    let mut current_expression = expression.clone();
+    let mut current_env = env.clone();
 
     loop {
-        match to_be_evaluated {
-            SExpr::Symbol(ref val) => match environment.lock().unwrap().get(val) {
+        match current_expression {
+            SExpr::Symbol(ref val) => match current_env.lock().unwrap().get(val) {
                 Some(v) => return Ok(v),
                 None => return Err(format!("Exception: in eval: could not find a value bound to <{}>", val)),
             },
             SExpr::List(list) => {
                 if list.borrow().len() > 0 {
-                    match eval(&list.borrow()[0], environment.clone()) {
+                    match eval(&list.borrow()[0], current_env.clone()) {
                         Ok(res) => match res {
                             SExpr::Procedure(proc) => {
                                 let args = &list.borrow()[1..].to_vec();
@@ -55,18 +55,15 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             || special_form == SpecialForm::LET_STAR
                                             || special_form == SpecialForm::TIME
                                         {
-                                            let result = special_form(args.to_vec(), environment.clone());
+                                            let result = special_form(args.to_vec(), current_env.clone());
                                             match result {
                                                 Ok(expression) => return Ok(expression),
                                                 Err(e) => return Err(e),
                                             }
                                         } else {
-                                            let result = special_form(args.to_vec(), environment.clone());
+                                            let result = special_form(args.to_vec(), current_env.clone());
                                             match result {
-                                                Ok(expression) => {
-                                                    to_be_evaluated = expression;
-                                                    continue;
-                                                }
+                                                Ok(expression) => current_expression = expression,
                                                 Err(e) => return Err(e),
                                             }
                                         }
@@ -79,15 +76,15 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             || primitive == Primitive::SET_CAR
                                             || primitive == Primitive::FLATTEN
                                         {
-                                            match primitive(args.to_vec(), environment.clone()) {
+                                            match primitive(args.to_vec(), current_env.clone()) {
                                                 Ok(res) => return Ok(res),
                                                 Err(e) => return Err(e),
                                             }
                                         } else if primitive == Primitive::APPLY {
-                                            let result = Primitive::APPLY(args.to_vec(), environment.clone());
+                                            let result = Primitive::APPLY(args.to_vec(), current_env.clone());
                                             match result {
                                                 Ok(expr) => {
-                                                    to_be_evaluated = expr;
+                                                    current_expression = expr;
                                                     continue;
                                                 }
                                                 Err(e) => return Err(e),
@@ -96,13 +93,13 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             let mut expanded_args = vec![];
 
                                             for arg in args.iter() {
-                                                match eval(arg, environment.clone()) {
+                                                match eval(arg, current_env.clone()) {
                                                     Ok(res) => expanded_args.push(res),
                                                     Err(e) => return Err(e),
                                                 }
                                             }
 
-                                            return primitive(expanded_args, environment.clone());
+                                            return primitive(expanded_args, current_env.clone());
                                         }
                                     }
                                     Procedure::Compound(ref arg_names, ref body, ref closure_env) => {
@@ -113,7 +110,7 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         let mut expanded_args = vec![];
 
                                         for arg in args.iter() {
-                                            match eval(arg, environment.clone()) {
+                                            match eval(arg, current_env.clone()) {
                                                 Ok(res) => expanded_args.push(res),
                                                 Err(e) => return Err(e),
                                             }
@@ -122,7 +119,7 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         let lambda_env = Environment::new_child(closure_env.clone());
 
                                         for (name, arg) in arg_names.iter().zip(expanded_args.iter()) {
-                                            match eval(arg, environment.clone()) {
+                                            match eval(arg, current_env.clone()) {
                                                 Ok(val) => {
                                                     if lambda_env.lock().unwrap().define(name.clone(), val).is_err() {
                                                         return Err(String::from("Exception: could not bind value to the procedure frame"));
@@ -138,8 +135,8 @@ pub fn eval(arg: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         new.push(SExpr::Procedure(Procedure::SpecialForm(SpecialForm::BEGIN)));
                                         body.iter().for_each(|x| new.push(x.clone()));
 
-                                        to_be_evaluated = SExpr::List(SList::new(new));
-                                        environment = eval_env.clone();
+                                        current_expression = SExpr::List(SList::new(new));
+                                        current_env = eval_env.clone();
                                         continue;
                                     }
                                 };
