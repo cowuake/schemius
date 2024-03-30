@@ -38,6 +38,12 @@
     <script type="module">
       import init, { evaluate } from "./pkg/schemius_web.js";
 
+      ["compositionstart", "compositionupdate", "compositionend"].forEach(
+        (event) => {
+          $(document).off(event);
+        }
+      );
+
       init().then(() => {
         $("body").terminal(
           function (expression) {
