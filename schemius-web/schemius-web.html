@@ -38,10 +38,10 @@
     <script type="module">
       import init, { evaluate } from "./pkg/schemius_web.js";
 
-      ["compositionstart", "compositionupdate", "compositionend"].forEach(
+      ["compositionstart", "compositionupdate", "compositionend", "input"].forEach(
         (event) => {
           window.addEventListener(event, (e) => {
-            e.preventDefault();
+            console.log(event, e);
           }, true);
         }
       );
