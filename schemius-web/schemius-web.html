@@ -40,7 +40,9 @@
 
       ["compositionstart", "compositionupdate", "compositionend"].forEach(
         (event) => {
-          $(document).off(event);
+          window.addEventListener(event, (e) => {
+            e.preventDefault();
+          }, true);
         }
       );
 
