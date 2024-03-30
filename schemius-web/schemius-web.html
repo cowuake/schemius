@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="en-US">
   <head>
-    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta
+      charset="UTF-8"
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content"
+    />
     <title>schemius</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"/></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery.terminal/js/jquery.terminal.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/jquery.terminal/css/jquery.terminal.min.css"
     />
     <style>
-      @import url('https://cdn.jsdelivr.net/npm/@xz/fonts@1/serve/cascadia-code.css');
+      @import url("https://cdn.jsdelivr.net/npm/@xz/fonts@1/serve/cascadia-code.css");
 
-      .terminal, .terminal-mobile {
+      .terminal,
+      .terminal-mobile {
         --color: #eadcb4;
         --background: #32302f;
         --link-color: #689d6a;
-        --font: 'Cascadia Code', monospace;
+        --font: "Cascadia Code", monospace;
       }
 
       .terminal {
@@ -33,9 +38,9 @@
       import init, { evaluate } from "./pkg/schemius_web.js";
 
       init().then(() => {
-        $("body").terminal(function(expression)
-          {
-            this.echo(evaluate(expression))
+        $("body").terminal(
+          function (expression) {
+            this.echo(evaluate(expression));
           },
           {
             greetings: `
@@ -48,7 +53,7 @@
 
       Welcome to Schemius!
         (environment-bindings)  -> Show bindings in current env
-        (fact 5000)             -> If you'd like to see a big number :)
+        (fact 2000)             -> If you'd like to see a big number :)
 
       Go through the code at https://github.com/cowuake/schemius
 
