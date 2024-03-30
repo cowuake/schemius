@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-SCHEMIUS_DIR=/workspaces/schemius
+[ -d "/workspaces/schemius" ] && SCHEMIUS_DIR="/workspaces/schemius" || SCHEMIUS_DIR=$(pwd)
 alias build-cli="cd $SCHEMIUS_DIR && cargo build --release"
 alias build-web="wasm-pack build --release --target web $SCHEMIUS_DIR/schemius-web/"
 alias format="cd $SCHEMIUS_DIR && cargo fmt"
