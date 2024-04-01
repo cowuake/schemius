@@ -49,7 +49,9 @@
       init().then(() => {
         $("body").terminal(
           function (expression) {
-            this.echo(evaluate(expression));
+            if (expression.trim()) {
+              this.echo(evaluate(expression));
+            }
           },
           {
             greetings: `
