@@ -1,15 +1,16 @@
 pub mod s_number;
 pub mod s_procedure;
-pub mod s_wrapper;
 
+use super::accessor::*;
 use std::fmt;
 
-pub use self::{s_number::*, s_procedure::*, s_wrapper::*};
+pub use self::{s_number::*, s_procedure::*};
+pub type SAccessor<T> = BaseAccessor<T>;
 
-pub type SList = SWrapper<Vec<SExpr>>;
-pub type SPair = SWrapper<(Box<SExpr>, Box<SExpr>)>;
-pub type SString = SWrapper<String>;
-pub type SVector = SWrapper<Vec<SExpr>>;
+pub type SList = SAccessor<Vec<SExpr>>;
+pub type SPair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
+pub type SString = SAccessor<String>;
+pub type SVector = SAccessor<Vec<SExpr>>;
 
 #[derive(Clone, Debug)]
 pub enum SExpr {
@@ -42,7 +43,7 @@ impl fmt::Display for SExpr {
             SExpr::Char(val) => write!(f, "#\\{}", val),
             SExpr::Number(val) => write!(f, "{}", val),
             SExpr::Boolean(val) => write!(f, "#{}", if *val { "t" } else { "f" }),
-            SExpr::String(ref val) => write!(f, "\"{}\"", val.borrow()),
+            SExpr::String(ref val) => write!(f, "\"{}\"", *val.borrow()),
             SExpr::Procedure(app) => match app {
                 Procedure::SpecialForm(_) => write!(f, "#<special form>"),
                 Procedure::Primitive(_) => write!(f, "#<primitive>"),
@@ -270,7 +271,7 @@ impl SExpr {
                     return Ok(self.clone());
                 }
 
-                let unflattened = list.clone();
+                let unflattened = list;
                 unflattened.borrow_mut().remove(0);
                 unflattened.borrow_mut().pop();
 

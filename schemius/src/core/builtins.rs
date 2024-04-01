@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use super::{environment::Environment, evaluator::eval, s_expression::*};
+use super::{accessor::*, environment::*, evaluator::eval, s_expression::*};
 
 pub struct Primitive;
 pub struct SpecialForm;
@@ -96,9 +96,9 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                         other => other,
                     };
 
-                    match env.lock().unwrap().define(name.clone(), value) {
+                    match env.borrow_mut().define(name, &value) {
                         Ok(_) => Ok(SExpr::Ok),
-                        Err(()) => Err(format!("Exception: error defining {}", name)),
+                        Err(_) => Err(format!("Exception: error defining {}", name)),
                     }
                 }
                 Err(e) => Err(e),
@@ -123,7 +123,7 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                         Err(e) => return Err(e),
                     };
 
-                    match env.lock().unwrap().define(lambda_name.clone(), lambda_proc) {
+                    match env.borrow_mut().define(&lambda_name, &lambda_proc) {
                         Ok(_) => Ok(SExpr::Ok),
                         Err(_) => Err(String::from("")),
                     }
@@ -149,7 +149,7 @@ fn r_set(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     other => other,
                 };
 
-                match env.lock().unwrap().set(name.clone(), value) {
+                match env.borrow_mut().set(&name, &value) {
                     Ok(_) => Ok(SExpr::Ok),
                     Err(e) => Err(e),
                 }
@@ -173,7 +173,7 @@ fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 match binding {
                     SExpr::List(binding) => match &binding.borrow()[0] {
                         SExpr::Symbol(symbol) => match eval(&binding.borrow()[1], env.clone()) {
-                            Ok(expr) => let_env.lock().unwrap().define(symbol.clone(), expr).unwrap(),
+                            Ok(expr) => let_env.borrow_mut().define(&symbol, &expr).unwrap(),
                             Err(e) => return Err(e),
                         },
                         other => return Err(format!("Exception in let: {} is not a symbol", other)),
@@ -213,7 +213,7 @@ fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                             Ok(expr) => {
                                 inner_env = Environment::new_child(inner_env.clone());
                                 inner_env = Environment::new_child(inner_env.clone());
-                                inner_env.lock().unwrap().define(symbol.clone(), expr).unwrap();
+                                inner_env.borrow_mut().define(&symbol, &expr).unwrap();
                             }
                             Err(e) => return Err(e),
                         },
@@ -552,7 +552,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                         let mut incriminated = false;
 
                                         if let SExpr::Symbol(symbol) = suspect {
-                                            if !env.lock().unwrap().get(&symbol).unwrap().is_procedure().unwrap() {
+                                            if !env.borrow().get(&symbol).unwrap().is_procedure().unwrap() {
                                                 incriminated = true;
                                             }
                                         } else {
@@ -819,7 +819,7 @@ fn r_environment_bindings(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOu
         return Err(format!("Exception in environment-bindings: expected 0 arguments, found {}", args.len()));
     }
 
-    let env_guard = env.lock().unwrap();
+    let env_guard = env.borrow();
     let mut bindings = env_guard.get_bindings().clone();
     bindings.sort_by(|a, b| (a.0).cmp(b.0));
 

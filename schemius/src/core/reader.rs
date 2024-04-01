@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 
-use super::s_expression::*;
+use super::{accessor::Accessor, s_expression::*};
 
 pub fn read(line: &mut String) -> SExpr {
     let first_token = init(line);

@@ -1,63 +1,80 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+use std::collections::HashMap;
 
 use super::{
+    accessor::*,
     builtins::*,
     s_expression::{s_procedure::*, NumericalConstant, SExpr},
 };
 
-#[derive(Debug)]
+pub type EnvAccessor<EnvironmentTrait> = ThreadSafeAccessor<EnvironmentTrait>;
+
+pub trait SchemeEnvironment<T: Accessor<Self>>: Clone
+where
+    Self: Sized,
+{
+    fn new() -> Self;
+    fn new_child(parent: T) -> T;
+    fn define(&mut self, key: &String, value: &SExpr) -> Result<(), String>;
+    fn set(&mut self, key: &String, value: &SExpr) -> Result<(), String>;
+    fn get(&self, key: &String) -> Option<SExpr>;
+    fn get_bindings(&self) -> Vec<(&String, &SExpr)>;
+    fn get_root(env: ProcedureEnv) -> ProcedureEnv;
+}
+
+#[derive(Clone, Debug)]
 pub struct Environment {
-    parent: Option<Arc<Mutex<Environment>>>,
+    parent: Option<EnvAccessor<Environment>>,
     table: HashMap<String, SExpr>,
 }
 
-impl Environment {
-    pub fn new_child(parent: Arc<Mutex<Environment>>) -> Arc<Mutex<Environment>> {
-        let env = Environment { parent: Some(parent), table: HashMap::new() };
-        Arc::new(Mutex::new(env))
+impl SchemeEnvironment<EnvAccessor<Self>> for Environment {
+    fn new() -> Environment {
+        Environment { parent: None, table: HashMap::new() }
     }
 
-    pub fn define(&mut self, key: String, value: SExpr) -> Result<(), ()> {
-        self.table.insert(key, value);
+    fn new_child(parent: EnvAccessor<Self>) -> EnvAccessor<Self> {
+        let env = Environment { parent: Some(parent), table: HashMap::new() };
+        EnvAccessor::new(env)
+    }
+
+    fn define(&mut self, key: &String, value: &SExpr) -> Result<(), String> {
+        self.table.insert(key.clone(), value.clone());
 
         Ok(())
     }
 
-    pub fn set(&mut self, key: String, value: SExpr) -> Result<(), String> {
-        if self.table.contains_key(&key) {
-            self.table.insert(key, value);
+    fn set(&mut self, key: &String, value: &SExpr) -> Result<(), String> {
+        if self.table.contains_key(key) {
+            self.table.insert(key.clone(), value.clone());
 
             Ok(())
         } else {
             match self.parent {
-                Some(ref parent) => parent.lock().unwrap().set(key, value),
+                Some(ref parent) => parent.borrow_mut().set(key, value),
                 None => Err(format!("Exception: {} is not bound", key)),
             }
         }
     }
 
-    pub fn get(&self, key: &String) -> Option<SExpr> {
+    fn get(&self, key: &String) -> Option<SExpr> {
         match self.table.get(key) {
             Some(val) => Some(val.clone()),
             None => match self.parent {
-                Some(ref parent) => parent.lock().unwrap().get(key),
+                Some(ref parent) => parent.borrow().get(key),
                 None => None,
             },
         }
     }
 
-    pub fn get_bindings(&self) -> Vec<(&String, &SExpr)> {
+    fn get_bindings(&self) -> Vec<(&String, &SExpr)> {
         let symbols: Vec<(&String, &SExpr)> = self.table.iter().map(|e| (e.0, e.1)).collect();
 
         symbols
     }
 
-    pub fn get_root(env: ProcedureEnv) -> ProcedureEnv {
-        match env.lock().unwrap().parent {
-            Some(ref frame) => Environment::get_root(frame.clone()),
+    fn get_root(env: ProcedureEnv) -> ProcedureEnv {
+        match &env.borrow().parent {
+            Some(frame) => Environment::get_root(frame.clone()),
             None => env.clone(),
         }
     }
@@ -65,7 +82,8 @@ impl Environment {
 
 impl Default for Environment {
     fn default() -> Self {
-        let table: HashMap<String, SExpr> = HashMap::from([
+        let mut new_env = Environment::new();
+        let default_table: HashMap<String, SExpr> = HashMap::from([
             (String::from("π"), SExpr::Number(NumericalConstant::PI)),
             (String::from("pi"), SExpr::Number(NumericalConstant::PI)),
             (String::from("avogadro"), SExpr::Number(NumericalConstant::AVOGADRO)),
@@ -124,6 +142,10 @@ impl Default for Environment {
             (String::from("unflatten"), SExpr::Procedure(Procedure::Primitive(Primitive::UNFLATTEN))),
         ]);
 
-        Self { parent: None, table }
+        for (key, value) in default_table.iter() {
+            new_env.define(key, value).unwrap();
+        }
+
+        new_env
     }
 }

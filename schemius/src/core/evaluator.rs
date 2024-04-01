@@ -1,15 +1,14 @@
-use std::sync::{Arc, Mutex};
-
 use super::{
+    accessor::Accessor,
     builtins::{Primitive, SpecialForm},
-    environment::Environment,
+    environment::{EnvAccessor, Environment, SchemeEnvironment},
     s_expression::*,
 };
 
 pub type EvalOutput = Result<SExpr, String>;
 
 pub struct Evaluator {
-    root_environment: Arc<Mutex<Environment>>,
+    root_environment: EnvAccessor<Environment>,
 }
 
 impl Default for Evaluator {
@@ -20,7 +19,7 @@ impl Default for Evaluator {
 
 impl Evaluator {
     pub fn new() -> Self {
-        Self { root_environment: Arc::new(Mutex::new(Environment::default())) }
+        Self { root_environment: EnvAccessor::new(Environment::default()) }
     }
 
     pub fn eval(&self, expression: &SExpr) -> EvalOutput {
@@ -34,7 +33,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
 
     loop {
         match current_expression {
-            SExpr::Symbol(ref val) => match current_env.lock().unwrap().get(val) {
+            SExpr::Symbol(ref val) => match current_env.borrow().get(val) {
                 Some(v) => return Ok(v),
                 None => return Err(format!("Exception: in eval: could not find a value bound to <{}>", val)),
             },
@@ -121,7 +120,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         for (name, arg) in arg_names.iter().zip(expanded_args.iter()) {
                                             match eval(arg, current_env.clone()) {
                                                 Ok(val) => {
-                                                    if lambda_env.lock().unwrap().define(name.clone(), val).is_err() {
+                                                    if lambda_env.borrow_mut().define(&name, &val).is_err() {
                                                         return Err(String::from("Exception: could not bind value to the procedure frame"));
                                                     }
                                                 }
