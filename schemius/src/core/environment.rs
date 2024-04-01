@@ -8,12 +8,12 @@ use super::{
 
 pub type EnvAccessor<EnvironmentTrait> = ThreadSafeAccessor<EnvironmentTrait>;
 
-pub trait SchemeEnvironment<T: Accessor<Self>>: Clone
+pub trait SchemeEnvironment: Clone
 where
     Self: Sized,
 {
     fn new() -> Self;
-    fn new_child(parent: T) -> T;
+    fn new_child(parent: EnvAccessor<Self>) -> EnvAccessor<Self>;
     fn define(&mut self, key: &String, value: &SExpr) -> Result<(), String>;
     fn set(&mut self, key: &String, value: &SExpr) -> Result<(), String>;
     fn get(&self, key: &String) -> Option<SExpr>;
@@ -27,7 +27,7 @@ pub struct Environment {
     table: HashMap<String, SExpr>,
 }
 
-impl SchemeEnvironment<EnvAccessor<Self>> for Environment {
+impl SchemeEnvironment for Environment {
     fn new() -> Environment {
         Environment { parent: None, table: HashMap::new() }
     }
