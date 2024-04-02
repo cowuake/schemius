@@ -80,7 +80,7 @@ fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         _ => return Err(String::from("")),
     };
 
-    let body = (args[1..]).to_vec();
+    let body = args[1..].to_vec();
     Ok(SExpr::Procedure(Procedure::Compound(arg_names, body, env.clone())))
 }
 
@@ -592,7 +592,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                                 list.borrow_mut().remove(i);
                                             }
 
-                                            for i in (0..(internal.borrow().len())).into_iter().rev() {
+                                            for i in (0..internal.borrow().len()).into_iter().rev() {
                                                 list.borrow_mut().splice(first_idx..first_idx, [internal.borrow()[i].clone()]);
                                             }
                                         }
@@ -821,7 +821,7 @@ fn r_environment_bindings(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOu
 
     let env_guard = env.borrow();
     let mut bindings = env_guard.get_bindings().clone();
-    bindings.sort_by(|a, b| (a.0).cmp(b.0));
+    bindings.sort_by(|a, b| a.0.cmp(b.0));
 
     let mut output: String = "".to_owned();
     bindings.iter().for_each(|b| output.push_str(format!("({}, {})\n", b.0, b.1).as_str()));

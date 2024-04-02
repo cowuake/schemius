@@ -22,7 +22,7 @@ impl Interpreter {
         let expression = reader::read(&mut prelude);
 
         match evaluator.eval(&expression) {
-            Ok(_) => Self { current_expression: String::new(), evaluator: evaluator, line_idx: 0, lines: vec![] },
+            Ok(_) => Self { current_expression: String::new(), evaluator, line_idx: 0, lines: vec![] },
             Err(_) => Self { current_expression: String::new(), evaluator: Evaluator::new(), line_idx: 0, lines: vec![] },
         }
     }
@@ -108,14 +108,14 @@ impl Interpreter {
         }
     }
 
-    fn is_preliminarily_validated(&mut self, expression_string: &String) -> bool {
+    fn is_preliminarily_validated(&self, expression_string: &String) -> bool {
         // TODO: Judge the validity of the approach and extend the function if it's worth
-        if (expression_string.trim().starts_with("(") && !expression_string.trim_end().ends_with(")"))
+        return if (expression_string.trim().starts_with("(") && !expression_string.trim_end().ends_with(")"))
             || (expression_string.trim().starts_with("[") && !expression_string.trim_end().ends_with("]"))
         {
-            return false;
+            false
         } else {
-            return true;
+            true
         }
     }
 
