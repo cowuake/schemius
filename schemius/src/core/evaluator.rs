@@ -33,10 +33,12 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
 
     loop {
         match current_expression {
-            SExpr::Symbol(ref val) => return match current_env.borrow().get(val) {
-                Some(v) => Ok(v),
-                None => Err(format!("Exception: in eval: could not find a value bound to <{}>", val)),
-            },
+            SExpr::Symbol(ref val) => {
+                return match current_env.borrow().get(val) {
+                    Some(v) => Ok(v),
+                    None => Err(format!("Exception: in eval: could not find a value bound to <{}>", val)),
+                }
+            }
             SExpr::List(list) => {
                 if list.borrow().len() > 0 {
                     match eval(&list.borrow()[0], current_env.clone()) {
@@ -58,7 +60,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             return match result {
                                                 Ok(expression) => Ok(expression),
                                                 Err(e) => Err(e),
-                                            }
+                                            };
                                         } else {
                                             let result = special_form(args.to_vec(), current_env.clone());
                                             match result {
@@ -78,7 +80,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             return match primitive(args.to_vec(), current_env.clone()) {
                                                 Ok(res) => Ok(res),
                                                 Err(e) => Err(e),
-                                            }
+                                            };
                                         } else if primitive == Primitive::APPLY {
                                             let result = Primitive::APPLY(args.to_vec(), current_env.clone());
                                             match result {

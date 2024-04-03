@@ -116,7 +116,7 @@ impl Interpreter {
             false
         } else {
             true
-        }
+        };
     }
 
     pub fn eval_expression(&mut self, expression_string: String) -> EvalOutput {
