@@ -5,9 +5,9 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-lazy_static = "1.4.0"
+lazy_static = "1.4"
 num = "0.4"
-regex = "1"
+regex = "1.10"
 
 [profile.dev]
 opt-level = 0
