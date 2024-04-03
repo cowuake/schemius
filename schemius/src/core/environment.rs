@@ -14,9 +14,9 @@ where
 {
     fn new() -> Self;
     fn new_child(parent: EnvAccessor<Self>) -> EnvAccessor<Self>;
-    fn define(&mut self, key: &String, value: &SExpr) -> Result<(), String>;
-    fn set(&mut self, key: &String, value: &SExpr) -> Result<(), String>;
-    fn get(&self, key: &String) -> Option<SExpr>;
+    fn define(&mut self, key: &str, value: &SExpr) -> Result<(), String>;
+    fn set(&mut self, key: &str, value: &SExpr) -> Result<(), String>;
+    fn get(&self, key: &str) -> Option<SExpr>;
     fn get_bindings(&self) -> Vec<(&String, &SExpr)>;
     fn get_root(env: ProcedureEnv) -> ProcedureEnv;
 }
@@ -37,15 +37,15 @@ impl SchemeEnvironment for Environment {
         EnvAccessor::new(env)
     }
 
-    fn define(&mut self, key: &String, value: &SExpr) -> Result<(), String> {
-        self.table.insert(key.clone(), value.clone());
+    fn define(&mut self, key: &str, value: &SExpr) -> Result<(), String> {
+        self.table.insert(key.to_string(), value.clone());
 
         Ok(())
     }
 
-    fn set(&mut self, key: &String, value: &SExpr) -> Result<(), String> {
+    fn set(&mut self, key: &str, value: &SExpr) -> Result<(), String> {
         if self.table.contains_key(key) {
-            self.table.insert(key.clone(), value.clone());
+            self.table.insert(key.to_string(), value.clone());
 
             Ok(())
         } else {
@@ -56,7 +56,7 @@ impl SchemeEnvironment for Environment {
         }
     }
 
-    fn get(&self, key: &String) -> Option<SExpr> {
+    fn get(&self, key: &str) -> Option<SExpr> {
         match self.table.get(key) {
             Some(val) => Some(val.clone()),
             None => match self.parent {

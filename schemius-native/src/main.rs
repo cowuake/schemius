@@ -24,7 +24,7 @@ fn main() {
 
     match args.eval {
         Some(expr) => {
-            let _ = interpreter.eval_expression_no_print(expr);
+            interpreter.eval_expression_no_print(expr);
             return;
         }
         _ => (),

@@ -110,7 +110,7 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     let lambda_body = &mut args[1..].to_vec();
 
                     if list.borrow().len() > 1 {
-                        for arg in (&list.borrow()[1..]).iter() {
+                        for arg in &list.borrow()[1..] {
                             lambda_args.push(arg.clone());
                         }
                     }
@@ -318,13 +318,7 @@ fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     let have_else_clause = args.len() > 3
         && match &args[args.len() - 2] {
-            SExpr::Symbol(clause) => {
-                if *clause == String::from("else") {
-                    true
-                } else {
-                    false
-                }
-            }
+            SExpr::Symbol(clause) => *clause == "else",
             _ => false,
         };
 
@@ -490,7 +484,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                         let unquotes = SExpr::List(list.clone()).find_symbol("unquote");
                         let unquotes_splicing = SExpr::List(list.clone()).find_symbol("unquote-splicing");
-                        let mut unquotes = if unquotes.is_some() { unquotes.unwrap().iter().map(|x| (false, *x)).collect() } else { vec![] };
+                        let mut unquotes = if let Some(unquotes) = unquotes { unquotes.iter().map(|x| (false, *x)).collect() } else { vec![] };
                         let mut unquotes_splicing =
                             if unquotes_splicing.is_some() { unquotes_splicing.unwrap().iter().map(|x| (true, *x)).collect() } else { vec![] };
 
@@ -517,13 +511,12 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                             let paren_map = SExpr::List(list.clone()).matching_brackets();
                             let unquote_is_splicing = unquotes[0].0;
-                            let unquote_index;
 
                             let apply_offset = |source: i32, offset: i32| match offset {
                                 0.. => (source - offset) as usize,
                                 _ => (source + offset) as usize,
                             };
-                            unquote_index = apply_offset(unquotes[0].1 as i32, offset);
+                            let unquote_index = apply_offset(unquotes[0].1 as i32, offset);
 
                             let enclosing = match paren_map {
                                 Some(ref paren_map) => {
@@ -588,11 +581,11 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                         SExpr::List(internal) => {
                                             offset -= (internal.borrow().len() - 1) as i32;
 
-                                            for i in (first_idx..last_idx).into_iter().rev() {
+                                            for i in (first_idx..last_idx).rev() {
                                                 list.borrow_mut().remove(i);
                                             }
 
-                                            for i in (0..internal.borrow().len()).into_iter().rev() {
+                                            for i in (0..internal.borrow().len()).rev() {
                                                 list.borrow_mut().splice(first_idx..first_idx, [internal.borrow()[i].clone()]);
                                             }
                                         }

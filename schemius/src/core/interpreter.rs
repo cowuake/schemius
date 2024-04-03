@@ -92,7 +92,7 @@ impl Interpreter {
         }
     }
 
-    pub fn run_repl(&mut self) -> () {
+    pub fn run_repl(&mut self) {
         self.main_loop(&read_line_from_repl);
     }
 
@@ -108,15 +108,10 @@ impl Interpreter {
         }
     }
 
-    fn is_preliminarily_validated(&self, expression_string: &String) -> bool {
+    fn is_preliminarily_validated(&self, expression_string: &str) -> bool {
         // TODO: Judge the validity of the approach and extend the function if it's worth
-        return if (expression_string.trim().starts_with("(") && !expression_string.trim_end().ends_with(")"))
-            || (expression_string.trim().starts_with("[") && !expression_string.trim_end().ends_with("]"))
-        {
-            false
-        } else {
-            true
-        };
+        !((expression_string.trim().starts_with('(') && !expression_string.trim_end().ends_with(')'))
+            || (expression_string.trim().starts_with('[') && !expression_string.trim_end().ends_with(']')))
     }
 
     pub fn eval_expression(&mut self, expression_string: String) -> EvalOutput {
@@ -150,6 +145,12 @@ impl Interpreter {
     }
 }
 
+impl Default for Interpreter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 fn read_line_from_file(interpreter: &mut Interpreter) -> String {
     if interpreter.lines.len() > interpreter.line_idx {
         let line = interpreter.lines[interpreter.line_idx].clone();
@@ -164,7 +165,7 @@ fn read_line_from_file(interpreter: &mut Interpreter) -> String {
 fn read_line_from_repl(_: &mut Interpreter) -> String {
     let mut line = String::new();
 
-    io::stdout().write(b"> ").unwrap();
+    io::stdout().write_all(b"> ").unwrap();
     io::stdout().flush().unwrap();
     io::stdin().read_line(&mut line).unwrap();
 

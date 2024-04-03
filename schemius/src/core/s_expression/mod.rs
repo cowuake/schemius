@@ -52,7 +52,7 @@ impl fmt::Display for SExpr {
             SExpr::Pair(val) => write!(f, "({} . {})", val.borrow().0, val.borrow().1),
             SExpr::List(ref val) => write!(f, "({})", val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")),
             SExpr::Vector(ref val) => write!(f, "#({})", val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")),
-            SExpr::Unspecified => write!(f, "\n"),
+            SExpr::Unspecified => writeln!(f),
             SExpr::Ok => write!(f, "ok"),
         }
     }
@@ -212,23 +212,20 @@ impl SExpr {
 
     pub fn find_symbol(&self, symbol: &str) -> Option<Vec<usize>> {
         match self.flatten() {
-            Ok(list) => match list {
-                SExpr::List(flattened) => {
-                    if !flattened.borrow().first().unwrap().is_symbol(Some("(")).unwrap() {
-                        return None;
-                    }
-
-                    let indexes: Vec<usize> =
-                        flattened.borrow().iter().enumerate().filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap()).map(|(i, _)| i - 1).collect();
-
-                    if !indexes.is_empty() {
-                        Some(indexes)
-                    } else {
-                        None
-                    }
+            Ok(SExpr::List(flattened)) => {
+                if !flattened.borrow().first().unwrap().is_symbol(Some("(")).unwrap() {
+                    return None;
                 }
-                _ => None,
-            },
+
+                let indexes: Vec<usize> =
+                    flattened.borrow().iter().enumerate().filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap()).map(|(i, _)| i - 1).collect();
+
+                if !indexes.is_empty() {
+                    Some(indexes)
+                } else {
+                    None
+                }
+            }
             _ => None,
         }
     }
@@ -242,11 +239,8 @@ impl SExpr {
 
                 list.borrow().iter().for_each(|item| match item {
                     SExpr::List(_) => {
-                        if let Ok(res) = item.flatten() {
-                            match res {
-                                SExpr::List(internal) => internal.borrow().iter().for_each(|x| flattened.push(x.clone())),
-                                _ => {}
-                            }
+                        if let Ok(SExpr::List(internal)) = item.flatten() {
+                            internal.borrow().iter().for_each(|x| flattened.push(x.clone()))
                         }
                     }
                     other => flattened.push(other.clone()),

@@ -156,7 +156,7 @@ macro_rules! impl_partial_eq_ord_op {
 impl PartialEq for SNumber {
     impl_partial_eq_ord_op! {
         eq: ==
-        ne: !=
+        // ne: != // Not needed (hint by Clippy)
     }
 }
 
