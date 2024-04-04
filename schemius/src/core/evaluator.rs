@@ -13,13 +13,17 @@ pub struct Evaluator {
 
 impl Default for Evaluator {
     fn default() -> Self {
-        Self::new()
+        Self::new(None)
     }
 }
 
 impl Evaluator {
-    pub fn new() -> Self {
-        Self { root_environment: EnvAccessor::new(Environment::default()) }
+    pub fn new(environment: Option<Environment>) -> Self {
+        let env = match environment {
+            Some(env) => EnvAccessor::new(env),
+            None => EnvAccessor::new(Environment::default()),
+        };
+        Self { root_environment: env }
     }
 
     pub fn eval(&self, expression: &SExpr) -> EvalOutput {
@@ -163,7 +167,7 @@ mod tests {
 
     #[test]
     fn evaluator_ok_int() {
-        let evaluator = Evaluator::new();
+        let evaluator = Evaluator::default();
         let expression = SExpr::Number(SNumber::Int(0));
         let res = evaluator.eval(&expression);
 

@@ -20,7 +20,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let mut interpreter = Interpreter::new();
+    let mut interpreter = Interpreter::default();
 
     match args.eval {
         Some(expr) => {

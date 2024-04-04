@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use crate::core::reader;
 use crate::scheme::prelude::PRELUDE;
 
+use super::environment::Environment;
 use super::evaluator::EvalOutput;
 use super::{evaluator::Evaluator, s_expression::SExpr};
 
@@ -15,15 +16,18 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new() -> Self {
-        let evaluator = Evaluator::new();
+    pub fn new(environment: Option<Environment>) -> Self {
+        let evaluator = match environment {
+            Some(env) => Evaluator::new(Some(env)),
+            None => Evaluator::default(),
+        };
         let source = PRELUDE.lines().fold("".to_string(), |current, next| current + next);
         let mut prelude = source.to_string();
         let expression = reader::read(&mut prelude);
 
         match evaluator.eval(&expression) {
             Ok(_) => Self { current_expression: String::new(), evaluator, line_idx: 0, lines: vec![] },
-            Err(_) => Self { current_expression: String::new(), evaluator: Evaluator::new(), line_idx: 0, lines: vec![] },
+            Err(_) => Self { current_expression: String::new(), evaluator: Evaluator::default(), line_idx: 0, lines: vec![] },
         }
     }
 
@@ -147,7 +151,7 @@ impl Interpreter {
 
 impl Default for Interpreter {
     fn default() -> Self {
-        Self::new()
+        Self::new(None)
     }
 }
 

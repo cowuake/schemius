@@ -3,7 +3,7 @@ use crate::core::interpreter::Interpreter;
 
 macro_rules! integration_subtest_eval_to {
     ($({expression:$expression:literal, expected:$expected_result:literal};)*) => {
-        let mut interpreter = Interpreter::new();
+        let mut interpreter = Interpreter::default();
 
         $(
             let res = interpreter.eval_expression_and_format(String::from($expression));
@@ -16,7 +16,7 @@ macro_rules! integration_subtest_eval_to {
 
 macro_rules! integration_subtest_is_err {
     ($(expression:$expression:literal;)*) => {
-        let mut interpreter = Interpreter::new();
+        let mut interpreter = Interpreter::default();
 
         $(
             let res = interpreter.eval_expression(String::from($expression));

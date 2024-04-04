@@ -8,5 +8,5 @@ use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
 pub fn evaluate(expression: &str) -> String {
-    Interpreter::new().eval_expression_and_format(expression.to_string())
+    Interpreter::default().eval_expression_and_format(expression.to_string())
 }

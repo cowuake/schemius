@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use super::{accessor::*, environment::*, evaluator::eval, s_expression::*};
+use super::{accessor::*, environment::*, evaluator::*, s_expression::*};
 
 pub struct Primitive;
 pub struct SpecialForm;
