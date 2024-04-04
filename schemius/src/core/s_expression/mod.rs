@@ -75,6 +75,7 @@ impl SExpr {
         }
     }
 
+    #[allow(dead_code)]
     fn is_left_bracket(&self) -> Result<bool, String> {
         if self.is_symbol(Some(Bracket::LEFT_ROUND)).unwrap() || self.is_symbol(Some(Bracket::LEFT_SQUARE)).unwrap() {
             Ok(true)
@@ -83,6 +84,7 @@ impl SExpr {
         }
     }
 
+    #[allow(dead_code)]
     fn is_right_bracket(&self) -> Result<bool, String> {
         if self.is_symbol(Some(Bracket::RIGHT_ROUND)).unwrap() || self.is_symbol(Some(Bracket::RIGHT_SQUARE)).unwrap() {
             Ok(true)

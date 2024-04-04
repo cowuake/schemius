@@ -1,6 +1,7 @@
 #[cfg(test)]
 use crate::core::interpreter::Interpreter;
 
+#[allow(unused_macros)]
 macro_rules! integration_subtest_eval_to {
     ($({expression:$expression:literal, expected:$expected_result:literal};)*) => {
         let mut interpreter = Interpreter::default();
@@ -14,6 +15,7 @@ macro_rules! integration_subtest_eval_to {
     }
 }
 
+#[allow(unused_macros)]
 macro_rules! integration_subtest_is_err {
     ($(expression:$expression:literal;)*) => {
         let mut interpreter = Interpreter::default();
