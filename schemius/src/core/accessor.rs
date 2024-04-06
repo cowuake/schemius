@@ -12,12 +12,12 @@ pub trait Accessor<T: Clone> {
     fn replace(&self, src: T) -> T;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct BaseAccessor<T> {
     inner: Rc<RefCell<T>>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 pub struct ThreadSafeAccessor<T> {
     inner: Arc<Mutex<T>>,
 }
@@ -42,12 +42,12 @@ impl<T: Clone> Accessor<T> for ThreadSafeAccessor<T> {
         Self { inner: Arc::new(Mutex::new(src)) }
     }
     fn borrow(&self) -> impl Deref<Target = T> {
-        self.inner.lock().unwrap()
+        self.inner.try_lock().unwrap()
     }
     fn borrow_mut(&self) -> impl DerefMut<Target = T> {
-        self.inner.lock().unwrap()
+        self.inner.try_lock().unwrap()
     }
     fn replace(&self, src: T) -> T {
-        std::mem::replace(&mut *self.inner.lock().unwrap(), src)
+        std::mem::replace(&mut *self.inner.try_lock().unwrap(), src)
     }
 }

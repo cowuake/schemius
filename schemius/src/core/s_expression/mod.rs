@@ -5,7 +5,7 @@ use super::accessor::*;
 use std::fmt;
 
 pub use self::{s_number::*, s_procedure::*};
-pub type SAccessor<T> = BaseAccessor<T>;
+pub type SAccessor<T> = ThreadSafeAccessor<T>;
 
 pub type SList = SAccessor<Vec<SExpr>>;
 pub type SPair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
@@ -49,7 +49,10 @@ impl fmt::Display for SExpr {
                 Procedure::Primitive(_) => write!(f, "#<primitive>"),
                 Procedure::Compound(args, _, _) => write!(f, "#<procedure ({})>", args.join(", ")),
             },
-            SExpr::Pair(val) => write!(f, "({} . {})", val.borrow().0, val.borrow().1),
+            SExpr::Pair(val) => {
+                let borrowed_val = val.borrow();
+                write!(f, "({} . {})", borrowed_val.0, borrowed_val.1)
+            }
             SExpr::List(ref val) => write!(f, "({})", val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")),
             SExpr::Vector(ref val) => write!(f, "#({})", val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")),
             SExpr::Unspecified => writeln!(f),
@@ -215,12 +218,14 @@ impl SExpr {
     pub fn find_symbol(&self, symbol: &str) -> Option<Vec<usize>> {
         match self.flatten() {
             Ok(SExpr::List(flattened)) => {
-                if !flattened.borrow().first().unwrap().is_symbol(Some("(")).unwrap() {
+                let borrowed_flattened = flattened.borrow();
+
+                if borrowed_flattened.first().unwrap().is_symbol(Some("(")).unwrap() {
                     return None;
                 }
 
                 let indexes: Vec<usize> =
-                    flattened.borrow().iter().enumerate().filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap()).map(|(i, _)| i - 1).collect();
+                    borrowed_flattened.iter().enumerate().filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap()).map(|(i, _)| i - 1).collect();
 
                 if !indexes.is_empty() {
                     Some(indexes)
@@ -236,7 +241,6 @@ impl SExpr {
         match self {
             SExpr::List(list) => {
                 let mut flattened = vec![];
-
                 flattened.push(SExpr::Symbol(String::from("(")));
 
                 list.borrow().iter().for_each(|item| match item {
@@ -253,7 +257,8 @@ impl SExpr {
                 Ok(SExpr::List(SList::new(flattened.clone())))
             }
             SExpr::Pair(pair) => {
-                SExpr::List(SList::new(vec![*pair.borrow().0.clone(), SExpr::Symbol(".".to_string()), *pair.borrow().1.clone()])).flatten()
+                let pair = pair.borrow();
+                SExpr::List(SList::new(vec![*pair.0.clone(), SExpr::Symbol(".".to_string()), *pair.1.clone()])).flatten()
             }
             other => Ok(other.clone()),
         }
@@ -267,16 +272,16 @@ impl SExpr {
                     return Ok(self.clone());
                 }
 
-                let unflattened = list;
-                unflattened.borrow_mut().remove(0);
-                unflattened.borrow_mut().pop();
+                let mut unflattened = list.borrow_mut();
+                unflattened.remove(0);
+                unflattened.pop();
 
                 loop {
                     let l_index;
                     let r_index;
 
                     match unflattened
-                        .borrow()
+                        // .borrow()
                         .iter()
                         .enumerate()
                         .filter(|x| x.1.is_symbol(Some(")")).unwrap())
@@ -285,7 +290,7 @@ impl SExpr {
                     {
                         Some(r) => {
                             match unflattened
-                                .borrow()
+                                // .borrow()
                                 .iter()
                                 .enumerate()
                                 .filter(|x| x.1.is_symbol(Some("(")).unwrap())
@@ -303,11 +308,11 @@ impl SExpr {
                         None => break,
                     }
 
-                    let internal = SExpr::List(SList::new(unflattened.borrow()[(l_index + 1)..r_index].to_vec()));
-                    unflattened.borrow_mut().splice(l_index..(r_index + 1), [internal]);
+                    let internal = SExpr::List(SList::new(unflattened[(l_index + 1)..r_index].to_vec()));
+                    unflattened.splice(l_index..(r_index + 1), [internal]);
                 }
 
-                Ok(SExpr::List(unflattened.clone()))
+                Ok(SExpr::List(SAccessor::new(unflattened.clone())))
             }
             other => Ok(other.clone()),
         }

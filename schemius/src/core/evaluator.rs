@@ -45,7 +45,8 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
             }
             SExpr::List(list) => {
                 if list.borrow().len() > 0 {
-                    match eval(&list.borrow()[0], current_env.clone()) {
+                    let first = eval(&list.borrow()[0], current_env.clone());
+                    match first {
                         Ok(res) => match res {
                             SExpr::Procedure(proc) => {
                                 let args = &list.borrow()[1..].to_vec();
