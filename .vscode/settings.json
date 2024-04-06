@@ -1,5 +1,8 @@
 {
     "rust-analyzer.linkedProjects": [
-        ".\\schemius\\Cargo.toml"
+        "Cargo.toml",
+        "schemius/Cargo.toml",
+        "schemius-native/Cargo.toml",
+        "schemius-web/Cargo.toml"
     ]
 }
