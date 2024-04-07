@@ -118,7 +118,7 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     }
                 }
 
-                lambda_args = vec![SExpr::List(SList::new(lambda_args))];
+                lambda_args = vec![SExpr::List(SchemeList::new(lambda_args))];
                 lambda_args.append(lambda_body);
 
                 let lambda_proc = match r_lambda(lambda_args, env.clone()) {
@@ -379,7 +379,7 @@ fn r_apply(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
                 let mut args = args.borrow().clone();
                 args.splice(0..0, iterator);
 
-                Ok(SExpr::List(SList::new(args.clone())))
+                Ok(SExpr::List(SchemeList::new(args.clone())))
             }
             _ => Err(String::from("Exception in apply: must provide a quoted list of arguments")),
         },
@@ -412,10 +412,10 @@ fn r_cons(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
                 new_list.push(car.unwrap());
                 list.borrow().iter().for_each(|x| new_list.push(x.clone()));
 
-                Ok(SExpr::List(SList::new(new_list)))
+                Ok(SExpr::List(SchemeList::new(new_list)))
             }
             cdr => {
-                let pair = SPair::new((Box::new(car.unwrap()), Box::new(cdr)));
+                let pair = SchemePair::new((Box::new(car.unwrap()), Box::new(cdr)));
 
                 Ok(SExpr::Pair(pair))
             }
@@ -431,7 +431,7 @@ fn r_list(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         list.push(arg.clone());
     }
 
-    Ok(SExpr::List(SList::new(list)))
+    Ok(SExpr::List(SchemeList::new(list)))
 }
 
 fn r_begin(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
@@ -567,7 +567,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                         }
                                     }
 
-                                    let expr = SExpr::List(SList::new(raw_expr));
+                                    let expr = SExpr::List(SchemeList::new(raw_expr));
                                     to_be_evaluated = expr.unflatten().unwrap();
                                     first_idx = lparen_idx - 2; // Index of the left parenthesis preceding the unquote symbol
                                     last_idx = rparen_idx + 2; // Index of the right matching parenthesis + 1
@@ -648,7 +648,7 @@ fn r_cdr(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
                 let mut cdr = vec.borrow().clone();
                 cdr.remove(0);
 
-                Ok(SExpr::List(SList::new(cdr)))
+                Ok(SExpr::List(SchemeList::new(cdr)))
             }
             _ => Err(String::from("Exception: #<procedure cdr> cannot take a quoted empty list")),
         },

@@ -5,24 +5,28 @@ use super::accessor::*;
 use std::fmt;
 
 pub use self::{s_number::*, s_procedure::*};
-pub type SAccessor<T> = ThreadSafeAccessor<T>;
+type SAccessor<T> = ThreadSafeAccessor<T>;
 
-pub type SList = SAccessor<Vec<SExpr>>;
-pub type SPair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
-pub type SString = SAccessor<String>;
-pub type SVector = SAccessor<Vec<SExpr>>;
+pub type SchemeBoolean = bool;
+pub type SchemeChar = char;
+pub type SchemeList = SAccessor<Vec<SExpr>>;
+pub type SchemePair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
+pub type SchemeProcedure = Procedure;
+pub type SchemeSymbol = String;
+pub type SchemeString = SAccessor<String>;
+pub type SchemeVector = SAccessor<Vec<SExpr>>;
 
 #[derive(Clone, Debug)]
 pub enum SExpr {
-    Boolean(bool),
-    Char(char),
-    Symbol(String),
-    String(SString),
+    Boolean(SchemeBoolean),
+    Char(SchemeChar),
+    Symbol(SchemeSymbol),
+    String(SchemeString),
     Number(SNumber),
-    Pair(SPair),
-    List(SList),
-    Vector(SVector),
-    Procedure(Procedure),
+    Pair(SchemePair),
+    List(SchemeList),
+    Vector(SchemeVector),
+    Procedure(SchemeProcedure),
     Unspecified,
     Ok,
 }
@@ -254,11 +258,11 @@ impl SExpr {
 
                 flattened.push(SExpr::Symbol(String::from(")")));
 
-                Ok(SExpr::List(SList::new(flattened.clone())))
+                Ok(SExpr::List(SchemeList::new(flattened.clone())))
             }
             SExpr::Pair(pair) => {
                 let pair = pair.borrow();
-                SExpr::List(SList::new(vec![*pair.0.clone(), SExpr::Symbol(".".to_string()), *pair.1.clone()])).flatten()
+                SExpr::List(SchemeList::new(vec![*pair.0.clone(), SExpr::Symbol(".".to_string()), *pair.1.clone()])).flatten()
             }
             other => Ok(other.clone()),
         }
@@ -308,7 +312,7 @@ impl SExpr {
                         None => break,
                     }
 
-                    let internal = SExpr::List(SList::new(unflattened[(l_index + 1)..r_index].to_vec()));
+                    let internal = SExpr::List(SchemeList::new(unflattened[(l_index + 1)..r_index].to_vec()));
                     unflattened.splice(l_index..(r_index + 1), [internal]);
                 }
 
