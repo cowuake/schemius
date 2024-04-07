@@ -10,6 +10,7 @@ type SAccessor<T> = ThreadSafeAccessor<T>;
 pub type SchemeBoolean = bool;
 pub type SchemeChar = char;
 pub type SchemeList = SAccessor<Vec<SExpr>>;
+pub type SchemeNumber = SNumber;
 pub type SchemePair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
 pub type SchemeProcedure = Procedure;
 pub type SchemeSymbol = String;
@@ -22,7 +23,7 @@ pub enum SExpr {
     Char(SchemeChar),
     Symbol(SchemeSymbol),
     String(SchemeString),
-    Number(SNumber),
+    Number(SchemeNumber),
     Pair(SchemePair),
     List(SchemeList),
     Vector(SchemeVector),
