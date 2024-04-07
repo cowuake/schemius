@@ -487,7 +487,6 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
             match flattened {
                 Ok(expr) => match expr {
                     SExpr::List(list) => {
-                        let mut borrowed_list = list.borrow_mut();
                         let s_list = SExpr::List(list.clone());
                         let quasiquotes = s_list.find_symbol("quasiquote");
                         let mapping = s_list.matching_brackets().unwrap();
@@ -513,6 +512,7 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                         // After each and every unquoting indexes will be shifted by a certain offset
                         let mut offset: i32 = 0;
+                        let mut borrowed_list = list.borrow_mut();
 
                         loop {
                             if unquotes.is_empty() {

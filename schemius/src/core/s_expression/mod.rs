@@ -174,14 +174,14 @@ impl SExpr {
     pub fn matching_brackets(&self) -> Option<Vec<(usize, usize, usize)>> {
         match self {
             SExpr::List(list) => {
-                if !list.borrow().first().unwrap().is_symbol(Some("(")).unwrap() {
+                let list = list.borrow();
+                if !list.first().unwrap().is_symbol(Some("(")).unwrap() {
                     return None;
                 }
 
                 let mut pairs: Vec<(usize, usize)> = vec![];
 
                 while let Some(right) = list
-                    .borrow()
                     .iter()
                     .enumerate()
                     .filter(|x| (pairs.is_empty() || pairs.iter().all(|(_, right)| right != &x.0)) && x.1.is_symbol(Some(")")).unwrap())
@@ -189,7 +189,6 @@ impl SExpr {
                     .map(|x| x.0)
                 {
                     match list
-                        .borrow()
                         .iter()
                         .enumerate()
                         .filter(|x| (pairs.is_empty() || pairs.iter().all(|(left, _)| left != &x.0)) && x.1.is_symbol(Some("(")).unwrap())
@@ -206,7 +205,7 @@ impl SExpr {
                 pairs
                     .iter()
                     .map(|(left, right)| {
-                        if *left == 0 && *right == list.borrow().len() - 1 {
+                        if *left == 0 && *right == list.len() - 1 {
                             (left, right, 0)
                         } else {
                             (left, right, pairs.iter().filter(|(l, r)| l < left && r > left).count())
@@ -273,11 +272,13 @@ impl SExpr {
         // TODO: Deal with pairs, since flattening has been extended to them.
         match self {
             SExpr::List(list) => {
-                if !list.borrow().first().unwrap().is_symbol(Some("(")).unwrap() {
+                let cloned = list.clone();
+                let mut unflattened = cloned.borrow_mut();
+
+                if !unflattened.first().unwrap().is_symbol(Some("(")).unwrap() {
                     return Ok(self.clone());
                 }
 
-                let mut unflattened = list.borrow_mut();
                 unflattened.remove(0);
                 unflattened.pop();
 
@@ -286,7 +287,6 @@ impl SExpr {
                     let r_index;
 
                     match unflattened
-                        // .borrow()
                         .iter()
                         .enumerate()
                         .filter(|x| x.1.is_symbol(Some(")")).unwrap())
@@ -295,7 +295,6 @@ impl SExpr {
                     {
                         Some(r) => {
                             match unflattened
-                                // .borrow()
                                 .iter()
                                 .enumerate()
                                 .filter(|x| x.1.is_symbol(Some("(")).unwrap())
