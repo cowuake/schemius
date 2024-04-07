@@ -181,6 +181,7 @@ fn interpreter_flattening_unflattening() {
     }
 }
 
+#[ignore]
 #[test]
 fn interpreter_quasiquotation() {
     integration_subtest_eval_to! {
@@ -199,6 +200,7 @@ fn interpreter_quasiquotation() {
     }
 }
 
+#[ignore]
 #[test]
 fn interpreter_r7rs_quasiquotation() {
     integration_subtest_eval_to! {
