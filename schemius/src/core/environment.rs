@@ -91,7 +91,10 @@ impl Default for Environment {
             (String::from("e"), SExpr::Number(NumericalConstant::EULER)),
             (String::from("euler"), SExpr::Number(NumericalConstant::EULER)),
             (String::from("golden-ratio"), SExpr::Number(NumericalConstant::GOLDEN_RATIO)),
-            (String::from("gravitational-constant"), SExpr::Number(NumericalConstant::GRAVITATIONAL_CONSTANT)),
+            (
+                String::from("gravitational-constant"),
+                SExpr::Number(NumericalConstant::GRAVITATIONAL_CONSTANT),
+            ),
             (String::from("h"), SExpr::Number(NumericalConstant::PLANCK)),
             (String::from("planck"), SExpr::Number(NumericalConstant::PLANCK)),
             (String::from("exit"), SExpr::Procedure(Procedure::Primitive(Primitive::EXIT))),
@@ -107,7 +110,10 @@ impl Default for Environment {
             (String::from("'"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::QUOTE))),
             (String::from("quote"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::QUOTE))),
             (String::from("`"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::QUASIQUOTE))),
-            (String::from("quasiquote"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::QUASIQUOTE))),
+            (
+                String::from("quasiquote"),
+                SExpr::Procedure(Procedure::SpecialForm(SpecialForm::QUASIQUOTE)),
+            ),
             (String::from("λ"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::LAMBDA))),
             (String::from("lambda"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::LAMBDA))),
             (String::from("let"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::LET))),
@@ -128,18 +134,33 @@ impl Default for Environment {
             (String::from("display"), SExpr::Procedure(Procedure::Primitive(Primitive::DISPLAY))),
             (String::from("char?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_CHAR))),
             (String::from("string?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_STRING))),
-            (String::from("boolean?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_BOOLEAN))),
+            (
+                String::from("boolean?"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::IS_BOOLEAN)),
+            ),
             (String::from("number?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_NUMBER))),
             (String::from("exact?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_EXACT))),
             (String::from("list?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_LIST))),
             (String::from("pair?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_PAIR))),
             (String::from("vector?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_VECTOR))),
-            (String::from("procedure?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_PROCEDURE))),
+            (
+                String::from("procedure?"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::IS_PROCEDURE)),
+            ),
             (String::from("time"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::TIME))),
-            (String::from("environment-bindings"), SExpr::Procedure(Procedure::Primitive(Primitive::ENVIRONMENT_BINDINGS))),
-            (String::from("string-set!"), SExpr::Procedure(Procedure::Primitive(Primitive::STRING_SET))),
+            (
+                String::from("environment-bindings"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::ENVIRONMENT_BINDINGS)),
+            ),
+            (
+                String::from("string-set!"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::STRING_SET)),
+            ),
             (String::from("flatten"), SExpr::Procedure(Procedure::Primitive(Primitive::FLATTEN))),
-            (String::from("unflatten"), SExpr::Procedure(Procedure::Primitive(Primitive::UNFLATTEN))),
+            (
+                String::from("unflatten"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::UNFLATTEN)),
+            ),
         ]);
 
         for (key, value) in default_table.iter() {

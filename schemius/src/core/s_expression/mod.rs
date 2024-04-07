@@ -58,8 +58,16 @@ impl fmt::Display for SExpr {
                 let borrowed_val = val.borrow();
                 write!(f, "({} . {})", borrowed_val.0, borrowed_val.1)
             }
-            SExpr::List(ref val) => write!(f, "({})", val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")),
-            SExpr::Vector(ref val) => write!(f, "#({})", val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")),
+            SExpr::List(ref val) => write!(
+                f,
+                "({})",
+                val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")
+            ),
+            SExpr::Vector(ref val) => write!(
+                f,
+                "#({})",
+                val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")
+            ),
             SExpr::Unspecified => writeln!(f),
             SExpr::Ok => write!(f, "ok"),
         }
@@ -85,7 +93,9 @@ impl SExpr {
 
     #[allow(dead_code)]
     fn is_left_bracket(&self) -> Result<bool, String> {
-        if self.is_symbol(Some(Bracket::LEFT_ROUND)).unwrap() || self.is_symbol(Some(Bracket::LEFT_SQUARE)).unwrap() {
+        if self.is_symbol(Some(Bracket::LEFT_ROUND)).unwrap()
+            || self.is_symbol(Some(Bracket::LEFT_SQUARE)).unwrap()
+        {
             Ok(true)
         } else {
             Ok(false)
@@ -94,7 +104,9 @@ impl SExpr {
 
     #[allow(dead_code)]
     fn is_right_bracket(&self) -> Result<bool, String> {
-        if self.is_symbol(Some(Bracket::RIGHT_ROUND)).unwrap() || self.is_symbol(Some(Bracket::RIGHT_SQUARE)).unwrap() {
+        if self.is_symbol(Some(Bracket::RIGHT_ROUND)).unwrap()
+            || self.is_symbol(Some(Bracket::RIGHT_SQUARE)).unwrap()
+        {
             Ok(true)
         } else {
             Ok(false)
@@ -184,14 +196,20 @@ impl SExpr {
                 while let Some(right) = list
                     .iter()
                     .enumerate()
-                    .filter(|x| (pairs.is_empty() || pairs.iter().all(|(_, right)| right != &x.0)) && x.1.is_symbol(Some(")")).unwrap())
+                    .filter(|x| {
+                        (pairs.is_empty() || pairs.iter().all(|(_, right)| right != &x.0))
+                            && x.1.is_symbol(Some(")")).unwrap()
+                    })
                     .min_by(|x, y| (x.0).cmp(&y.0))
                     .map(|x| x.0)
                 {
                     match list
                         .iter()
                         .enumerate()
-                        .filter(|x| (pairs.is_empty() || pairs.iter().all(|(left, _)| left != &x.0)) && x.1.is_symbol(Some("(")).unwrap())
+                        .filter(|x| {
+                            (pairs.is_empty() || pairs.iter().all(|(left, _)| left != &x.0))
+                                && x.1.is_symbol(Some("(")).unwrap()
+                        })
                         .filter(|x| x.0 < right)
                         .max_by(|x, y| (x.0).cmp(&y.0))
                         .map(|x| x.0)
@@ -208,7 +226,11 @@ impl SExpr {
                         if *left == 0 && *right == list.len() - 1 {
                             (left, right, 0)
                         } else {
-                            (left, right, pairs.iter().filter(|(l, r)| l < left && r > left).count())
+                            (
+                                left,
+                                right,
+                                pairs.iter().filter(|(l, r)| l < left && r > left).count(),
+                            )
                         }
                     })
                     .for_each(|(left, right, level)| mapping.push((*left, *right, level)));
@@ -228,8 +250,12 @@ impl SExpr {
                     return None;
                 }
 
-                let indexes: Vec<usize> =
-                    borrowed_flattened.iter().enumerate().filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap()).map(|(i, _)| i - 1).collect();
+                let indexes: Vec<usize> = borrowed_flattened
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap())
+                    .map(|(i, _)| i - 1)
+                    .collect();
 
                 if !indexes.is_empty() {
                     Some(indexes)
@@ -262,7 +288,12 @@ impl SExpr {
             }
             SExpr::Pair(pair) => {
                 let pair = pair.borrow();
-                SExpr::List(SchemeList::new(vec![*pair.0.clone(), SExpr::Symbol(".".to_string()), *pair.1.clone()])).flatten()
+                SExpr::List(SchemeList::new(vec![
+                    *pair.0.clone(),
+                    SExpr::Symbol(".".to_string()),
+                    *pair.1.clone(),
+                ]))
+                .flatten()
             }
             other => Ok(other.clone()),
         }
@@ -312,7 +343,8 @@ impl SExpr {
                         None => break,
                     }
 
-                    let internal = SExpr::List(SchemeList::new(unflattened[(l_index + 1)..r_index].to_vec()));
+                    let internal =
+                        SExpr::List(SchemeList::new(unflattened[(l_index + 1)..r_index].to_vec()));
                     unflattened.splice(l_index..(r_index + 1), [internal]);
                 }
 

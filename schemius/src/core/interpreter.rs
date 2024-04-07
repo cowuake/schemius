@@ -26,8 +26,15 @@ impl Interpreter {
         let expression = reader::read(&mut prelude);
 
         match evaluator.eval(&expression) {
-            Ok(_) => Self { current_expression: String::new(), evaluator, line_idx: 0, lines: vec![] },
-            Err(_) => Self { current_expression: String::new(), evaluator: Evaluator::default(), line_idx: 0, lines: vec![] },
+            Ok(_) => {
+                Self { current_expression: String::new(), evaluator, line_idx: 0, lines: vec![] }
+            }
+            Err(_) => Self {
+                current_expression: String::new(),
+                evaluator: Evaluator::default(),
+                line_idx: 0,
+                lines: vec![],
+            },
         }
     }
 
@@ -35,8 +42,10 @@ impl Interpreter {
         loop {
             // TODO: Handle the case of parentheses inside strings and all other similar cases
             //      -> Only parenthes used as syntax elements should be considered here
-            let lparens = self.current_expression.chars().filter(|c| c == &'(' || c == &'[').count();
-            let rparens = self.current_expression.chars().filter(|c| c == &')' || c == &']').count();
+            let lparens =
+                self.current_expression.chars().filter(|c| c == &'(' || c == &'[').count();
+            let rparens =
+                self.current_expression.chars().filter(|c| c == &')' || c == &']').count();
 
             if lparens == rparens {
                 break;
@@ -114,8 +123,10 @@ impl Interpreter {
 
     fn is_preliminarily_validated(&self, expression_string: &str) -> bool {
         // TODO: Judge the validity of the approach and extend the function if it's worth
-        !((expression_string.trim().starts_with('(') && !expression_string.trim_end().ends_with(')'))
-            || (expression_string.trim().starts_with('[') && !expression_string.trim_end().ends_with(']')))
+        !((expression_string.trim().starts_with('(')
+            && !expression_string.trim_end().ends_with(')'))
+            || (expression_string.trim().starts_with('[')
+                && !expression_string.trim_end().ends_with(']')))
     }
 
     pub fn eval_expression(&mut self, expression_string: String) -> EvalOutput {

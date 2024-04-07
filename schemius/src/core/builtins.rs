@@ -69,7 +69,10 @@ fn list_args(list: &[SExpr]) -> Result<Vec<String>, String> {
 
 fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.len() < 2 {
-        return Err(format!("Exception in lambda: expected at least 2 arguments, found {}", args.len()));
+        return Err(format!(
+            "Exception in lambda: expected at least 2 arguments, found {}",
+            args.len()
+        ));
     }
 
     let arg_names = match args[0] {
@@ -131,7 +134,9 @@ fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     Err(_) => Err(String::from("")),
                 }
             }
-            _ => Err(String::from("Exception: #<procedure define> cant take only a symbol and a list")),
+            _ => Err(String::from(
+                "Exception: #<procedure define> cant take only a symbol and a list",
+            )),
         },
         _ => Err(String::from("Exception: #<procedure define> needs arguments")),
     }
@@ -163,7 +168,10 @@ fn r_set(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
 fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.len() < 2 {
-        return Err(format!("Exception in let: expected at least 2 arguments, found {}", args.len()));
+        return Err(format!(
+            "Exception in let: expected at least 2 arguments, found {}",
+            args.len()
+        ));
     }
 
     let let_env = Environment::new_child(env.clone());
@@ -175,11 +183,17 @@ fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     SExpr::List(binding) => {
                         let borrowed_binding = binding.borrow();
                         match &borrowed_binding[0] {
-                            SExpr::Symbol(symbol) => match eval(&borrowed_binding[1], env.clone()) {
-                                Ok(expr) => let_env.borrow_mut().define(&symbol, &expr).unwrap(),
-                                Err(e) => return Err(e),
-                            },
-                            other => return Err(format!("Exception in let: {} is not a symbol", other)),
+                            SExpr::Symbol(symbol) => {
+                                match eval(&borrowed_binding[1], env.clone()) {
+                                    Ok(expr) => {
+                                        let_env.borrow_mut().define(&symbol, &expr).unwrap()
+                                    }
+                                    Err(e) => return Err(e),
+                                }
+                            }
+                            other => {
+                                return Err(format!("Exception in let: {} is not a symbol", other))
+                            }
                         }
                     }
                     other => return Err(format!("Exception in let: {} is not a list", other)),
@@ -203,7 +217,10 @@ fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
 fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.len() < 2 {
-        return Err(format!("Exception in let: expected at least 2 arguments, found {}", args.len()));
+        return Err(format!(
+            "Exception in let: expected at least 2 arguments, found {}",
+            args.len()
+        ));
     }
 
     let mut inner_env = env;
@@ -215,15 +232,19 @@ fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     SExpr::List(binding) => {
                         let borrowed_binding = binding.borrow();
                         match &borrowed_binding[0] {
-                            SExpr::Symbol(symbol) => match eval(&borrowed_binding[1], inner_env.clone()) {
-                                Ok(expr) => {
-                                    inner_env = Environment::new_child(inner_env.clone());
-                                    inner_env = Environment::new_child(inner_env.clone());
-                                    inner_env.borrow_mut().define(&symbol, &expr).unwrap();
+                            SExpr::Symbol(symbol) => {
+                                match eval(&borrowed_binding[1], inner_env.clone()) {
+                                    Ok(expr) => {
+                                        inner_env = Environment::new_child(inner_env.clone());
+                                        inner_env = Environment::new_child(inner_env.clone());
+                                        inner_env.borrow_mut().define(&symbol, &expr).unwrap();
+                                    }
+                                    Err(e) => return Err(e),
                                 }
-                                Err(e) => return Err(e),
-                            },
-                            other => return Err(format!("Exception in let: {} is not a symbol", other)),
+                            }
+                            other => {
+                                return Err(format!("Exception in let: {} is not a symbol", other))
+                            }
                         }
                     }
                     other => return Err(format!("Exception in let: {} is not a list", other)),
@@ -264,17 +285,24 @@ fn r_set_car(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 
                     Ok(SExpr::Pair(pair.clone()))
                 }
-                other => Err(format!("Exception in set-car: {} is neither a list nor a pair", other)),
+                other => {
+                    Err(format!("Exception in set-car: {} is neither a list nor a pair", other))
+                }
             },
             Err(e) => Err(e),
         },
-        _ => Err(String::from("Exception in set-car!: must provide a symbol as the first argument")),
+        _ => {
+            Err(String::from("Exception in set-car!: must provide a symbol as the first argument"))
+        }
     }
 }
 
 fn r_if(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.len() != 2 && args.len() != 3 {
-        return Err(format!("Exception in if: expected two or three arguments, found {}", args.len()));
+        return Err(format!(
+            "Exception in if: expected two or three arguments, found {}",
+            args.len()
+        ));
     }
 
     match eval(&args[0], env.clone()) {
@@ -320,7 +348,10 @@ fn r_display(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 
 fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.is_empty() {
-        return Err(format!("Exception in cond: expected at least 1 argument, found {}", args.len()));
+        return Err(format!(
+            "Exception in cond: expected at least 1 argument, found {}",
+            args.len()
+        ));
     }
 
     let have_else_clause = args.len() > 3
@@ -335,7 +366,9 @@ fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         match block {
             SExpr::List(list) => {
                 if list.borrow().len() != 2 {
-                    return Err(String::from("Exception: malformed args provided to #<procedure cond>"));
+                    return Err(String::from(
+                        "Exception: malformed args provided to #<procedure cond>",
+                    ));
                 }
                 let first = eval(&list.borrow()[0], env.clone());
                 match first {
@@ -344,7 +377,11 @@ fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                             true => return Ok(list.borrow()[1].clone()),
                             false => continue,
                         },
-                        _ => return Err(String::from("Exception: malformed condition provided to #<procedure cond>")),
+                        _ => {
+                            return Err(String::from(
+                                "Exception: malformed condition provided to #<procedure cond>",
+                            ))
+                        }
                     },
                     Err(e) => return Err(e),
                 }
@@ -436,7 +473,10 @@ fn r_list(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
 fn r_begin(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.is_empty() {
-        return Err(format!("Exception in begin: expected at least 1 argument, found {}", args.len()));
+        return Err(format!(
+            "Exception in begin: expected at least 1 argument, found {}",
+            args.len()
+        ));
     }
 
     let splitted = args.split_last().unwrap();
@@ -493,9 +533,16 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                         let unquotes = s_list.find_symbol("unquote");
                         let unquotes_splicing = s_list.find_symbol("unquote-splicing");
-                        let mut unquotes = if let Some(unquotes) = unquotes { unquotes.iter().map(|x| (false, *x)).collect() } else { vec![] };
-                        let mut unquotes_splicing =
-                            if unquotes_splicing.is_some() { unquotes_splicing.unwrap().iter().map(|x| (true, *x)).collect() } else { vec![] };
+                        let mut unquotes = if let Some(unquotes) = unquotes {
+                            unquotes.iter().map(|x| (false, *x)).collect()
+                        } else {
+                            vec![]
+                        };
+                        let mut unquotes_splicing = if unquotes_splicing.is_some() {
+                            unquotes_splicing.unwrap().iter().map(|x| (true, *x)).collect()
+                        } else {
+                            vec![]
+                        };
 
                         unquotes.append(&mut unquotes_splicing);
                         unquotes.sort_by(|x, y| x.1.cmp(&y.1));
@@ -505,7 +552,10 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                             unquotes.retain(|(_, index)| {
                                 !mapping.iter().any(|(left, right, level)| {
-                                    index > left && index < right && quasiquotes.iter().any(|quasi| *left == quasi + 1) && *level > 0
+                                    index > left
+                                        && index < right
+                                        && quasiquotes.iter().any(|quasi| *left == quasi + 1)
+                                        && *level > 0
                                 })
                             });
                         }
@@ -530,10 +580,16 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
                             let enclosing = match paren_map {
                                 Some(ref paren_map) => {
-                                    if !paren_map.iter().enumerate().any(|(_, (i, _, _))| *i == (unquote_index + 1)) {
+                                    if !paren_map
+                                        .iter()
+                                        .enumerate()
+                                        .any(|(_, (i, _, _))| *i == (unquote_index + 1))
+                                    {
                                         None
                                     } else {
-                                        paren_map.iter().find_map(|(opening, closing, _)| Some((*opening, *closing)))
+                                        paren_map.iter().find_map(|(opening, closing, _)| {
+                                            Some((*opening, *closing))
+                                        })
                                     }
                                 }
                                 None => None,
@@ -547,7 +603,8 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                 // Unquoting expression (list)
                                 Some((lparen_idx, rparen_idx)) => {
                                     // The final expression does not need enclosing parentheses
-                                    let raw_expr = borrowed_list[(lparen_idx + 1)..rparen_idx].to_vec();
+                                    let raw_expr =
+                                        borrowed_list[(lparen_idx + 1)..rparen_idx].to_vec();
 
                                     // The expression... Must be a non-self-evaluating one!
                                     if raw_expr.len() == 1 {
@@ -555,7 +612,13 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                         let mut incriminated = false;
 
                                         if let SExpr::Symbol(symbol) = suspect {
-                                            if !env.borrow().get(&symbol).unwrap().is_procedure().unwrap() {
+                                            if !env
+                                                .borrow()
+                                                .get(&symbol)
+                                                .unwrap()
+                                                .is_procedure()
+                                                .unwrap()
+                                            {
                                                 incriminated = true;
                                             }
                                         } else {
@@ -563,7 +626,10 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                         }
 
                                         if incriminated {
-                                            return Err(format!("Exception: {} is not a procedure", raw_expr[0]));
+                                            return Err(format!(
+                                                "Exception: {} is not a procedure",
+                                                raw_expr[0]
+                                            ));
                                         }
                                     }
 
@@ -581,7 +647,8 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                             };
 
                             offset += (last_idx - first_idx - 1) as i32;
-                            let evaluated: Result<SExpr, String> = eval(&to_be_evaluated, env.clone());
+                            let evaluated: Result<SExpr, String> =
+                                eval(&to_be_evaluated, env.clone());
 
                             if !unquote_is_splicing {
                                 borrowed_list.splice(first_idx..last_idx, evaluated);
@@ -597,10 +664,18 @@ fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                                             }
 
                                             for i in (0..internal.borrow().len()).rev() {
-                                                borrowed_list.splice(first_idx..first_idx, [borrowed_internal[i].clone()]);
+                                                borrowed_list.splice(
+                                                    first_idx..first_idx,
+                                                    [borrowed_internal[i].clone()],
+                                                );
                                             }
                                         }
-                                        other => return Err(format!("Exception: ,@ followed by non-list {} -> {}", to_be_evaluated, other)),
+                                        other => {
+                                            return Err(format!(
+                                                "Exception: ,@ followed by non-list {} -> {}",
+                                                to_be_evaluated, other
+                                            ))
+                                        }
                                     },
                                     Err(e) => return Err(e),
                                 }
@@ -790,7 +865,10 @@ fn_is! {
 
 fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     if args.len() != 3 {
-        return Err(format!("Exception in string-set!: expected 3 arguments, found {}", args.len()));
+        return Err(format!(
+            "Exception in string-set!: expected 3 arguments, found {}",
+            args.len()
+        ));
     }
 
     match &args[0] {
@@ -802,7 +880,9 @@ fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
                 if is_in_range {
                     match &args[2] {
                         SExpr::Char(character) => {
-                            string.borrow_mut().replace_range(index..index + 1, character.to_string().as_str());
+                            string
+                                .borrow_mut()
+                                .replace_range(index..index + 1, character.to_string().as_str());
 
                             Ok(SExpr::String(string.clone()))
                         }
@@ -820,7 +900,10 @@ fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
 fn r_environment_bindings(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
     if !args.is_empty() {
-        return Err(format!("Exception in environment-bindings: expected 0 arguments, found {}", args.len()));
+        return Err(format!(
+            "Exception in environment-bindings: expected 0 arguments, found {}",
+            args.len()
+        ));
     }
 
     let env_guard = env.borrow();
