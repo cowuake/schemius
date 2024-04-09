@@ -91,8 +91,6 @@ fn interpreter_inter_variant() {
     }
 }
 
-
-
 #[test]
 fn interpreter_factorial_basic() {
     integration_subtest_eval_to! {
