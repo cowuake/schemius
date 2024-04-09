@@ -1,5 +1,5 @@
 use clap::Parser;
-use schemius::core::interpreter::Interpreter;
+use schemius::Interpreter;
 
 /// Simple Scheme interpreter born as a personal learning project
 #[derive(Parser, Debug)]

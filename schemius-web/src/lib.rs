@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use schemius::core::interpreter::Interpreter;
+use schemius::Interpreter;
 use std::sync::Mutex;
 use wasm_bindgen::prelude::*;
 
