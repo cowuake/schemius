@@ -74,8 +74,8 @@
       init().then(() => {
         $("body").terminal(
           function (expression) {
-            if (expression.trim()) {
-              expression = expression.replace(/\r?\n|\r/g, " ").trim();
+            expression = expression.replace(/\r?\n|\r/g, " ").trim();
+            if (expression) {
               this.echo(evaluate(expression));
             }
           },
