@@ -84,8 +84,8 @@ fn interpreter_quot() {
 #[test]
 fn interpreter_inter_variant() {
     integration_subtest_eval_to! {
-        { expression: "(begin (define a \"hello\") (define b \"world\") (define l (list a b)) (set! a \"farewell\") l)", expected: "(\"hello\" \"world\")" };
-        { expression: "(begin (define a \"hello\") (define b \"world\") (define l (list a b)) (string-set! a 0 #\\W) l)", expected: "(\"Wello\" \"world\")" };
+        { expression: r#"(begin (define a "hello") (define b "world") (define l (list a b)) (set! a "farewell") l)"#, expected: r#"("hello" "world")"# };
+        { expression: r#"(begin (define a "hello") (define b "world") (define l (list a b)) (string-set! a 0 #\W) l)"#, expected: r#"("Wello" "world")"# };
         { expression: "(begin (define a (cons 1 2)) (define l (list 1 a)) (set-car! a 0) l)", expected: "(1 (0 . 2))" };
         { expression: "(begin (define a (list 1 2)) (define b (list 3 4)) (define l (list a b)) (set! a '(0 1)) (set-car! b 2) l)", expected: "((1 2) (2 4))" };
     }
@@ -158,9 +158,9 @@ fn interpreter_quasiquotation() {
         { expression: "`(1 2 ,@(list 1 2 3))", expected: "(1 2 1 2 3)" };
         { expression: "`(,@x ,x)", expected: "(1 2 3 (1 2 3))" };
         { expression: "`(,@x ,x ,@x ,x ,@x)", expected: "(1 2 3 (1 2 3) 1 2 3 (1 2 3) 1 2 3)" };
-        { expression: "(define x \"unquoted\")", expected: "ok" };
-        { expression: "`(1 2 ,x (+ 3 ,x))", expected: "(1 2 \"unquoted\" (+ 3 \"unquoted\"))" };
-        { expression: "`(1 2 ,x `(1 2 ,x (+ 3 ,x)))", expected: "(1 2 \"unquoted\" (quasiquote (1 2 (unquote x) (+ 3 (unquote x)))))" };
+        { expression: r#"(define x "unquoted")"#, expected: "ok" };
+        { expression: r#"`(1 2 ,x (+ 3 ,x))"#, expected: r#"(1 2 "unquoted" (+ 3 "unquoted"))"# };
+        { expression: "`(1 2 ,x `(1 2 ,x (+ 3 ,x)))", expected: r#"(1 2 "unquoted" (quasiquote (1 2 (unquote x) (+ 3 (unquote x)))))"# };
     }
 }
 
@@ -168,8 +168,8 @@ fn interpreter_quasiquotation() {
 fn interpreter_recursion_deep() {
     integration_subtest_eval_to! {
         {
-            expression: "(begin (define (count-to n) (if (= n 0) \"Done!\" (count-to (- n 1)))) (count-to 100000))",
-            expected: "\"Done!\""
+            expression: r#"(begin (define (count-to n) (if (= n 0) "Done!" (count-to (- n 1)))) (count-to 100000))"#,
+            expected: r#""Done!""#
         };
     }
 }
@@ -189,7 +189,7 @@ fn interpreter_number_comparison() {
 fn interpreter_sepr_type() {
     integration_subtest_eval_to! {
         { expression: "(boolean? #f)", expected: "#t" };
-        { expression: "(string? \"hello\")", expected: "#t" };
+        { expression: r#"(string? "hello")"#, expected: "#t" };
         { expression: "(number? 1/2)", expected: "#t" };
         { expression: "(number? .11)", expected: "#t" };
         { expression: "(number? 100000000000000000000000)", expected: "#t" };

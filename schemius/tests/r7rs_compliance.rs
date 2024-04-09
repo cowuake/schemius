@@ -35,7 +35,7 @@ fn interpreter_r7rs_cons() {
     integration_subtest_eval_to! {
         { expression: "(cons 'a '())", expected: "(a)" };
         { expression: "(cons '(a) '(b c d))", expected: "((a) b c d)" };
-        { expression: "(cons \"a\" '(b c))", expected: "(\"a\" b c)" };
+        { expression: r#"(cons "a" '(b c))"#, expected: r#"("a" b c)"# };
         { expression: "(cons 'a 3)", expected: "(a . 3)" };
         { expression: "(cons '(a b) 'c)", expected: "((a b) . c)" };
     }
@@ -65,7 +65,7 @@ fn interpreter_r7rs_equivalence_predicates() {
         { expression: "(eqv? (lambda () 1) (lambda () 2))", expected: "#f" };
         { expression: "(let ((p (lambda (x) x))) (eqv? p p))", expected: "#t" };
         { expression: "(eqv? #f 'nil)", expected: "#f" };
-        { expression: "(eqv? \"\" \"\")", expected: "" };
+        { expression: r#"(eqv? "" "")"#, expected: "" };
         { expression: "(eqv? '#() '#())", expected: "" };
         { expression: "(eqv? (lambda (x) x) (lambda (x) x))", expected: "" };
         { expression: "(eqv? (lambda (x) x) (lambda (y) y)", expected: "" };
@@ -80,16 +80,16 @@ fn interpreter_r7rs_equivalence_predicates() {
         { expression: "(letrec ((f (lambda () (if (eqv? f g) 'both 'f))) (g (lambda () (if eqv? f g) 'both 'f)))) (eqv? f g)) ", expected: "" };
         { expression: "(letrec ((f (lambda () (if (eqv? f g) 'f 'both))) (g (lambda () (if eqv? f g) 'g 'both)))) (eqv? f g)) ", expected: "#f" };
         { expression: "(eqv? '(a) '(a))", expected: "" };
-        { expression: "(eqv? \"a\" \"a\")", expected: "" };
+        { expression: r#"(eqv? "a" "a")"#, expected: "" };
         { expression: "(eqv? '(b) (cdr '(a b)))", expected: "" };
         { expression: "(let ((x '(a))) (eqv? x x))", expected: "#t" };
         { expression: "(eq? 'a 'a)", expected: "#t" };
         { expression: "(eq? '(a) '(a))", expected: "" };
         { expression: "(eq? (list 'a) (list 'a))", expected: "#f" };
-        { expression: "(eq? \"a\" \"a\")", expected: "" };
+        { expression: r#"(eq? "a" "a")"#, expected: "" };
         { expression: "(eq? '() '())", expected: "#t" };
         { expression: "(eq? 2 2)", expected: "" };
-        { expression: "(eq? #\\A #\\A)", expected: "" };
+        { expression: r#"(eq? #\A #\A)"#, expected: "" };
         { expression: "(eq? car car)", expected: "#t" };
         { expression: "(let ((n (+ 2 3))) (eq? n n))", expected: "" };
         { expression: "(let ((x '(a))) (eq? x x))", expected: "#t" };
@@ -98,7 +98,7 @@ fn interpreter_r7rs_equivalence_predicates() {
         { expression: "(equal? 'a 'a)", expected: "#t" };
         { expression: "(equal? '() '())", expected: "#t" };
         { expression: "(equal? '(a (b) c) '(a (b) c))", expected: "#t" };
-        { expression: "(equal? \"abc\" \"abc\")", expected: "#t" };
+        { expression: r#"(equal? "abc" "abc")"#, expected: "#t" };
         { expression: "(equal? 2 2)", expected: "#t" };
         { expression: "(equal? (make-vector 5 'a) (make-vector 5 'a))", expected: "#t" };
         { expression: "(equal? '#1=(a b . #1#) '#2=(a b a b . #2#))", expected: "#t" };
