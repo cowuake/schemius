@@ -38,23 +38,22 @@
     <script type="module">
       import init, { evaluate } from "./pkg/schemius_web.js";
 
-      ["compositionstart", "compositionupdate", "compositionend", "input"].forEach(
-        (event) => {
-          window.addEventListener(event, (e) => {
+      [
+        "compositionstart",
+        "compositionupdate",
+        "compositionend",
+        "input",
+      ].forEach((event) => {
+        window.addEventListener(
+          event,
+          (e) => {
             console.log(event, e);
-          }, true);
-        }
-      );
-
-      init().then(() => {
-        $("body").terminal(
-          function (expression) {
-            if (expression.trim()) {
-              this.echo(evaluate(expression));
-            }
           },
-          {
-            greetings: `
+          true
+        );
+      });
+
+      const welcomeMessage = `
     ███████╗ ██████╗██╗  ██╗███████╗███╗   ███╗██╗██╗   ██╗███████╗
     ██╔════╝██╔════╝██║  ██║██╔════╝████╗ ████║██║██║   ██║██╔════╝
     ███████╗██║     ███████║█████╗  ██╔████╔██║██║██║   ██║███████╗
@@ -63,12 +62,24 @@
     ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
       Welcome to Schemius!
+        Press [Shift + Enter] to enter multiline insert mode
         (environment-bindings)  -> Show bindings in current env
         (fact 2000)             -> If you'd like to see a big number :)
 
       Go through the code at https://github.com/cowuake/schemius
 
-          `,
+      `;
+
+      init().then(() => {
+        $("body").terminal(
+          function (expression) {
+            if (expression.trim()) {
+              expression = expression.replace(/\r?\n|\r/g, " ").trim();
+              this.echo(evaluate(expression));
+            }
+          },
+          {
+            greetings: welcomeMessage,
           }
         );
       });
