@@ -68,7 +68,6 @@
         (fact 2000)             -> If you'd like to see a big number :)
 
       Go through the code at https://github.com/cowuake/schemius
-
       `;
 
       init().then(() => {
@@ -82,9 +81,13 @@
           {
             greetings: welcomeMessage,
             keydown: function (e) {
-              if (e.ctrlKey && e.which === 72) { //  Ctrl + H
-                this.echo(welcomeMessage);
-                return false;
+              if (e.ctrlKey) {
+                e.preventDefault();
+                switch (e.which) {
+                  case 72: // Ctrl + H
+                    this.echo(welcomeMessage);
+                    return false;
+                }
               }
             },
           }
