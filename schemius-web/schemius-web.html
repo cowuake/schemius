@@ -94,12 +94,21 @@
 
       Welcome to Schemius!
         Press [Ctrl + H]        to show this welcome message
-        Press [Shift + Enter]   to enter multiline insert mode
+        Press [Ctrl + K]        to show essential keymap
         (environment-bindings)  -> Show bindings in current env
         (fact 2000)             -> If you'd like to see a big number :)
 
       Go through the code at https://github.com/cowuake/schemius
       `;
+
+      const keymap = `
+      Keymap:
+        [arrow keys]            -> Move cursor | Navigate history
+        [Shift + Enter]         -> Enter multiline insert mode
+        [Ctrl + H]              -> Show help message
+        [Ctrl + K]              -> Show keymap
+        [Ctrl + Shift + F]      -> Switch font
+      `
 
       setFont(defaultFont);
 
@@ -127,6 +136,9 @@
                 switch (e.which) {
                   case 72: // Ctrl + H
                     this.echo(welcomeMessage);
+                    return false;
+                  case 75: // Ctrl + K
+                    this.echo(keymap);
                     return false;
                 }
                 if (e.shiftKey) {
