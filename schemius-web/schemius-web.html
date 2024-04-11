@@ -75,7 +75,15 @@
           function (expression) {
             expression = expression.replace(/\r?\n|\r/g, " ").trim();
             if (expression) {
-              this.echo(evaluate(expression));
+              try {
+                this.echo(evaluate(expression));
+              } catch (e) {
+                console.log(e);
+                this.echo("Ooops... Something went wrong! :(");
+                this.read("Press [Enter] to reload\n\t").then(() => {
+                  location.reload();
+                });
+              }
             }
           },
           {
