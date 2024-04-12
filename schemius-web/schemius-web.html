@@ -45,7 +45,7 @@
         "Fira Code",
         "JetBrains Mono",
         "Consolas",
-        "monospace"
+        "monospace",
       ];
       const localFont = localStorage.getItem("font");
       const defaultFont = localFont ?? fonts[0];
@@ -113,7 +113,7 @@
         [Ctrl + H]              -> Show help message
         [Ctrl + K]              -> Show keymap
         [Ctrl + Shift + F]      -> Switch font
-      `
+      `;
 
       setFont(defaultFont);
 
