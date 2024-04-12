@@ -19,13 +19,6 @@
       @import url("https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.min.css");
       @import url("https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/css/jetbrains-mono.min.css");
 
-      .terminal,
-      .terminal-mobile {
-        --color: #eadcb4;
-        --background: #32302f;
-        --link-color: #689d6a;
-      }
-
       .terminal {
         --size: 1.3;
       }
@@ -74,6 +67,65 @@
         setFont(currentFont);
       }
 
+      const themes = [
+        {
+          // gruvbox dark
+          color: "#ebdbb2",
+          background: "#3c3836",
+          linkColor: "#b8bb26",
+        },
+        {
+          // gruvbox light
+          color: "#504945",
+          background: "#fbf1c7",
+          linkColor: "#689d6a",
+        },
+      ];
+      const localTheme = JSON.parse(localStorage.getItem("theme"));
+      const defaultTheme = localTheme ?? themes[0];
+
+      function getTheme() {
+        const color =
+          document.documentElement.style.getPropertyValue("--color");
+        const background =
+          document.documentElement.style.getPropertyValue("--background");
+        const linkColor =
+          document.documentElement.style.getPropertyValue("--link-color");
+
+        return {
+          color: color,
+          background: background,
+          linkColor: linkColor,
+        };
+      }
+
+      function setTheme(theme) {
+        document.documentElement.style.setProperty("--color", theme.color);
+        document.documentElement.style.setProperty(
+          "--background",
+          theme.background
+        );
+        document.documentElement.style.setProperty(
+          "--link-color",
+          theme.linkColor
+        );
+        localStorage.setItem("theme", JSON.stringify(theme));
+      }
+
+      function switchTheme() {
+        let currentTheme = getTheme();
+        console.log("Previous theme", currentTheme);
+        let index = themes.indexOf(
+          themes.filter(
+            (theme) => JSON.stringify(theme) == JSON.stringify(currentTheme)
+          )[0]
+        );
+        index = ++index % themes.length;
+        currentTheme = themes[index];
+        console.log("Setting theme to", currentTheme);
+        setTheme(currentTheme);
+      }
+
       [
         "compositionstart",
         "compositionupdate",
@@ -116,6 +168,7 @@
       `;
 
       setFont(defaultFont);
+      setTheme(defaultTheme);
 
       init().then(() => {
         $("body").terminal(
@@ -150,6 +203,9 @@
                   switch (e.which) {
                     case 70: // Ctrl + Shift + F
                       switchFont();
+                      return false;
+                    case 84: // Ctrl + Shift + T
+                      switchTheme();
                       return false;
                   }
                 }
