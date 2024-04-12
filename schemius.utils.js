@@ -64,8 +64,20 @@ const themes = [
   {
     // gruvbox dark
     color: "#ebdbb2",
-    background: "#3c3836",
+    background: "#32302f",
     linkColor: "#b8bb26",
+  },
+  {
+    // everforest light
+    color: "#5C6a72",
+    background: "#fdf6e3",
+    linkColor: "#88C0D0",
+  },
+  {
+    // dracula
+    color: "#f8f8f2",
+    background: "#282a36",
+    linkColor: "#ff79c6",
   },
   {
     // gruvbox light
