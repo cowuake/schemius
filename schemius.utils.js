@@ -22,6 +22,7 @@ const keymap = `
         [Ctrl + H]              -> Show help message
         [Ctrl + K]              -> Show keymap
         [Ctrl + Shift + F]      -> Switch font
+        [Ctrl + Shift + T]      -> Switch color theme
 `;
 
 const fonts = [
