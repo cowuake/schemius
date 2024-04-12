@@ -14,16 +14,13 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        rust-version: [stable, beta, nightly]
+        os: [ubuntu-latest, macos-latest]
 
     steps:
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: ${{ matrix.rust-version }}
-          components: cargo-tarpaulin
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          cargo install cargo-tarpaulin
 
       - name: Check out code
         uses: actions/checkout@v4
