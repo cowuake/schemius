@@ -7,8 +7,11 @@ on:
 
 env:
   WORK_DIR: ./schemius-web
-  WEB_PAGE_SOURCE: schemius-web.html
   WEB_PAGE: index.html
+  WEB_PAGE_SOURCE: schemius-web.html
+  WEB_PAGE_JS: schemius.utils.js
+  ARTIFACTS: artifacts
+  PUBLISH_DIR: ./dist
 
 jobs:
   build:
@@ -22,32 +25,25 @@ jobs:
       - name: Install rustup
         run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
-      - name: Add Rust WASM target
-        run: rustup target add wasm32-unknown-unknown
-
-      - name: Build WASM package
-        run: wasm-pack build --release --target web
+      - name: Produce WASM package
+        run: |
+          cargo install wasm-pack
+          rustup target add wasm32-unknown-unknown
+          wasm-pack build --release --target web
         working-directory: ${{ env.WORK_DIR }}
 
       - name: Generate final web page
         run: cp $WEB_PAGE_SOURCE $WEB_PAGE
         working-directory: ${{ env.WORK_DIR }}
 
-      - name: Upload web page artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: web-page
-          path: ${{ env.WORK_DIR }}/${{ env.WEB_PAGE }}
-          if-no-files-found: error
-
-      - name: Upload WASM package artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: wasm-pkg
-          path: ${{ env.WORK_DIR }}/pkg
+          name: ${{ env.ARTIFACTS }}
+          path: |
+            ${{ env.WORK_DIR }}/${{ env.WEB_PAGE }}
+            ${{ env.WORK_DIR }}/${{ env.WEB_PAGE_JS }}
+            ${{ env.WORK_DIR }}/pkg
           if-no-files-found: error
 
   deploy:
@@ -57,23 +53,17 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Download web page artifact
-        uses: actions/download-artifact@v3
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: web-page
-          path: ./dist
-
-      - name: Download WASM package artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: wasm-pkg
-          path: ./dist/pkg
+          name: ${{ env.ARTIFACTS }}
+          path: ${{ env.PUBLISH_DIR }}
 
       - name: Remove vicious .gitignore
-        run: rm ./dist/pkg/.gitignore
+        run: rm ${{ env.PUBLISH_DIR }}/pkg/.gitignore
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ${{ env.PUBLISH_DIR }}
