@@ -47,15 +47,20 @@
         "Consolas",
         "monospace"
       ];
-      const defaultFont = fonts[0];
+      const localFont = localStorage.getItem("font");
+      const defaultFont = localFont ?? fonts[0];
+
+      function getFont() {
+        return document.documentElement.style.getPropertyValue("--font");
+      }
 
       function setFont(font) {
         document.documentElement.style.setProperty("--font", font);
+        localStorage.setItem("font", font);
       }
 
       async function switchFont() {
-        let currentFont =
-          document.documentElement.style.getPropertyValue("--font");
+        let currentFont = getFont();
         let keepSearching = true;
         let nVisited = 0;
 
