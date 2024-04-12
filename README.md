@@ -1,5 +1,7 @@
 # Schemius
 
+[![CI](https://github.com/cowuake/schemius/actions/workflows/ci.yaml/badge.svg)](https://github.com/cowuake/schemius/actions/workflows/ci.yaml)
+[![Web Client](https://github.com/cowuake/schemius/actions/workflows/deploy-web.yml/badge.svg?branch=main)](https://github.com/cowuake/schemius/actions/workflows/deploy-web.yml)
 [![Coverage Status](https://coveralls.io/repos/github/cowuake/schemius/badge.svg)](https://coveralls.io/github/cowuake/schemius)
 
 A "toy" intepreter for the Scheme programming language aiming to be compliant with the R7RS-small standard.
