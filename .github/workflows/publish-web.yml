@@ -1,9 +1,13 @@
-name: Deploy Schemius web client
+name: Publish Web Page
 
 on:
   push:
     branches:
       - main
+    paths:
+      - .github/workflows/**
+      - schemius/**
+      - schemius-web/**
 
 env:
   WORK_DIR: ./schemius-web
