@@ -123,3 +123,8 @@ function switchTheme() {
   console.log("Setting theme to", currentTheme);
   setTheme(currentTheme);
 }
+
+const fakeProcedures = {
+  "(switch-font)": switchFont,
+  "(switch-theme)": switchTheme,
+};
