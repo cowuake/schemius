@@ -5,7 +5,7 @@ macro_rules! integration_subtest_eval_to {
 
         $(
             let res = interpreter.eval_expression_and_format(String::from($expression));
-            let expected = String::from($expected_result);
+            let expected = $expected_result;
 
             assert_eq!(res, expected);
         )*

@@ -66,11 +66,10 @@ impl Interpreter {
     }
 
     fn format(&self, expression: EvalOutput) -> String {
-        (match expression {
-            Ok(val) => val.to_string(),
+        match expression {
+            Ok(val) => format!("{}", val),
             Err(e) => e,
-        })
-        .to_string()
+        }
     }
 
     fn print(&self, expression: EvalOutput) {

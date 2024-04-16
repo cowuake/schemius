@@ -75,6 +75,13 @@ impl fmt::Display for SExpr {
 }
 
 impl SExpr {
+    pub fn to_char(&self) -> Result<SchemeChar, String> {
+        match self {
+            SExpr::Char(val) => Ok(*val as SchemeChar),
+            _ => panic!("Exception: {} is not a character", self),
+        }
+    }
+
     pub fn symbol_is(&self, repr: &str) -> Result<bool, String> {
         match self {
             SExpr::Symbol(val) => {

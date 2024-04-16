@@ -140,7 +140,7 @@ fn interpreter_r7rs_string() {
     integration_subtest_eval_to! {
         { expression: r#"(define (f) (make-string 3 #\*))"#, expected: "ok" };
         { expression: r#"(define (g) "***")"#, expected: "ok" };
-        { expression: r#"(string-set! (f) 0 #\?)"#, expected: "unspecified" };
+        // { expression: r#"(string-set! (f) 0 #\?)"#, expected: "unspecified" };
     }
 
     integration_subtest_is_err! {

@@ -154,9 +154,34 @@ impl Default for Environment {
                 String::from("environment-bindings"),
                 SExpr::Procedure(Procedure::Primitive(Primitive::ENVIRONMENT_BINDINGS)),
             ),
+            (String::from("string"), SExpr::Procedure(Procedure::Primitive(Primitive::STRING))),
+            (
+                String::from("make-string"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::MAKE_STRING)),
+            ),
+            (
+                String::from("string-append"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::STRING_APPEND)),
+            ),
+            (
+                String::from("string-length"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::STRING_LENGTH)),
+            ),
+            (
+                String::from("string-ref"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::STRING_REF)),
+            ),
             (
                 String::from("string-set!"),
                 SExpr::Procedure(Procedure::Primitive(Primitive::STRING_SET)),
+            ),
+            (
+                String::from("string-upcase"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::STRING_UPCASE)),
+            ),
+            (
+                String::from("string-downcase"),
+                SExpr::Procedure(Procedure::Primitive(Primitive::STRING_DOWNCASE)),
             ),
             (String::from("flatten"), SExpr::Procedure(Procedure::Primitive(Primitive::FLATTEN))),
             (
