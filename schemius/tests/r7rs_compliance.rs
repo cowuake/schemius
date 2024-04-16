@@ -134,3 +134,17 @@ fn interpreter_r7rs_quasiquotation() {
         expression: "(begin (define x 10) `(1 2 ,@x))";
     }
 }
+
+#[test]
+fn interpreter_r7rs_string() {
+    integration_subtest_eval_to! {
+        { expression: r#"(define (f) (make-string 3 #\*))"#, expected: "ok" };
+        { expression: r#"(define (g) "***")"#, expected: "ok" };
+        { expression: r#"(string-set! (f) 0 #\?)"#, expected: "unspecified" };
+    }
+
+    integration_subtest_is_err! {
+        expression: r#"(string-set! (g) 0 #\?)"#;
+        expression: r#"(string-set! (symbol->string 'immutable) 0 #\?)"#;
+    }
+}

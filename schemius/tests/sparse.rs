@@ -225,3 +225,24 @@ fn interpreter_sexpr_null() {
         { expression: "(null? +inf.0)", expected: "#f" };
     }
 }
+
+#[test]
+fn interpreter_strings() {
+    integration_subtest_eval_to! {
+        { expression: r#"(string #\h #\e #\l #\l #\o)"#, expected: r#""hello""# };
+        { expression: r#"(string-append "hello, " "world)"#, expected: r#"hello, world"# };
+        { expression: r#"(string-downcase "HELLO")"#, expected: r#""hello""# };
+        { expression: r#"(string-upcase "hello")"#, expected: r#""HELLO""# };
+        { expression: r#"(string-upcase (string-downcase "HELLO"))"#, expected: r#""HELLO""# };
+        { expression: "(make-string 7)", expected: r#""       ""# };
+        { expression: r#"(make-string 3 #\W"#, expected: "WWW" };
+        { expression: r#"(string-length "hello")"#, expected: "5" };
+        { expression: r#"(string-ref "hello" 1)"#, expected: r#"#\e"# };
+        { expression: r#"(string-set! "hallo" 1 #\e)"#, expected: "hello" };
+    }
+
+    integration_subtest_is_err! {
+        expression: r#"(string-ref "hello" 5)"#;
+        expression: r#"(string-set! "hello" 5 #\e)"#;
+    }
+}

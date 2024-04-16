@@ -19,7 +19,7 @@ macro_rules! integration_subtest_is_err {
 
         $(
             let res = interpreter.eval_expression(String::from($expression));
-            assert!(res.is_err())
+            assert!(res.is_err());
         )*
     }
 }
