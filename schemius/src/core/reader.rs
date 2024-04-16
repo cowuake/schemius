@@ -64,61 +64,56 @@ fn advance(line: &mut String, string_token: &String) -> SExpr {
     }
 }
 
-fn parse_token(line: &mut String, token: &String) -> SExpr {
-    if token == "#t" {
-        return SExpr::Boolean(true);
-    } else if token == "#f" {
-        return SExpr::Boolean(false);
-    } else if token == "-nan.0" || token == "+nan.0" {
-        return SExpr::Number(SNumber::Float(NativeFloat::NAN));
-    } else if token == "-inf.0" {
-        return SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY));
-    } else if token == "+inf.0" {
-        return SExpr::Number(SNumber::Float(NativeFloat::INFINITY));
-    } else if token.starts_with('"') {
-        return SExpr::String(SchemeString::new(
-            token.get(1..token.len() - 1).unwrap().to_string(),
-        ));
-    } else if token == "'" || token == "`" || token == "," || token == ",@" {
-        let internal_token = init(line);
-        let quoted = advance(line, &internal_token);
-        let mut vec: Vec<SExpr> = vec![];
+fn parse_token(line: &mut String, token: &str) -> SExpr {
+    match token {
+        "#t" => SExpr::Boolean(true),
+        "#f" => SExpr::Boolean(false),
+        "-nan.0" | "+nan.0" => SExpr::Number(SNumber::Float(NativeFloat::NAN)),
+        "-inf.0" => SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY)),
+        "+inf.0" => SExpr::Number(SNumber::Float(NativeFloat::INFINITY)),
+        token if token.starts_with('"') => {
+            SExpr::String(SchemeString::new(token.get(1..token.len() - 1).unwrap().to_string()))
+        }
+        "'" | "`" | "," | ",@" => {
+            let internal_token = init(line);
+            let quoted = advance(line, &internal_token);
+            let mut vec: Vec<SExpr> = vec![];
 
-        let string_token = {
-            if token == "'" {
-                "quote".to_string()
-            } else if token == "`" {
-                "quasiquote".to_string()
-            } else if token == "," {
-                "unquote".to_string()
-            } else if token == ",@" {
-                "unquote-splicing".to_string()
-            } else {
-                token.to_string()
+            let string_token = match token {
+                "'" => "quote".to_string(),
+                "`" => "quasiquote".to_string(),
+                "," => "unquote".to_string(),
+                ",@" => "unquote-splicing".to_string(),
+                _ => token.to_string(),
+            };
+
+            vec.push(SExpr::Symbol(string_token));
+            vec.push(quoted);
+            SExpr::List(SchemeList::new(vec))
+        }
+        token if token.starts_with(r#"#\"#) => {
+            match token.len() {
+                3 => SExpr::Char(token.chars().last().unwrap()),
+                _ => {
+                    // Handle invalid character token
+                    // Return an appropriate value or raise an error
+                    // For now, returning SExpr::Symbol(token.clone())
+                    SExpr::Symbol(token.to_string())
+                }
             }
-        };
-
-        vec.push(SExpr::Symbol(string_token));
-        vec.push(quoted);
-        return SExpr::List(SchemeList::new(vec));
-    } else if token.starts_with(r#"#\"#) {
-        if token.len() == 3 {
-            return SExpr::Char(token.chars().last().unwrap());
         }
-    } else {
-        if let Ok(n) = token.parse::<NativeInt>() {
-            return SExpr::Number(SNumber::Int(n));
-        }
-        if let Ok(n) = token.parse::<NativeBigInt>() {
-            return SExpr::Number(SNumber::BigInt(n));
-        }
-        if let Ok(n) = token.parse::<NativeRational>() {
-            return SExpr::Number(SNumber::Rational(n));
-        }
-        if let Ok(f) = token.parse::<NativeFloat>() {
-            return SExpr::Number(SNumber::Float(f));
-        }
+        _ => match token.parse::<NativeInt>() {
+            Ok(n) => SExpr::Number(SNumber::Int(n)),
+            _ => match token.parse::<NativeBigInt>() {
+                Ok(n) => SExpr::Number(SNumber::BigInt(n)),
+                _ => match token.parse::<NativeRational>() {
+                    Ok(n) => SExpr::Number(SNumber::Rational(n)),
+                    _ => match token.parse::<NativeFloat>() {
+                        Ok(f) => SExpr::Number(SNumber::Float(f)),
+                        _ => SExpr::Symbol(token.to_string()),
+                    },
+                },
+            },
+        },
     }
-
-    SExpr::Symbol(token.clone())
 }
