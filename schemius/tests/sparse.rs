@@ -186,7 +186,7 @@ fn interpreter_number_comparison() {
 }
 
 #[test]
-fn interpreter_sepr_type() {
+fn interpreter_sexpr_type() {
     integration_subtest_eval_to! {
         { expression: "(boolean? #f)", expected: "#t" };
         { expression: r#"(string? "hello")"#, expected: "#t" };
@@ -204,5 +204,24 @@ fn interpreter_sepr_type() {
         { expression: "(list? '(1 . 2))", expected: "#f" };
         { expression: "(pair? '(1 2 3))", expected: "#t" };
         { expression: "(pair? '(1 . 2))", expected: "#t" };
+        { expression: "(symbol? 'hello)", expected: "#t" };
+        { expression: r#"(symbol? "hello")"#, expected: "#f" };
+    }
+}
+
+#[test]
+fn interpreter_sexpr_null() {
+    integration_subtest_eval_to! {
+        { expression: "(null? '())", expected: "#t" };
+        { expression: "(null? '(1 2 3))", expected: "#f" };
+        { expression: "(null? 1)", expected: "#f" };
+        { expression: "(null? #f)", expected: "#f" };
+        { expression: "(null? 'hello)", expected: "#f" };
+        { expression: "(null? 0)", expected: "#f" };
+        { expression: "(null? 0.0)", expected: "#f" };
+        { expression: "(null? 1/2)", expected: "#f" };
+        { expression: "(null? +nan.0)", expected: "#f" };
+        { expression: "(null? -inf.0)", expected: "#f" };
+        { expression: "(null? +inf.0)", expected: "#f" };
     }
 }

@@ -2,7 +2,7 @@ pub mod s_number;
 pub mod s_procedure;
 
 use super::accessor::*;
-use std::fmt;
+use std::{fmt, result};
 
 pub use self::{s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
@@ -75,26 +75,23 @@ impl fmt::Display for SExpr {
 }
 
 impl SExpr {
-    pub fn is_symbol(&self, repr: Option<&str>) -> Result<bool, String> {
+    pub fn symbol_is(&self, repr: &str) -> Result<bool, String> {
         match self {
-            SExpr::Symbol(val) => match repr {
-                Some(token) => {
-                    if val.as_str() == token {
-                        Ok(true)
-                    } else {
-                        Ok(false)
-                    }
+            SExpr::Symbol(val) => {
+                if val.as_str() == repr {
+                    Ok(true)
+                } else {
+                    Ok(false)
                 }
-                None => Ok(true),
-            },
+            }
             _ => Ok(false),
         }
     }
 
     #[allow(dead_code)]
     fn is_left_bracket(&self) -> Result<bool, String> {
-        if self.is_symbol(Some(Bracket::LEFT_ROUND)).unwrap()
-            || self.is_symbol(Some(Bracket::LEFT_SQUARE)).unwrap()
+        if self.symbol_is(Bracket::LEFT_ROUND).unwrap()
+            || self.symbol_is(Bracket::LEFT_SQUARE).unwrap()
         {
             Ok(true)
         } else {
@@ -104,8 +101,8 @@ impl SExpr {
 
     #[allow(dead_code)]
     fn is_right_bracket(&self) -> Result<bool, String> {
-        if self.is_symbol(Some(Bracket::RIGHT_ROUND)).unwrap()
-            || self.is_symbol(Some(Bracket::RIGHT_SQUARE)).unwrap()
+        if self.symbol_is(Bracket::RIGHT_ROUND).unwrap()
+            || self.symbol_is(Bracket::RIGHT_SQUARE).unwrap()
         {
             Ok(true)
         } else {
@@ -116,6 +113,13 @@ impl SExpr {
     pub fn is_char(&self) -> Result<bool, String> {
         match self {
             SExpr::Char(_) => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
+    pub fn is_symbol(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Symbol(_) => Ok(true),
             _ => Ok(false),
         }
     }
@@ -183,11 +187,24 @@ impl SExpr {
         }
     }
 
+    pub fn is_null(&self) -> result::Result<bool, String> {
+        match self {
+            SExpr::List(list) => {
+                if list.borrow().is_empty() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Ok(false),
+        }
+    }
+
     pub fn matching_brackets(&self) -> Option<Vec<(usize, usize, usize)>> {
         match self {
             SExpr::List(list) => {
                 let list = list.borrow();
-                if !list.first().unwrap().is_symbol(Some("(")).unwrap() {
+                if !list.first().unwrap().symbol_is("(").unwrap() {
                     return None;
                 }
 
@@ -198,7 +215,7 @@ impl SExpr {
                     .enumerate()
                     .filter(|x| {
                         (pairs.is_empty() || pairs.iter().all(|(_, right)| right != &x.0))
-                            && x.1.is_symbol(Some(")")).unwrap()
+                            && x.1.symbol_is(")").unwrap()
                     })
                     .min_by(|x, y| (x.0).cmp(&y.0))
                     .map(|x| x.0)
@@ -208,7 +225,7 @@ impl SExpr {
                         .enumerate()
                         .filter(|x| {
                             (pairs.is_empty() || pairs.iter().all(|(left, _)| left != &x.0))
-                                && x.1.is_symbol(Some("(")).unwrap()
+                                && x.1.symbol_is("(").unwrap()
                         })
                         .filter(|x| x.0 < right)
                         .max_by(|x, y| (x.0).cmp(&y.0))
@@ -246,14 +263,14 @@ impl SExpr {
             Ok(SExpr::List(flattened)) => {
                 let borrowed_flattened = flattened.borrow();
 
-                if borrowed_flattened.first().unwrap().is_symbol(Some("(")).unwrap() {
+                if borrowed_flattened.first().unwrap().symbol_is("(").unwrap() {
                     return None;
                 }
 
                 let indexes: Vec<usize> = borrowed_flattened
                     .iter()
                     .enumerate()
-                    .filter(|(_, x)| x.is_symbol(Some(symbol)).unwrap())
+                    .filter(|(_, x)| x.symbol_is(symbol).unwrap())
                     .map(|(i, _)| i - 1)
                     .collect();
 
@@ -306,7 +323,7 @@ impl SExpr {
                 let cloned = list.clone();
                 let mut unflattened = cloned.borrow_mut();
 
-                if !unflattened.first().unwrap().is_symbol(Some("(")).unwrap() {
+                if !unflattened.first().unwrap().symbol_is("(").unwrap() {
                     return Ok(self.clone());
                 }
 
@@ -320,7 +337,7 @@ impl SExpr {
                     match unflattened
                         .iter()
                         .enumerate()
-                        .filter(|x| x.1.is_symbol(Some(")")).unwrap())
+                        .filter(|x| x.1.symbol_is(")").unwrap())
                         .min_by(|x, y| (x.0).cmp(&y.0))
                         .map(|x| x.0)
                     {
@@ -328,7 +345,7 @@ impl SExpr {
                             match unflattened
                                 .iter()
                                 .enumerate()
-                                .filter(|x| x.1.is_symbol(Some("(")).unwrap())
+                                .filter(|x| x.1.symbol_is("(").unwrap())
                                 .filter(|x| x.0 < r)
                                 .max_by(|x, y| (x.0).cmp(&y.0))
                                 .map(|x| x.0)

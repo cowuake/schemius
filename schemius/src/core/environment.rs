@@ -133,6 +133,7 @@ impl Default for Environment {
             (String::from("cond"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::COND))),
             (String::from("display"), SExpr::Procedure(Procedure::Primitive(Primitive::DISPLAY))),
             (String::from("char?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_CHAR))),
+            (String::from("symbol?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_SYMBOL))),
             (String::from("string?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_STRING))),
             (
                 String::from("boolean?"),
@@ -147,6 +148,7 @@ impl Default for Environment {
                 String::from("procedure?"),
                 SExpr::Procedure(Procedure::Primitive(Primitive::IS_PROCEDURE)),
             ),
+            (String::from("null?"), SExpr::Procedure(Procedure::Primitive(Primitive::IS_NULL))),
             (String::from("time"), SExpr::Procedure(Procedure::SpecialForm(SpecialForm::TIME))),
             (
                 String::from("environment-bindings"),

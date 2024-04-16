@@ -69,6 +69,12 @@ fn parse_token(line: &mut String, token: &String) -> SExpr {
         return SExpr::Boolean(true);
     } else if token == "#f" {
         return SExpr::Boolean(false);
+    } else if token == "-nan.0" || token == "+nan.0" {
+        return SExpr::Number(SNumber::Float(NativeFloat::NAN));
+    } else if token == "-inf.0" {
+        return SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY));
+    } else if token == "+inf.0" {
+        return SExpr::Number(SNumber::Float(NativeFloat::INFINITY));
     } else if token.starts_with('"') {
         return SExpr::String(SchemeString::new(
             token.get(1..token.len() - 1).unwrap().to_string(),

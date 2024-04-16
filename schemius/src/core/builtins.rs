@@ -30,9 +30,11 @@ impl Primitive {
     pub const IS_NUMBER: ProcedureSignature = r_is_number;
     pub const IS_EXACT: ProcedureSignature = r_is_exact;
     pub const IS_PAIR: ProcedureSignature = r_is_pair;
+    pub const IS_SYMBOL: ProcedureSignature = r_is_symbol;
     pub const IS_LIST: ProcedureSignature = r_is_list;
     pub const IS_VECTOR: ProcedureSignature = r_is_vector;
     pub const IS_PROCEDURE: ProcedureSignature = r_is_procedure;
+    pub const IS_NULL: ProcedureSignature = r_is_null;
     pub const ENVIRONMENT_BINDINGS: ProcedureSignature = r_environment_bindings;
     pub const STRING_SET: ProcedureSignature = r_string_set;
     pub const FLATTEN: ProcedureSignature = r_flatten;
@@ -860,7 +862,8 @@ fn_is! {
     r_is_pair, is_pair, "pair?"
     r_is_vector, is_vector, "vector?"
     r_is_procedure, is_procedure, "procedure?"
-    // r_is_symbol, is_symbol, "symbol?"
+    r_is_symbol, is_symbol, "symbol?"
+    r_is_null, is_null, "null?"
 }
 
 fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
