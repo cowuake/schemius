@@ -17,7 +17,7 @@ const welcomeMessage = `
 
 const keymap = `
       Keymap:
-        [arrow keys]            -> Move cursor | Navigate history
+        [arrow keys | swipe]    -> Move cursor | Navigate history
         [Shift + Enter]         -> Enter multiline insert mode
         [Ctrl + H]              -> Show help message
         [Ctrl + K]              -> Show keymap
@@ -128,3 +128,43 @@ const fakeProcedures = {
   "(switch-font)": switchFont,
   "(switch-theme)": switchTheme,
 };
+
+var xStart = null;
+var yStart = null;
+
+function handleTouchStart(event) {
+  const touch = (event.touches || event.originalEvent.touches)[0];
+  xStart = touch.clientX;
+  yStart = touch.clientY;
+  return false;
+}
+
+function dispatchKeyEvent(key) {
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: key }));
+  $(".terminal").trigger($.Event("keydown", { key: key }));
+}
+
+function handleTouchMove(event) {
+  if (!xStart || !yStart) {
+    return;
+  }
+
+  const touch = (event.touches || event.originalEvent.touches)[0];
+  var xDelta = touch.clientX - xStart;
+  var yDelta = touch.clientY - yStart;
+
+  const key =
+    Math.abs(xDelta) > Math.abs(yDelta)
+      ? xDelta > 0
+        ? "ArrowRight"
+        : "ArrowLeft"
+      : yDelta > 0
+      ? "ArrowDown"
+      : "ArrowUp";
+
+  dispatchKeyEvent(key);
+
+  xStart = null;
+  yStart = null;
+  return false;
+}
