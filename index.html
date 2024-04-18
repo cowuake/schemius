@@ -48,6 +48,10 @@
         );
       });
 
+      $(document)
+        .on("touchstart", ".terminal", handleTouchStart)
+        .on("touchmove", ".terminal", handleTouchMove);
+
       init().then(() => {
         setFont(defaultFont);
         setTheme(defaultTheme);
@@ -79,19 +83,15 @@
                 switch (e.which) {
                   case 72: // Ctrl + H
                     this.echo(welcomeMessage);
-                    return false;
                   case 75: // Ctrl + K
                     this.echo(keymap);
-                    return false;
                 }
                 if (e.shiftKey) {
                   switch (e.which) {
                     case 70: // Ctrl + Shift + F
                       switchFont();
-                      return false;
                     case 84: // Ctrl + Shift + T
                       switchTheme();
-                      return false;
                   }
                 }
               }
