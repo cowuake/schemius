@@ -1,32 +1,46 @@
 {
-    "name": "Codespaces Rust DevEnv",
-    "dockerFile": "Dockerfile",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "github.copilot",
-                "github.copilot-chat",
-                "github.vscode-github-actions",
-                "github.vscode-pull-request-github",
-                "jdinhlife.gruvbox",
-                "ritwickdey.liveserver",
-                "rust-lang.rust-analyzer",
-                "vscode-icons-team.vscode-icons",
-                "vscodevim.vim"
-            ],
-            "settings": {
-                "diffEditor.ignoreTrimWhitespace": true,
-                "editor.cursorBlinking": "phase",
-                "editor.cursorStyle": "block",
-                "editor.fontFamily": "'Source Code Pro', 'Cascadia Code'",
-                "editor.fontLigatures": true,
-                "editor.formatOnSave": true,
-                "editor.trimAutoWhitespace": true,
-                "terminal.integrated.shell.linux": "/usr/bin/bash",
-                "vsicons.dontShowNewVersionMessage": true,
-                "workbench.colorTheme": "Gruvbox Dark Soft",
-                "workbench.iconTheme": "vscode-icons"
-            }
-        }
+  "name": "Codespaces Rust DevEnv",
+  "dockerFile": "Dockerfile",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "github.copilot",
+        "github.copilot-chat",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "jdinhlife.gruvbox",
+        "ritwickdey.liveserver",
+        "rust-lang.rust-analyzer",
+        "vscode-icons-team.vscode-icons",
+        "vscodevim.vim"
+      ],
+      "settings": {
+        "[html]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[rust]": {
+          "editor.defaultFormatter": "rust-lang.rust-analyzer"
+        },
+        "[yaml]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "diffEditor.ignoreTrimWhitespace": true,
+        "editor.cursorBlinking": "phase",
+        "editor.cursorStyle": "block",
+        "editor.fontFamily": "'Source Code Pro', 'Cascadia Code'",
+        "editor.fontLigatures": true,
+        "editor.formatOnSave": true,
+        "editor.trimAutoWhitespace": true,
+        "git.autofetch": true,
+        "terminal.integrated.shell.linux": "/usr/bin/bash",
+        "vsicons.dontShowNewVersionMessage": true,
+        "workbench.colorTheme": "Gruvbox Dark Soft",
+        "workbench.iconTheme": "vscode-icons"
+      }
     }
+  }
 }
