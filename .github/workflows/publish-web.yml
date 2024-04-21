@@ -1,13 +1,13 @@
 name: Publish Web Page
 
 on:
-  push:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - .github/workflows/**
-      - schemius/**
-      - schemius-web/**
 
 env:
   WORK_DIR: ./schemius-web
@@ -21,6 +21,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout
@@ -54,7 +55,7 @@ jobs:
     name: Deploy
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Download artifacts
