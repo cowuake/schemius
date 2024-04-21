@@ -16,3 +16,13 @@ lazy_static! {
 pub fn evaluate(expression: &str) -> String {
     INTERPRETER.try_lock().unwrap().eval_expression_and_format(expression.to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_evaluate() {
+        assert_eq!(evaluate("(display 'hello)"), "hello");
+    }
+}
