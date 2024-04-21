@@ -189,7 +189,10 @@ function handleDelete() {
   const position = terminal.get_position();
   const char = terminal.cmd().get()[position - 1];
 
-  if (matchingChars[char] && terminal.cmd().get()[position] === matchingChars[char]) {
+  if (
+    matchingChars[char] &&
+    terminal.cmd().get()[position] === matchingChars[char]
+  ) {
     terminal.cmd().delete(1);
   }
 }
