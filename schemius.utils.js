@@ -101,10 +101,8 @@ const defaultTheme = localTheme ?? themes[0];
 
 function getTheme() {
   const color = document.documentElement.style.getPropertyValue("--color");
-  const background =
-    document.documentElement.style.getPropertyValue("--background");
-  const linkColor =
-    document.documentElement.style.getPropertyValue("--link-color");
+  const background = document.documentElement.style.getPropertyValue("--background");
+  const linkColor = document.documentElement.style.getPropertyValue("--link-color");
 
   return {
     color: color,
@@ -124,9 +122,7 @@ function switchTheme() {
   let currentTheme = getTheme();
   console.log("Previous theme", currentTheme);
   let index = themes.indexOf(
-    themes.filter(
-      (theme) => JSON.stringify(theme) == JSON.stringify(currentTheme)
-    )[0]
+    themes.filter((theme) => JSON.stringify(theme) == JSON.stringify(currentTheme))[0]
   );
   index = ++index % themes.length;
   currentTheme = themes[index];
@@ -189,10 +185,7 @@ function handleDelete() {
   const position = terminal.get_position();
   const char = terminal.cmd().get()[position - 1];
 
-  if (
-    matchingChars[char] &&
-    terminal.cmd().get()[position] === matchingChars[char]
-  ) {
+  if (matchingChars[char] && terminal.cmd().get()[position] === matchingChars[char]) {
     terminal.cmd().delete(1);
   }
 }
