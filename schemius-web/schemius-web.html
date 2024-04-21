@@ -56,7 +56,7 @@
         setFont(defaultFont);
         setTheme(defaultTheme);
 
-        $("body").terminal(
+        terminal = $("body").terminal(
           function (expression) {
             expression = expression.replace(/\r?\n|\r/g, " ").trim();
             if (expression) {
@@ -98,6 +98,10 @@
                       return false;
                   }
                 }
+              }
+              if (e.key in matchingChars) {
+                matchChar(e.key);
+                return false;
               }
             },
             prompt: "λ> ",
