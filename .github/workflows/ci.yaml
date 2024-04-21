@@ -1,15 +1,8 @@
 name: CI
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/**
-      - schemius/**
-      - schemius-native/**
-      - schemius-web/**
   pull_request:
+  push:
     branches:
       - main
     paths:
@@ -25,12 +18,16 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
+        toolchain: [stable, beta, nightly]
 
     steps:
       - name: Set up Rust
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain ${{ matrix.toolchain }}
           cargo install cargo-tarpaulin
+
+      - name: Check Rust toolchain
+        run: rustup toolchain list
 
       - name: Check out code
         uses: actions/checkout@v4
@@ -38,11 +35,16 @@ jobs:
       - name: Build
         run: cargo build --verbose
 
+      - name: Test
+        run: cargo test --verbose
+
       - name: Generate code coverage
         run: cargo tarpaulin --out lcov
+        if: matrix.toolchain == 'stable' && matrix.os == 'ubuntu-latest'
 
       - name: Upload code coverage to Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: ./lcov.info
+        if: matrix.os == 'ubuntu-latest' && matrix.toolchain == 'stable'
