@@ -200,12 +200,17 @@ fn interpreter_sexpr_type() {
         { expression: "(procedure? +)", expected: "#t" };
         { expression: "(procedure? apply)", expected: "#t" };
         { expression: "(procedure? eval)", expected: "#t" };
+        { expression: "(char? #\\c)", expected: "#t" };
         { expression: "(list? '(1 2 3))", expected: "#t" };
+        { expression: "(list? #(1 2 3))", expected: "#f" };
         { expression: "(list? '(1 . 2))", expected: "#f" };
         { expression: "(pair? '(1 2 3))", expected: "#t" };
+        { expression: "(pair? #(1 2 3))", expected: "#f" };
         { expression: "(pair? '(1 . 2))", expected: "#t" };
         { expression: "(symbol? 'hello)", expected: "#t" };
         { expression: r#"(symbol? "hello")"#, expected: "#f" };
+        { expression: "(vector? #(1 2 3))", expected: "#t" };
+        { expression: "(vector? '(1 2 3))", expected: "#f" };
     }
 }
 
