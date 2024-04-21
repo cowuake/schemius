@@ -98,10 +98,11 @@
                       return false;
                   }
                 }
-              }
-              if (e.key in matchingChars) {
+              } else if (e.key in matchingChars) {
                 matchChar(e.key);
                 return false;
+              } else if (e.key === "BACKSPACE") {
+                handleDelete();
               }
             },
             prompt: "λ> ",
