@@ -1,3 +1,5 @@
+var terminal = null;
+
 const welcomeMessage = `
     ███████╗ ██████╗██╗  ██╗███████╗███╗   ███╗██╗██╗   ██╗███████╗
     ██╔════╝██╔════╝██║  ██║██╔════╝████╗ ████║██║██║   ██║██╔════╝
@@ -35,6 +37,14 @@ const fonts = [
 ];
 const localFont = localStorage.getItem("font");
 const defaultFont = localFont ?? fonts[0];
+
+const matchingChars = {
+  "(": ")",
+  "[": "]",
+  "{": "}",
+  '"': '"',
+  "'": "'",
+};
 
 function getFont() {
   return document.documentElement.style.getPropertyValue("--font");
@@ -140,7 +150,6 @@ function handleTouchStart(event) {
 }
 
 function dispatchKeyEvent(key) {
-  document.dispatchEvent(new KeyboardEvent("keydown", { key: key }));
   $(".terminal").trigger($.Event("keydown", { key: key }));
 }
 
@@ -167,4 +176,11 @@ function handleTouchMove(event) {
   xStart = null;
   yStart = null;
   return false;
+}
+
+function matchChar(opening) {
+  const closing = matchingChars[opening];
+  terminal.insert(opening);
+  terminal.insert(closing);
+  dispatchKeyEvent("ArrowLeft");
 }

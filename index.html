@@ -8,11 +8,11 @@
     />
     <title>schemius</title>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.39.3/js/jquery.terminal.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.0/js/jquery.terminal.min.js"></script>
     <script src="./schemius.utils.js"></script>
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.39.3/css/jquery.terminal.min.css"
+      href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.0/css/jquery.terminal.min.css"
     />
     <style>
       @import url("https://cdn.jsdelivr.net/npm/@xz/fonts@1/serve/cascadia-code.css");
@@ -56,7 +56,7 @@
         setFont(defaultFont);
         setTheme(defaultTheme);
 
-        $("body").terminal(
+        terminal = $("body").terminal(
           function (expression) {
             expression = expression.replace(/\r?\n|\r/g, " ").trim();
             if (expression) {
@@ -80,24 +80,28 @@
             keydown: function (e) {
               if (e.ctrlKey) {
                 e.preventDefault();
-                switch (e.which) {
-                  case 72: // Ctrl + H
+                switch (e.key) {
+                  case "H": // Ctrl + H
                     this.echo(welcomeMessage);
                     return false;
-                  case 75: // Ctrl + K
+                  case "K": // Ctrl + K
                     this.echo(keymap);
                     return false;
                 }
                 if (e.shiftKey) {
-                  switch (e.which) {
-                    case 70: // Ctrl + Shift + F
+                  switch (e.key) {
+                    case "F": // Ctrl + Shift + F
                       switchFont();
                       return false;
-                    case 84: // Ctrl + Shift + T
+                    case "T": // Ctrl + Shift + T
                       switchTheme();
                       return false;
                   }
                 }
+              }
+              if (e.key in matchingChars) {
+                matchChar(e.key);
+                return false;
               }
             },
             prompt: "λ> ",
