@@ -7,11 +7,6 @@ lazy_static! {
     static ref INTERPRETER: Mutex<Interpreter> = Mutex::new(Interpreter::default());
 }
 
-// #[wasm_bindgen]
-// extern {
-//     pub fn alert(s: &str);
-// }
-
 #[wasm_bindgen]
 pub fn evaluate(expression: &str) -> String {
     INTERPRETER.try_lock().unwrap().eval_expression_and_format(expression.to_string())
