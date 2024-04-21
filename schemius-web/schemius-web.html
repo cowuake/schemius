@@ -80,20 +80,20 @@
             keydown: function (e) {
               if (e.ctrlKey) {
                 e.preventDefault();
-                switch (e.which) {
-                  case 72: // Ctrl + H
+                switch (e.key) {
+                  case "H": // Ctrl + H
                     this.echo(welcomeMessage);
                     return false;
-                  case 75: // Ctrl + K
+                  case "K": // Ctrl + K
                     this.echo(keymap);
                     return false;
                 }
                 if (e.shiftKey) {
-                  switch (e.which) {
-                    case 70: // Ctrl + Shift + F
+                  switch (e.key) {
+                    case "F": // Ctrl + Shift + F
                       switchFont();
                       return false;
-                    case 84: // Ctrl + Shift + T
+                    case "T": // Ctrl + Shift + T
                       switchTheme();
                       return false;
                   }
