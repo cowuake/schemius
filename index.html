@@ -9,7 +9,6 @@
     <title>schemius</title>
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.0/js/jquery.terminal.min.js"></script>
-    <script src="./schemius.utils.js"></script>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.40.0/css/jquery.terminal.min.css"
@@ -30,94 +29,6 @@
     </style>
   </head>
   <body>
-    <script type="module">
-      import init, { evaluate } from "./pkg/schemius_web.js";
-
-      ["compositionstart", "compositionupdate", "compositionend", "input"].forEach((event) => {
-        window.addEventListener(
-          event,
-          (e) => {
-            console.log(event, e);
-          },
-          true
-        );
-      });
-
-      $(document)
-        .on("touchstart", ".terminal", handleTouchStart)
-        .on("touchmove", ".terminal", handleTouchMove);
-
-      init().then(() => {
-        setFont(defaultFont);
-        setTheme(defaultTheme);
-
-        terminal = $("body").terminal(
-          function (expression) {
-            expression = expression.replace(/\r?\n|\r/g, " ").trim();
-            if (expression) {
-              if (fakeProcedures[expression]) {
-                this.echo(fakeProcedures[expression]());
-              } else {
-                try {
-                  this.echo(evaluate(expression));
-                } catch (e) {
-                  console.log(e);
-                  this.echo("Ooops... Something went wrong! :(");
-                  this.read("Press [Enter] to reload\n\t").then(() => {
-                    location.reload();
-                  });
-                }
-              }
-            }
-          },
-          {
-            greetings: welcomeMessage,
-            keydown: function (e) {
-              if (e.ctrlKey) {
-                if (e.key !== "V") {
-                  e.preventDefault();
-                }
-                switch (e.key) {
-                  case "F":
-                    dispatchKeyEvent("ArrowRight");
-                    return false;
-                  case "B":
-                    dispatchKeyEvent("ArrowLeft");
-                    return false;
-                  case "J":
-                    dispatchKeyEvent("ArrowDown");
-                    return false;
-                  case "P":
-                    dispatchKeyEvent("ArrowUp");
-                    return false;
-                  case "H": // Ctrl + H
-                    this.echo(welcomeMessage);
-                    return false;
-                  case "K": // Ctrl + K
-                    this.echo(keymap);
-                    return false;
-                }
-                if (e.shiftKey) {
-                  switch (e.key) {
-                    case "F": // Ctrl + Shift + F
-                      switchFont();
-                      return false;
-                    case "T": // Ctrl + Shift + T
-                      switchTheme();
-                      return false;
-                  }
-                }
-              } else if (e.key in matchingChars) {
-                matchChar(e.key);
-                return false;
-              } else if (e.key === "BACKSPACE") {
-                handleDelete();
-              }
-            },
-            prompt: "λ> ",
-          }
-        );
-      });
-    </script>
+    <script type="module" src="schemius.js"></script>
   </body>
 </html>
