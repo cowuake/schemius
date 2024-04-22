@@ -74,8 +74,22 @@
             greetings: welcomeMessage,
             keydown: function (e) {
               if (e.ctrlKey) {
-                e.preventDefault();
+                if (e.key !== "V") {
+                  e.preventDefault();
+                }
                 switch (e.key) {
+                  case "F":
+                    dispatchKeyEvent("ArrowRight");
+                    return false;
+                  case "B":
+                    dispatchKeyEvent("ArrowLeft");
+                    return false;
+                  case "J":
+                    dispatchKeyEvent("ArrowDown");
+                    return false;
+                  case "P":
+                    dispatchKeyEvent("ArrowUp");
+                    return false;
                   case "H": // Ctrl + H
                     this.echo(welcomeMessage);
                     return false;
