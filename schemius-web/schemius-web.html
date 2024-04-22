@@ -74,7 +74,9 @@
             greetings: welcomeMessage,
             keydown: function (e) {
               if (e.ctrlKey) {
-                e.preventDefault();
+                if (e.key !== "V") {
+                  e.preventDefault();
+                }
                 switch (e.key) {
                   case "H": // Ctrl + H
                     this.echo(welcomeMessage);
