@@ -20,6 +20,7 @@ const welcomeMessage = `
 const keymap = `
       Keymap:
         [arrow keys | swipe]    -> Move cursor | Navigate history
+        [Ctrl + F / B / J / P]  -> Move cursor | Navigate history
         [Shift + Enter]         -> Enter multiline insert mode
         [Ctrl + H]              -> Show help message
         [Ctrl + K]              -> Show keymap
