@@ -141,8 +141,8 @@ class Schemius {
   static switchTheme() {
     let currentTheme = Schemius.getTheme();
     console.log("Previous theme", currentTheme);
-    let index = Schemius.themes.indexOf(
-      Schemius.themes.filter((theme) => JSON.stringify(theme) == JSON.stringify(currentTheme))[0]
+    let index = Schemius.themes.findIndex(
+      (theme) => JSON.stringify(theme) === JSON.stringify(currentTheme)
     );
     index = ++index % Schemius.themes.length;
     currentTheme = Schemius.themes[index];
