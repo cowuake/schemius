@@ -3,9 +3,13 @@ import init, { evaluate } from "./pkg/schemius_web.js";
 class Schemius {
   static xStart = null;
   static yStart = null;
-  static prompt = "λ> ";
 
-  static welcomeMessage = `
+  static get prompt() {
+    return "λ> ";
+  }
+
+  static get welcomeMessage() {
+    return `
       ███████╗ ██████╗██╗  ██╗███████╗███╗   ███╗██╗██╗   ██╗███████╗
       ██╔════╝██╔════╝██║  ██║██╔════╝████╗ ████║██║██║   ██║██╔════╝
       ███████╗██║     ███████║█████╗  ██╔████╔██║██║██║   ██║███████╗
@@ -20,9 +24,11 @@ class Schemius {
           (fact 2000)             -> If you'd like to see a big number :)
 
         Go through the code at https://github.com/cowuake/schemius
-  `;
+    `;
+  }
 
-  static keymap = `
+  static get keymap() {
+    return `
         Keymap:
           [arrow keys | swipe]    -> Move cursor | Navigate history
           [Ctrl + F / B / J / P]  -> Move cursor | Navigate history
@@ -31,27 +37,32 @@ class Schemius {
           [Ctrl + K]              -> Show keymap
           [Ctrl + Shift + F]      -> Switch font
           [Ctrl + Shift + T]      -> Switch color theme
-  `;
+    `;
+  }
 
-  static fonts = [
-    "Source Code Pro",
-    "Cascadia Code",
-    "Fira Code",
-    "JetBrains Mono",
-    "Consolas",
-    "monospace",
-  ];
+  static get fonts() {
+    return [
+      "Source Code Pro",
+      "Cascadia Code",
+      "Fira Code",
+      "JetBrains Mono",
+      "Consolas",
+      "monospace",
+    ];
+  }
 
   static defaultFont = localStorage.getItem("font") ?? Schemius.fonts[0];
   static defaultTheme = JSON.parse(localStorage.getItem("theme")) ?? Schemius.themes[0];
 
-  static matchingChars = {
-    "(": ")",
-    "[": "]",
-    "{": "}",
-    '"': '"',
-    "'": "'",
-  };
+  static get matchingChars() {
+    return {
+      "(": ")",
+      "[": "]",
+      "{": "}",
+      '"': '"',
+      "'": "'",
+    };
+  }
 
   static getFont() {
     return document.documentElement.style.getPropertyValue("--font");
@@ -63,6 +74,7 @@ class Schemius {
   }
 
   static async switchFont() {
+    console.log("OK");
     let currentFont = Schemius.getFont();
     let keepSearching = true;
     let nVisited = 0;
@@ -78,32 +90,34 @@ class Schemius {
     Schemius.setFont(currentFont);
   }
 
-  static themes = [
-    {
-      // gruvbox dark
-      color: "#ebdbb2",
-      background: "#32302f",
-      linkColor: "#b8bb26",
-    },
-    {
-      // everforest light
-      color: "#5C6a72",
-      background: "#fdf6e3",
-      linkColor: "#88C0D0",
-    },
-    {
-      // dracula
-      color: "#f8f8f2",
-      background: "#282a36",
-      linkColor: "#ff79c6",
-    },
-    {
-      // gruvbox light
-      color: "#504945",
-      background: "#f2e5bc",
-      linkColor: "#689d6a",
-    },
-  ];
+  static get themes() {
+    return [
+      {
+        // gruvbox dark
+        color: "#ebdbb2",
+        background: "#32302f",
+        linkColor: "#b8bb26",
+      },
+      {
+        // everforest light
+        color: "#5C6a72",
+        background: "#fdf6e3",
+        linkColor: "#88C0D0",
+      },
+      {
+        // dracula
+        color: "#f8f8f2",
+        background: "#282a36",
+        linkColor: "#ff79c6",
+      },
+      {
+        // gruvbox light
+        color: "#504945",
+        background: "#f2e5bc",
+        linkColor: "#689d6a",
+      },
+    ];
+  }
 
   static getTheme() {
     const color = document.documentElement.style.getPropertyValue("--color");
@@ -256,7 +270,6 @@ class Schemius {
             try {
               this.echo(evaluate(expression));
             } catch (e) {
-              console.log(e);
               this.echo("Ooops... Something went wrong! :(");
               this.read("Press [Enter] to reload\n\t").then(() => {
                 location.reload();
