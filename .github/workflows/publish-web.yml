@@ -12,7 +12,7 @@ on:
 env:
   WORK_DIR: ./schemius-web
   WEB_PAGE: index.html
-  WEB_PAGE_SOURCE: schemius-web.html
+  WEB_PAGE_SOURCE: schemius.html
   WEB_PAGE_JS: schemius.js
   ARTIFACTS: artifacts
   PUBLISH_DIR: ./dist
