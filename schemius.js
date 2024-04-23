@@ -226,19 +226,19 @@ class Schemius {
         }
       } else {
         switch (e.key) {
-          case "F":
+          case "F": // Ctrl + F
             Schemius.dispatchKeyEvent("ArrowRight");
             return false;
-          case "B":
+          case "B": // Ctrl + B
             Schemius.dispatchKeyEvent("ArrowLeft");
             return false;
-          case "J":
+          case "J": // Ctrl + J
             Schemius.dispatchKeyEvent("ArrowDown");
             return false;
-          case "P":
+          case "P": // Ctrl + P
             Schemius.dispatchKeyEvent("ArrowUp");
             return false;
-          case "G":
+          case "G": // Ctrl + G
             window.getSelection().removeAllRanges();
             return false;
           case "H": // Ctrl + H
