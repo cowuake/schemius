@@ -215,29 +215,6 @@ class Schemius {
       if (e.key !== "V") {
         e.preventDefault();
       }
-      switch (e.key) {
-        case "F":
-          Schemius.dispatchKeyEvent("ArrowRight");
-          return false;
-        case "B":
-          Schemius.dispatchKeyEvent("ArrowLeft");
-          return false;
-        case "J":
-          Schemius.dispatchKeyEvent("ArrowDown");
-          return false;
-        case "P":
-          Schemius.dispatchKeyEvent("ArrowUp");
-          return false;
-        case "G":
-          window.getSelection().removeAllRanges();
-          return false;
-        case "H": // Ctrl + H
-          this.echo(Schemius.welcomeMessage);
-          return false;
-        case "K": // Ctrl + K
-          this.echo(Schemius.keymap);
-          return false;
-      }
       if (e.shiftKey) {
         switch (e.key) {
           case "F": // Ctrl + Shift + F
@@ -245,6 +222,30 @@ class Schemius {
             return false;
           case "T": // Ctrl + Shift + T
             Schemius.switchTheme();
+            return false;
+        }
+      } else {
+        switch (e.key) {
+          case "F":
+            Schemius.dispatchKeyEvent("ArrowRight");
+            return false;
+          case "B":
+            Schemius.dispatchKeyEvent("ArrowLeft");
+            return false;
+          case "J":
+            Schemius.dispatchKeyEvent("ArrowDown");
+            return false;
+          case "P":
+            Schemius.dispatchKeyEvent("ArrowUp");
+            return false;
+          case "G":
+            window.getSelection().removeAllRanges();
+            return false;
+          case "H": // Ctrl + H
+            this.echo(Schemius.welcomeMessage);
+            return false;
+          case "K": // Ctrl + K
+            this.echo(Schemius.keymap);
             return false;
         }
       }
