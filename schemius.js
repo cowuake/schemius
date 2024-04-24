@@ -74,7 +74,6 @@ class Schemius {
   }
 
   static async switchFont() {
-    console.log("OK");
     let currentFont = Schemius.getFont();
     let keepSearching = true;
     let nVisited = 0;
