@@ -165,17 +165,9 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
                             },
                             _ => match NativeFloat::from_str_radix(number, radix) {
                                 Ok(f) => match is_exact {
-                                    Some(true) => {
-                                        if f <= NativeInt::MIN as NativeFloat
-                                            || f >= NativeInt::MAX as NativeFloat
-                                        {
-                                            SExpr::Number(SNumber::Rational(
-                                                NativeRational::from_float(f).unwrap(),
-                                            ))
-                                        } else {
-                                            SExpr::Number(SNumber::Int(f.floor() as NativeInt))
-                                        }
-                                    }
+                                    Some(true) => SExpr::Number(SNumber::Rational(
+                                        NativeRational::from_float(f).unwrap(),
+                                    )),
                                     Some(false) | None => SExpr::Number(SNumber::Float(f)),
                                 },
                                 _ => SExpr::Symbol(token.to_string()),
