@@ -186,6 +186,36 @@ fn interpreter_number_comparison() {
 }
 
 #[test]
+fn interpreter_prefixed_numbers() {
+    integration_subtest_eval_to! {
+        { expression: "#b101", expected: "5" };
+        { expression: "#b#e101", expected: "5" };
+        { expression: "#e#b101", expected: "5" };
+        { expression: "#b#i101", expected: "5.0" };
+        { expression: "#i#b101", expected: "5.0" };
+        { expression: "#o10", expected: "8" };
+        { expression: "#o#e10", expected: "8" };
+        { expression: "#e#o10", expected: "8" };
+        { expression: "#o#i10", expected: "8.0" };
+        { expression: "#i#o10", expected: "8.0" };
+        { expression: "#d10", expected: "10" };
+        { expression: "#d#e10", expected: "10" };
+        { expression: "#e#d10", expected: "10" };
+        { expression: "#d#i10", expected: "10.0" };
+        { expression: "#i#d10", expected: "10.0" };
+        { expression: "#xFF", expected: "255" };
+        { expression: "#x#eFF", expected: "255" };
+        { expression: "#e#xFF", expected: "255" };
+        { expression: "#x#iFF", expected: "255.0" };
+        { expression: "#i#xFF", expected: "255.0" };
+        { expression: "#e10", expected: "10" };
+        { expression: "#i10", expected: "10.0" };
+        { expression: "#e10.0", expected: "10" };
+        { expression: "#i10.0", expected: "10.0" };
+    }
+}
+
+#[test]
 fn interpreter_sexpr_type() {
     integration_subtest_eval_to! {
         { expression: "(boolean? #f)", expected: "#t" };
