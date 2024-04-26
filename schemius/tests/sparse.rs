@@ -188,26 +188,79 @@ fn interpreter_number_comparison() {
 #[test]
 fn interpreter_prefixed_numbers() {
     integration_subtest_eval_to! {
+        // integers, binary representation
         { expression: "#b101", expected: "5" };
         { expression: "#b#e101", expected: "5" };
         { expression: "#e#b101", expected: "5" };
         { expression: "#b#i101", expected: "5.0" };
         { expression: "#i#b101", expected: "5.0" };
+        // rationals, binary representation
+        { expression: "#b101/10", expected: "5/2" };
+        { expression: "#b#e101/10", expected: "5/2" };
+        { expression: "#e#b101/10", expected: "5/2" };
+        { expression: "#b#i101/10", expected: "2.5" };
+        { expression: "#i#b101/10", expected: "2.5" };
+        // reals, binary representation
+        { expression: "#b101.10", expected: "5.5" };
+        { expression: "#b#e101.10", expected: "11/2" };
+        { expression: "#e#b101.10", expected: "11/2" };
+        { expression: "#b#i101.10", expected: "5.5" };
+        { expression: "#i#b101.10", expected: "5.5" };
+        // integers, octal representation
         { expression: "#o10", expected: "8" };
         { expression: "#o#e10", expected: "8" };
         { expression: "#e#o10", expected: "8" };
         { expression: "#o#i10", expected: "8.0" };
         { expression: "#i#o10", expected: "8.0" };
+        // rationals, octal representation
+        { expression: "#o20/4", expected: "4" };
+        { expression: "#o#e20/4", expected: "4" };
+        { expression: "#e#o20/4", expected: "4" };
+        { expression: "#o#i20/4", expected: "4.0" };
+        { expression: "#i#o20/4", expected: "4.0" };
+        // reals, octal representation
+        { expression: "#o3.2", expected: "3.25" };
+        { expression: "#o#e3.2", expected: "13/4" };
+        { expression: "#e#o3.2", expected: "13/4" };
+        { expression: "#o#i3.2", expected: "3.25" };
+        { expression: "#i#o3.2", expected: "3.25" };
+        // integers, decimal representation
         { expression: "#d10", expected: "10" };
         { expression: "#d#e10", expected: "10" };
         { expression: "#e#d10", expected: "10" };
         { expression: "#d#i10", expected: "10.0" };
         { expression: "#i#d10", expected: "10.0" };
+        // rationals, decimal representation
+        { expression: "#d10/4", expected: "5/2" };
+        { expression: "#d#e10/4", expected: "5/2" };
+        { expression: "#e#d10/4", expected: "5/2" };
+        { expression: "#d#i10/4", expected: "2.5" };
+        { expression: "#i#d10/4", expected: "2.5" };
+        // reals, decimal representation
+        { expression: "#d1.5", expected: "1.5" };
+        { expression: "#d#e1.5", expected: "3/2" };
+        { expression: "#e#d1.5", expected: "3/2" };
+        { expression: "#d#i1.5", expected: "1.5" };
+        { expression: "#i#d1.5", expected: "1.5" };
+        // integers, hexadecimal representation
         { expression: "#xFF", expected: "255" };
         { expression: "#x#eFF", expected: "255" };
         { expression: "#e#xFF", expected: "255" };
         { expression: "#x#iFF", expected: "255.0" };
         { expression: "#i#xFF", expected: "255.0" };
+        // rationals, hexadecimal representation
+        { expression: "#xFF/5", expected: "51" };
+        { expression: "#x#eFF/5", expected: "51" };
+        { expression: "#e#xFF/5", expected: "51" };
+        { expression: "#x#iFF/5", expected: "51.0" };
+        { expression: "#i#xFF/5", expected: "51.0" };
+        // relas, hexadeimal representation
+        { expression: "#xFF.5", expected: "255.3125" };
+        { expression: "#x#eFF.5", expected: "4085/16" };
+        { expression: "#e#xFF.5", expected: "4085/16" };
+        { expression: "#x#iFF.5", expected: "255.3125" };
+        { expression: "#i#xFF.5", expected: "255.3125" };
+        // exact and non-exact representations
         { expression: "#e10", expected: "10" };
         { expression: "#i10", expected: "10.0" };
         { expression: "#e10.0", expected: "10" };
