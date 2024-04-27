@@ -1,6 +1,7 @@
 import init, { evaluate } from "./pkg/schemius_web.js";
 
 class Schemius {
+  static terminal = null;
   static xStart = null;
   static yStart = null;
 
@@ -161,7 +162,7 @@ class Schemius {
   }
 
   static dispatchKeyEvent(key) {
-    $(".terminal").trigger($.Event("keydown", { key: key }));
+    Schemius.terminal.trigger($.Event("keydown", { key: key }));
   }
 
   static handleTouchMove(event) {
@@ -189,22 +190,22 @@ class Schemius {
     return false;
   }
 
-  static matchChar(terminal, opening) {
+  static matchChar(opening) {
     const closing = Schemius.matchingChars[opening];
-    terminal.insert(opening);
-    terminal.insert(closing);
+    Schemius.terminal.insert(opening);
+    Schemius.terminal.insert(closing);
     Schemius.dispatchKeyEvent("ArrowLeft");
   }
 
-  static handleDelete(terminal) {
-    const position = terminal.get_position();
-    const char = terminal.cmd().get()[position - 1];
+  static handleDelete() {
+    const position = Schemius.terminal.get_position();
+    const char = Schemius.terminal.cmd().get()[position - 1];
 
     if (
       Schemius.matchingChars[char] &&
-      terminal.cmd().get()[position] === Schemius.matchingChars[char]
+      Schemius.terminal.cmd().get()[position] === Schemius.matchingChars[char]
     ) {
-      terminal.cmd().delete(1);
+      Schemius.terminal.cmd().delete(1);
     }
   }
 
@@ -240,18 +241,18 @@ class Schemius {
             window.getSelection().removeAllRanges();
             return false;
           case "H": // Ctrl + H
-            this.echo(Schemius.welcomeMessage);
+            Schemius.terminal.echo(Schemius.welcomeMessage);
             return false;
           case "K": // Ctrl + K
-            this.echo(Schemius.keymap);
+            Schemius.terminal.echo(Schemius.keymap);
             return false;
         }
       }
     } else if (e.key in Schemius.matchingChars) {
-      Schemius.matchChar(this, e.key);
+      Schemius.matchChar(e.key);
       return false;
     } else if (e.key === "BACKSPACE") {
-      Schemius.handleDelete(this);
+      Schemius.handleDelete();
     }
   }
 
@@ -259,7 +260,7 @@ class Schemius {
     Schemius.setFont(Schemius.defaultFont);
     Schemius.setTheme(Schemius.defaultTheme);
 
-    const terminal = $("body").terminal(
+    Schemius.terminal = $("body").terminal(
       function (expression) {
         expression = expression.replace(/\r?\n|\r/g, " ").trim();
         if (expression) {
@@ -285,8 +286,8 @@ class Schemius {
     );
 
     $(document)
-      .on("touchstart", terminal, Schemius.handleTouchStart)
-      .on("touchmove", terminal, Schemius.handleTouchMove);
+      .on("touchstart", Schemius.terminal, Schemius.handleTouchStart)
+      .on("touchmove", Schemius.terminal, Schemius.handleTouchMove);
   }
 }
 
