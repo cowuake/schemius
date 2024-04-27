@@ -1,5 +1,5 @@
 use lazy_static::lazy_static;
-use num::{Num, ToPrimitive};
+use num::Num;
 use regex::Regex;
 
 use super::{accessor::Accessor, s_expression::*};
@@ -156,12 +156,12 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
                     _ => match NativeBigInt::from_str_radix(number, radix) {
                         Ok(n) => match is_exact {
                             Some(true) | None => SExpr::Number(SNumber::BigInt(n)),
-                            Some(false) => SExpr::Number(SNumber::Float(n.to_f64().unwrap())),
+                            Some(false) => SExpr::Number(SNumber::Float(n.to_float().unwrap())),
                         },
                         _ => match NativeRational::from_str_radix(number, radix) {
                             Ok(q) => match is_exact {
                                 Some(true) | None => SExpr::Number(SNumber::Rational(q)),
-                                Some(false) => SExpr::Number(SNumber::Float(q.to_f64().unwrap())),
+                                Some(false) => SExpr::Number(SNumber::Float(q.to_float().unwrap())),
                             },
                             _ => match NativeFloat::from_str_radix(number, radix) {
                                 Ok(f) => match is_exact {

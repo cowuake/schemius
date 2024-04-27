@@ -1,10 +1,11 @@
 use core::fmt;
 use std::{
+    any::TypeId,
     cmp,
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-use num::{integer::Roots, BigInt, BigRational, FromPrimitive, ToPrimitive};
+use num::{integer::Roots, BigInt, BigRational, ToPrimitive};
 
 pub type NativeInt = i64;
 pub type NativeBigInt = BigInt;
@@ -29,6 +30,34 @@ impl NumericalConstant {
     pub const GRAVITATIONAL_CONSTANT: SNumber = SNumber::Float(6.67300e-11);
     pub const PI: SNumber = SNumber::Float(3.141592653589793);
     pub const PLANCK: SNumber = SNumber::Float(6.626068e-34);
+}
+
+pub trait NativeCasts {
+    fn to_float(&self) -> Option<NativeFloat>;
+}
+
+impl NativeCasts for NativeBigInt {
+    fn to_float(&self) -> Option<NativeFloat> {
+        if TypeId::of::<NativeFloat>() == TypeId::of::<f32>() {
+            self.to_f32().map(|f| f as NativeFloat)
+        } else if TypeId::of::<NativeFloat>() == TypeId::of::<f64>() {
+            self.to_f64().map(|f| f as NativeFloat)
+        } else {
+            panic!("Lacking proper implementation for NativeFloat")
+        }
+    }
+}
+
+impl NativeCasts for NativeRational {
+    fn to_float(&self) -> Option<NativeFloat> {
+        if TypeId::of::<NativeFloat>() == TypeId::of::<f32>() {
+            Some(self.to_f32().unwrap() as NativeFloat)
+        } else if TypeId::of::<NativeFloat>() == TypeId::of::<f64>() {
+            Some(self.to_f64().unwrap() as NativeFloat)
+        } else {
+            panic!("Lacking proper implementation for NativeFloat")
+        }
+    }
 }
 
 impl fmt::Display for SNumber {
@@ -60,18 +89,18 @@ macro_rules! impl_ref_op {
                         SNumber::Int(r) => SNumber::BigInt(l.clone() as NativeBigInt $op r),
                         SNumber::BigInt(r) => SNumber::BigInt(l $op r),
                         SNumber::Rational(r) => SNumber::Rational(NativeRational::from(l.clone()) $op r),
-                        SNumber::Float(r) => SNumber::Float(l.to_f64().unwrap() $op r),
+                        SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() $op r),
                     },
                     SNumber::Rational(l) => match other {
                         SNumber::Int(r) => SNumber::Rational(l $op NativeBigInt::from(*r)),
                         SNumber::BigInt(r) => SNumber::Rational(l $op r),
                         SNumber::Rational(r) => SNumber::Rational(l $op r),
-                        SNumber::Float(r) => SNumber::Float(l.to_f64().unwrap() $op r),
+                        SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() $op r),
                     },
                     SNumber::Float(l) => match other {
                         SNumber::Int(r) => SNumber::Float(l $op *r as NativeFloat),
-                        SNumber::BigInt(r) => SNumber::Float(l $op r.to_f64().unwrap()),
-                        SNumber::Rational(r) => SNumber::Float(l $op r.to_f64().unwrap()),
+                        SNumber::BigInt(r) => SNumber::Float(l $op r.to_float().unwrap()),
+                        SNumber::Rational(r) => SNumber::Float(l $op r.to_float().unwrap()),
                         SNumber::Float(r) => SNumber::Float(l $op r),
                     },
                 }
@@ -110,18 +139,18 @@ impl Div for &SNumber {
                 }
                 SNumber::BigInt(r) => SNumber::Rational(NativeRational::new(l.clone(), r.clone())),
                 SNumber::Rational(r) => SNumber::Rational(NativeRational::from(l.clone()) / r),
-                SNumber::Float(r) => SNumber::Float(l.to_f64().unwrap() / r),
+                SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() / r),
             },
             SNumber::Rational(l) => match other {
                 SNumber::Int(r) => SNumber::Rational(l / NativeBigInt::from(*r)),
                 SNumber::BigInt(r) => SNumber::Rational(l / r),
                 SNumber::Rational(r) => SNumber::Rational(l / r),
-                SNumber::Float(r) => SNumber::Float(l.to_f64().unwrap() / r),
+                SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() / r),
             },
             SNumber::Float(l) => match other {
                 SNumber::Int(r) => SNumber::Float(l / *r as NativeFloat),
-                SNumber::BigInt(r) => SNumber::Float(l / r.to_f64().unwrap()),
-                SNumber::Rational(r) => SNumber::Float(l / r.to_f64().unwrap()),
+                SNumber::BigInt(r) => SNumber::Float(l / r.to_float().unwrap()),
+                SNumber::Rational(r) => SNumber::Float(l / r.to_float().unwrap()),
                 SNumber::Float(r) => SNumber::Float(l / r),
             },
         }
@@ -143,18 +172,18 @@ macro_rules! impl_partial_eq_ord_op {
                     SNumber::Int(r) => *l $op NativeBigInt::from(*r),
                     SNumber::BigInt(r) => l $op r,
                     SNumber::Rational(r) => NativeRational::new(l.clone(), NativeBigInt::from(1 as NativeInt)) $op *r,
-                    SNumber::Float(r) => l.to_f64().unwrap() $op *r,
+                    SNumber::Float(r) => l.to_float().unwrap() $op *r,
                 },
                 SNumber::Rational(l) => match other {
                     SNumber::Int(r) => *l $op NativeRational::new(NativeBigInt::from(*r), NativeBigInt::from(1 as NativeInt)),
                     SNumber::BigInt(r) => *l $op NativeRational::new(r.clone(), NativeBigInt::from(1 as NativeInt)),
                     SNumber::Rational(r) => l $op r,
-                    SNumber::Float(r) => l.to_f64().unwrap() $op *r,
+                    SNumber::Float(r) => l.to_float().unwrap() $op *r,
                 },
                 SNumber::Float(l) => match other {
                     SNumber::Int(r) => *l $op *r as NativeFloat,
-                    SNumber::BigInt(r) => *l $op r.to_f64().unwrap(),
-                    SNumber::Rational(r) => *l $op r.to_f64().unwrap(),
+                    SNumber::BigInt(r) => *l $op r.to_float().unwrap(),
+                    SNumber::Rational(r) => *l $op r.to_float().unwrap(),
                     SNumber::Float(r) => l $op r,
                 },
             }
@@ -188,7 +217,7 @@ impl PartialOrd for SNumber {
                 ),
                 SNumber::Float(r) => Some(
                     NativeRational::new(NativeBigInt::from(*l), NativeBigInt::from(1 as NativeInt))
-                        .cmp(&NativeRational::from_f64(*r).unwrap()),
+                        .cmp(&NativeRational::from_float(*r).unwrap()),
                 ),
             },
             SNumber::BigInt(l) => match other {
@@ -199,7 +228,7 @@ impl PartialOrd for SNumber {
                 }
                 SNumber::Float(r) => Some(
                     NativeRational::new(l.clone(), NativeBigInt::from(1 as NativeInt))
-                        .cmp(&NativeRational::from_f64(*r).unwrap()),
+                        .cmp(&NativeRational::from_float(*r).unwrap()),
                 ),
             },
             SNumber::Rational(l) => match other {
@@ -211,23 +240,23 @@ impl PartialOrd for SNumber {
                     (*l).cmp(&NativeRational::new(r.clone(), NativeBigInt::from(1 as NativeInt))),
                 ),
                 SNumber::Rational(r) => Some(l.cmp(r)),
-                SNumber::Float(r) => Some(l.cmp(&NativeRational::from_f64(*r).unwrap())),
+                SNumber::Float(r) => Some(l.cmp(&NativeRational::from_float(*r).unwrap())),
             },
             SNumber::Float(l) => match other {
                 SNumber::Int(r) => {
-                    Some((NativeRational::from_f64(*l).unwrap()).cmp(&NativeRational::new(
+                    Some((NativeRational::from_float(*l).unwrap()).cmp(&NativeRational::new(
                         NativeBigInt::from(*r),
                         NativeBigInt::from(1 as NativeInt),
                     )))
                 }
                 SNumber::BigInt(r) => Some(
-                    (NativeRational::from_f64(*l).unwrap())
+                    (NativeRational::from_float(*l).unwrap())
                         .cmp(&NativeRational::new(r.clone(), NativeBigInt::from(1 as NativeInt))),
                 ),
-                SNumber::Rational(r) => Some((&NativeRational::from_f64(*l).unwrap()).cmp(r)),
+                SNumber::Rational(r) => Some((&NativeRational::from_float(*l).unwrap()).cmp(r)),
                 SNumber::Float(r) => Some(
-                    (NativeRational::from_f64(*l).unwrap())
-                        .cmp(&NativeRational::from_f64(*r).unwrap()),
+                    (NativeRational::from_float(*l).unwrap())
+                        .cmp(&NativeRational::from_float(*r).unwrap()),
                 ),
             },
         }
