@@ -1,13 +1,13 @@
 name: Publish Web Page
 
 on:
-  workflow_run:
-    workflows:
-      - CI
-    types:
-      - completed
-    branches:
-      - main
+  # workflow_run:
+  #   workflows:
+  #     - CI
+  #   types:
+  #     - completed
+  #   branches:
+  #     - main
 
   pull_request:
   push:
