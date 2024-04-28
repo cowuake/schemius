@@ -9,7 +9,8 @@ on:
       - .github/workflows/**
       - schemius/**
       - schemius-native/**
-      - schemius-web/**
+      - schemius-web/src/**
+      - schemius-web/Cargo.toml
 
 jobs:
   build-and-test:
