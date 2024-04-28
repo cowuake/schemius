@@ -13,9 +13,9 @@ on:
     branches:
       - main
     paths:
-      - schemius-web/**/*.css
-      - schemius-web/**/*.html
-      - schemius-web/**/*.js
+      - 'schemius-web/**/*.css'
+      - 'schemius-web/**/*.html'
+      - 'schemius-web/**/*.js'
 
 env:
   WORK_DIR: ./schemius-web

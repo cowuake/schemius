@@ -6,11 +6,11 @@ on:
     branches:
       - main
     paths:
-      - .github/workflows/**
-      - schemius/**
-      - schemius-native/**
-      - schemius-web/src/**
-      - schemius-web/Cargo.toml
+      - '.github/workflows/**'
+      - 'schemius/**'
+      - 'schemius-native/**'
+      - 'schemius-web/src/**'
+      - 'schemius-web/Cargo.toml'
 
 jobs:
   build-and-test:
