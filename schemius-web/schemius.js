@@ -150,12 +150,19 @@ class Schemius {
   }
 
   static isMobile() {
-    const isMobile = Schemius.terminal.hasClass("terminal-mobile");
-    Schemius.terminal.echo(isMobile ? "#t" : "#f");
+    return Schemius.terminal.hasClass("terminal-mobile");
+  }
+
+  static checkMobile() {
+    alert(
+      Schemius.isMobile()
+        ? "You seem to be on a mobile device"
+        : "You don't seem to be on a mobile device"
+    );
   }
 
   static fakeProcedures = {
-    "(mobile?)": Schemius.isMobile,
+    "(mobile?)": Schemius.checkMobile,
     "(switch-font)": Schemius.switchFont,
     "(switch-theme)": Schemius.switchTheme,
   };
