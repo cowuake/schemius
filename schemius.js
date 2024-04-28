@@ -255,7 +255,9 @@ class Schemius {
       Schemius.handleDelete();
     } else if (e.isComposing || e.keyCode === 229) {
       // Handle keydown events during IME composition
-      return;
+      if (Schemius.terminal.hasClass("terminal-mobile")) {
+        return false;
+      }
     }
   }
 
