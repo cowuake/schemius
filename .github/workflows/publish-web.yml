@@ -15,9 +15,9 @@ on:
       - main
     paths:
       - '.github/workflows/publish-web.yml'
-      - 'schemius-web/**/*.css'
-      - 'schemius-web/**/*.html'
-      - 'schemius-web/**/*.js'
+      - 'schemius-web/**.css'
+      - 'schemius-web/**.html'
+      - 'schemius-web/**.js'
 
 env:
   WORK_DIR: ./schemius-web
