@@ -1,6 +1,6 @@
 # Schemius
 
-[![CI](https://github.com/cowuake/schemius/actions/workflows/ci.yaml/badge.svg)](https://github.com/cowuake/schemius/actions/workflows/ci.yaml)
+[![CI](https://github.com/cowuake/schemius/actions/workflows/ci.yml/badge.svg)](https://github.com/cowuake/schemius/actions/workflows/ci.yaml)
 [![Publish Web Page](https://github.com/cowuake/schemius/actions/workflows/publish-web.yml/badge.svg)](https://github.com/cowuake/schemius/actions/workflows/publish-web.yml)
 [![Coverage Status](https://coveralls.io/repos/github/cowuake/schemius/badge.svg)](https://coveralls.io/github/cowuake/schemius)
 
