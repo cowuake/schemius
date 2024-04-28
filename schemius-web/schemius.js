@@ -253,6 +253,9 @@ class Schemius {
       return false;
     } else if (e.key === "BACKSPACE") {
       Schemius.handleDelete();
+    } else if (e.isComposing || e.keyCode === 229) {
+      // Handle keydown events during IME composition
+      return;
     }
   }
 
