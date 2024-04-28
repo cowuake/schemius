@@ -149,7 +149,12 @@ class Schemius {
     Schemius.setTheme(currentTheme);
   }
 
+  static isMobile() {
+    return Schemius.terminal.hasClass("terminal-mobile");
+  }
+
   static fakeProcedures = {
+    "(mobile?)": Schemius.isMobile,
     "(switch-font)": Schemius.switchFont,
     "(switch-theme)": Schemius.switchTheme,
   };
@@ -255,7 +260,7 @@ class Schemius {
       Schemius.handleDelete();
     } else if (e.isComposing || e.keyCode === 229) {
       // Handle keydown events during IME composition
-      if (Schemius.terminal.hasClass("terminal-mobile")) {
+      if (Schemius.isMobile()) {
         return false;
       }
     }
