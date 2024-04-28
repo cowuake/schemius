@@ -150,7 +150,8 @@ class Schemius {
   }
 
   static isMobile() {
-    return Schemius.terminal.hasClass("terminal-mobile");
+    const isMobile = Schemius.terminal.hasClass("terminal-mobile");
+    Schemius.terminal.echo(isMobile ? "#t" : "#f");
   }
 
   static fakeProcedures = {
