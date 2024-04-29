@@ -275,9 +275,15 @@ class Schemius {
   }
 
   static setSize() {
-    const scalingFactor = Schemius.terminal.hasClass("terminal-mobile") ? 2400 : 1200;
-    const width = window.screen.width * window.devicePixelRatio;
-    Schemius.terminal.attr("style", `--size: ${width / scalingFactor}`);
+    setTimeout(() => {
+      const scalingFactor = Schemius.isMobile
+        ? window.screen.orientation.type.startsWith("portrait")
+          ? 2400
+          : 4800
+        : 1200;
+      const width = window.screen.width * window.devicePixelRatio;
+      Schemius.terminal.attr("style", `--size: ${width / scalingFactor}`);
+    }, 10);
   }
 
   static initTerminal() {
@@ -314,6 +320,8 @@ class Schemius {
     $(document)
       .on("touchstart", Schemius.terminal, Schemius.handleTouchStart)
       .on("touchmove", Schemius.terminal, Schemius.handleTouchMove);
+
+    $(window).on("orientationchange", Schemius.setSize);
   }
 }
 
