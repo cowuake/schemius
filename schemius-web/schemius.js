@@ -275,8 +275,9 @@ class Schemius {
   }
 
   static setSize() {
-    const scalingFactor = Schemius.terminal.hasClass("terminal-mobile") ? 600 : 1200;
-    Schemius.terminal.attr("style", `--size: ${window.screen.width / scalingFactor}`);
+    const scalingFactor = Schemius.terminal.hasClass("terminal-mobile") ? 2400 : 1200;
+    const width = window.screen.width * window.devicePixelRatio;
+    Schemius.terminal.attr("style", `--size: ${width / scalingFactor}`);
   }
 
   static initTerminal() {
@@ -308,7 +309,7 @@ class Schemius {
       }
     );
 
-    //Schemius.setSize();
+    Schemius.setSize();
 
     $(document)
       .on("touchstart", Schemius.terminal, Schemius.handleTouchStart)
