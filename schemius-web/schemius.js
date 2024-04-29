@@ -283,7 +283,7 @@ class Schemius {
         : 1200;
       const width = window.screen.width * window.devicePixelRatio;
       Schemius.terminal.attr("style", `--size: ${width / scalingFactor}`);
-    }, 10);
+    }, 50);
   }
 
   static initTerminal() {
