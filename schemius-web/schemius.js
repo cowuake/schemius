@@ -274,8 +274,8 @@ class Schemius {
     }
   }
 
-  static setSize() {
-    setTimeout(() => {
+  static setSize(e) {
+    const apply = () => {
       const scalingFactor = Schemius.isMobile()
         ? window.screen.orientation.type.startsWith("portrait")
           ? 2400
@@ -284,7 +284,8 @@ class Schemius {
       const width = window.screen.width * window.devicePixelRatio;
       const size = width / scalingFactor;
       Schemius.terminal.attr("style", `--size: ${size}`);
-    }, 20);
+    };
+    e || Schemius.isMobile() ? setTimeout(() => apply(), 20) : apply();
   }
 
   static initTerminal() {
@@ -316,13 +317,13 @@ class Schemius {
       }
     );
 
-    Schemius.setSize();
+    // Schemius.setSize();
 
     $(document)
       .on("touchstart", Schemius.terminal, Schemius.handleTouchStart)
       .on("touchmove", Schemius.terminal, Schemius.handleTouchMove);
 
-    $(window).on("orientationchange", Schemius.setSize);
+    // $(window).on("orientationchange", Schemius.setSize);
   }
 }
 
