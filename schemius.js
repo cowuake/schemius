@@ -276,14 +276,15 @@ class Schemius {
 
   static setSize() {
     setTimeout(() => {
-      const scalingFactor = Schemius.isMobile
+      const scalingFactor = Schemius.isMobile()
         ? window.screen.orientation.type.startsWith("portrait")
           ? 2400
           : 4800
         : 1200;
       const width = window.screen.width * window.devicePixelRatio;
-      Schemius.terminal.attr("style", `--size: ${width / scalingFactor}`);
-    }, 50);
+      const size = width / scalingFactor;
+      Schemius.terminal.attr("style", `--size: ${size}`);
+    }, 20);
   }
 
   static initTerminal() {
