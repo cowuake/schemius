@@ -216,12 +216,12 @@ class Schemius {
 
   static handleDelete() {
     const position = Schemius.terminal.get_position();
-    const char = Schemius.terminal.cmd().get()[position - 1];
+    const picker = Schemius.terminal.cmd().get();
+    const [precedingChar, followingChar] = [picker[position - 1], picker[position]];
+    const match = Schemius.matchingChars[precedingChar];
 
-    if (
-      Schemius.matchingChars[char] &&
-      Schemius.terminal.cmd().get()[position] === Schemius.matchingChars[char]
-    ) {
+    Schemius.terminal.cmd().delete(-1);
+    if (match && followingChar === match) {
       Schemius.terminal.cmd().delete(1);
     }
   }
@@ -280,6 +280,7 @@ class Schemius {
       return false;
     } else if (e.key === "BACKSPACE") {
       Schemius.handleDelete();
+      return false;
     } else if (e.isComposing || e.keyCode === 229) {
       // Handle keydown events during IME composition
       if (Schemius.isMobile()) {
