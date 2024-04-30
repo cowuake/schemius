@@ -51,8 +51,7 @@
       "type": "firefox",
       "request": "launch",
       "url": "http://localhost:5500/schemius-web/schemius.html",
-      "webRoot": "${workspaceFolder}/schemius-web",
-      "preLaunchTask": "Start Live Server"
+      "webRoot": "${workspaceFolder}/schemius-web"
     }
   ]
 }
