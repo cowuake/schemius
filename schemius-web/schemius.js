@@ -284,7 +284,7 @@ class Schemius {
     } else if (e.isComposing || e.keyCode === 229) {
       // Handle keydown events during IME composition
       if (Schemius.isMobile()) {
-        return false;
+        // return false;
       }
     }
   }
