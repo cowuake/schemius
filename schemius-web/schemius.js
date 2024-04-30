@@ -32,8 +32,9 @@ class Schemius {
     return `
         Keymap:
           [arrow keys | swipe]    -> Move cursor | Navigate history
-          [Ctrl + F / B / J / P]  -> Move cursor | Navigate history
           [Shift + Enter]         -> Enter multiline insert mode
+          [Ctrl + F/B/J/P]        -> Move cursor | Navigate history
+          [Ctrl + A/E]            -> Move to start/end of (multi)line
           [Ctrl + H]              -> Show help message
           [Ctrl + K]              -> Show keymap
           [Ctrl + Shift + F]      -> Switch font
