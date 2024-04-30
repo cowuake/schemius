@@ -239,6 +239,12 @@ class Schemius {
         }
       } else {
         switch (e.key) {
+          case "A": // Ctrl + A
+            Schemius.dispatchKeyEvent("HOME");
+            return false;
+          case "E": // Ctrl + E
+            Schemius.dispatchKeyEvent("END");
+            return false;
           case "F": // Ctrl + F
             Schemius.dispatchKeyEvent("ArrowRight");
             return false;
