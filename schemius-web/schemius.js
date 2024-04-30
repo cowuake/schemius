@@ -188,19 +188,21 @@ class Schemius {
     const xDelta = touch.clientX - Schemius.xStart;
     const yDelta = touch.clientY - Schemius.yStart;
 
-    const key =
-      Math.abs(xDelta) > Math.abs(yDelta)
+    const [key, timeout] =
+      Math.abs(xDelta) > 0.5 * Math.abs(yDelta)
         ? xDelta > 0
-          ? "ArrowRight"
-          : "ArrowLeft"
+          ? ["ArrowRight", 50]
+          : ["ArrowLeft", 50]
         : yDelta > 0
-        ? "ArrowDown"
-        : "ArrowUp";
+        ? ["ArrowDown", 100]
+        : ["ArrowUp", 100];
 
     // Schemius.xStart = null;
     // Schemius.yStart = null;
 
-    Schemius.dispatchKeyEvent(key);
+    setTimeout(() => {
+      Schemius.dispatchKeyEvent(key);
+    }, timeout);
     return false;
   }
 
@@ -221,6 +223,10 @@ class Schemius {
     ) {
       Schemius.terminal.cmd().delete(1);
     }
+  }
+
+  static toEventSink() {
+    return false;
   }
 
   static handleKeyDown(e) {
@@ -328,7 +334,8 @@ class Schemius {
 
     $(document)
       .on("touchstart", Schemius.terminal, Schemius.handleTouchStart)
-      .on("touchmove", Schemius.terminal, Schemius.handleTouchMove);
+      .on("touchmove", Schemius.terminal, Schemius.handleTouchMove)
+      .on("touchend", Schemius.terminal, Schemius.toEventSink);
 
     // $(window).on("orientationchange", Schemius.setSize);
   }
