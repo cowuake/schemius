@@ -177,7 +177,7 @@ class Schemius {
 
   static dispatchKeyEvent(key) {
     Schemius.terminal.trigger($.Event("keydown", { key: key }));
-    Schemius.terminal.trigger($.Event("keyup", { key: key }));
+    Schemius.terminal.trigger($.Event("keypress", { key: key }));
   }
 
   static handleTouchMove(event) {
