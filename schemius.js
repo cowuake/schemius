@@ -287,9 +287,9 @@ class Schemius {
       return false;
     } else if (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing) {
       // Handle keydown events during IME composition
-      if (Schemius.isMobile()) {
-        return false;
-      }
+      // if (Schemius.isMobile()) {
+      //   return false;
+      // }
     }
   }
 
@@ -332,6 +332,7 @@ class Schemius {
       {
         greetings: Schemius.welcomeMessage,
         keydown: Schemius.handleKeyDown,
+        mobileDelete: false,
         prompt: Schemius.prompt,
       }
     );
