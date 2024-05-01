@@ -285,11 +285,11 @@ class Schemius {
     } else if (e.key === "BACKSPACE") {
       Schemius.handleDelete();
       return false;
-    } else if (e.isComposing || e.keyCode === 229) {
+    } else if (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing) {
       // Handle keydown events during IME composition
-      // if (Schemius.isMobile()) {
-      //   return false;
-      // }
+      if (Schemius.isMobile()) {
+        return false;
+      }
     }
   }
 
