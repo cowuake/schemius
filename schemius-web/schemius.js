@@ -2,9 +2,9 @@ import init, { evaluate } from "./pkg/schemius_web.js";
 
 class Schemius {
   static terminal = null;
-  static testing = true;
   static xStart = null;
   static yStart = null;
+  static testing = localStorage.getItem("testing") ?? false;
 
   static get prompt() {
     return "λ> ";
@@ -54,8 +54,13 @@ class Schemius {
     ];
   }
 
-  static defaultFont = localStorage.getItem("font") ?? Schemius.fonts[0];
-  static defaultTheme = JSON.parse(localStorage.getItem("theme")) ?? Schemius.themes[0];
+  static get defaultFont() {
+    return localStorage.getItem("font") ?? Schemius.fonts[0];
+  }
+
+  static get defaultTheme() {
+    return JSON.parse(localStorage.getItem("theme")) ?? Schemius.themes[0];
+  }
 
   static get matchingChars() {
     return {
@@ -151,6 +156,12 @@ class Schemius {
     Schemius.setTheme(currentTheme);
   }
 
+  static switchTestMode() {
+    Schemius.testing = !Schemius.testing;
+    localStorage.setItem("testing", Schemius.testing);
+    console.log("Testing mode is now", Schemius.testing ? "ON" : "OFF");
+  }
+
   static isMobile() {
     return Schemius.terminal.hasClass("terminal-mobile");
   }
@@ -173,6 +184,7 @@ class Schemius {
     "(mobile?)": Schemius.checkMobile,
     "(switch-font)": Schemius.switchFont,
     "(switch-theme)": Schemius.switchTheme,
+    "(test!)": Schemius.switchTestMode,
   };
 
   static handleTouchStart(event) {
@@ -218,8 +230,7 @@ class Schemius {
     const closing = Schemius.matchingChars[opening];
     Schemius.terminal.insert(opening);
     Schemius.terminal.insert(closing);
-    const currentPosition = Schemius.terminal.get_position();
-    Schemius.terminal.set_position(currentPosition - 1);
+    Schemius.dispatchKeyEvent("ArrowLeft");
   }
 
   static handleDelete() {
