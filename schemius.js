@@ -235,6 +235,7 @@ class Schemius {
   }
 
   static handleKeyDown(e) {
+    console.log("Keydown event", e.key, e.keyCode, e.ctrlKey, e.shiftKey, e.altKey, e.metaKey);
     if (e.ctrlKey) {
       if (e.shiftKey) {
         switch (e.key) {
