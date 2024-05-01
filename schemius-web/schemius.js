@@ -20,11 +20,11 @@ class Schemius {
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
         Welcome to Schemius!      [DATETIME_PLACEHOLDER]
-          Press [Ctrl + H]        to show this welcome message
-          Press [Ctrl + K]        to show essential keymap
+         ---------------------------------------------------------
+          Press [Ctrl + K]        -> Show essential keymap
           (environment-bindings)  -> Show bindings in current env
-          (fact 2000)             -> If you'd like to see a big number :)
-
+          (fact 2000)             -> Big number coming!
+         ---------------------------------------------------------
         Go through the code at https://github.com/cowuake/schemius
     `;
   }
