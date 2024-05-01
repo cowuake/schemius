@@ -11,6 +11,8 @@ on:
       - 'schemius-native/**'
       - 'schemius-web/src/**'
       - 'schemius-web/Cargo.toml'
+    paths-ignore:
+      - '.github/workflows/*-web.yml'
 
 jobs:
   build-and-test:

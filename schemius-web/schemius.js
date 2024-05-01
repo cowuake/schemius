@@ -19,7 +19,7 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!
+        Welcome to Schemius!      [DATETIME_PLACEHOLDER]
           Press [Ctrl + H]        to show this welcome message
           Press [Ctrl + K]        to show essential keymap
           (environment-bindings)  -> Show bindings in current env
