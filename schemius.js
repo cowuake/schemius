@@ -4,6 +4,7 @@ class Schemius {
   static terminal = null;
   static xStart = null;
   static yStart = null;
+  static testing = localStorage.getItem("testing") ?? false;
 
   static get prompt() {
     return "λ> ";
@@ -53,8 +54,13 @@ class Schemius {
     ];
   }
 
-  static defaultFont = localStorage.getItem("font") ?? Schemius.fonts[0];
-  static defaultTheme = JSON.parse(localStorage.getItem("theme")) ?? Schemius.themes[0];
+  static get defaultFont() {
+    return localStorage.getItem("font") ?? Schemius.fonts[0];
+  }
+
+  static get defaultTheme() {
+    return JSON.parse(localStorage.getItem("theme")) ?? Schemius.themes[0];
+  }
 
   static get matchingChars() {
     return {
@@ -86,7 +92,7 @@ class Schemius {
       keepSearching = fontFaces.length === 0 && currentFont !== "monospace";
     } while (keepSearching && nVisited++ < Schemius.fonts.length);
 
-    console.log("Setting font to", currentFont);
+    Schemius.log("Setting font to", currentFont);
     Schemius.setFont(currentFont);
   }
 
@@ -140,18 +146,30 @@ class Schemius {
 
   static switchTheme() {
     let currentTheme = Schemius.getTheme();
-    console.log("Previous theme", currentTheme);
+    Schemius.log("Previous theme", currentTheme);
     let index = Schemius.themes.findIndex(
       (theme) => JSON.stringify(theme) === JSON.stringify(currentTheme)
     );
     index = ++index % Schemius.themes.length;
     currentTheme = Schemius.themes[index];
-    console.log("Setting theme to", currentTheme);
+    Schemius.log("Setting theme to", currentTheme);
     Schemius.setTheme(currentTheme);
+  }
+
+  static switchTestMode() {
+    Schemius.testing = !Schemius.testing;
+    localStorage.setItem("testing", Schemius.testing);
+    console.log("Testing mode is now", Schemius.testing ? "ON" : "OFF");
   }
 
   static isMobile() {
     return Schemius.terminal.hasClass("terminal-mobile");
+  }
+
+  static log(message) {
+    if (Schemius.testing) {
+      console.log(message);
+    }
   }
 
   static checkMobile() {
@@ -166,6 +184,7 @@ class Schemius {
     "(mobile?)": Schemius.checkMobile,
     "(switch-font)": Schemius.switchFont,
     "(switch-theme)": Schemius.switchTheme,
+    "(test!)": Schemius.switchTestMode,
   };
 
   static handleTouchStart(event) {
@@ -218,7 +237,7 @@ class Schemius {
     const position = Schemius.terminal.get_position();
     const picker = Schemius.terminal.cmd().get();
     const [precedingChar, followingChar] = [picker[position - 1], picker[position]];
-    console.log(
+    Schemius.log(
       `Going to delete '${precedingChar}' and possibly '${followingChar}', ` +
         `starting from position ${position}.`
     );
@@ -235,7 +254,10 @@ class Schemius {
   }
 
   static handleKeyDown(e) {
-    console.log("Keydown event", e.key, e.keyCode, e.ctrlKey, e.shiftKey, e.altKey, e.metaKey);
+    Schemius.log(
+      `Keydown - key: ${e.key}, keyCode: ${e.keyCode}, ` +
+        `ctrl: ${e.ctrlKey}, shift: ${e.shiftKey}, alt: ${e.altKey}, meta: ${e.metaKey}`
+    );
     if (e.ctrlKey) {
       if (e.shiftKey) {
         switch (e.key) {
@@ -332,7 +354,7 @@ class Schemius {
       {
         greetings: Schemius.welcomeMessage,
         keydown: Schemius.handleKeyDown,
-        mobileDelete: false,
+        // mobileDelete: false,
         prompt: Schemius.prompt,
       }
     );
