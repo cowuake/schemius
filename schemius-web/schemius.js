@@ -232,9 +232,6 @@ class Schemius {
 
   static handleKeyDown(e) {
     if (e.ctrlKey) {
-      if (e.key !== "V") {
-        e.preventDefault();
-      }
       if (e.shiftKey) {
         switch (e.key) {
           case "F": // Ctrl + Shift + F
@@ -273,6 +270,8 @@ class Schemius {
           case "K": // Ctrl + K
             Schemius.terminal.echo(Schemius.keymap);
             return false;
+          case "V": // Ctrl + V
+            return true;
         }
       }
     } else if (e.key in Schemius.matchingChars) {
@@ -283,9 +282,9 @@ class Schemius {
       return false;
     } else if (e.isComposing || e.keyCode === 229) {
       // Handle keydown events during IME composition
-      if (Schemius.isMobile()) {
-        // return false;
-      }
+      // if (Schemius.isMobile()) {
+      //   return false;
+      // }
     }
   }
 
