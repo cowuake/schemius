@@ -50,7 +50,7 @@ jobs:
       - name: Generate final web page
         run: |
           cp $WEB_PAGE_SOURCE $WEB_PAGE
-          sed -i "s/DATETIME_PLACEHOLDER/$(date -u '+Published %F %H:%M:%S UTC')/g" ${{ env.WORK_DIR }}/${{ env.WEB_PAGE_JS }}
+          sed -i "s/DATETIME_PLACEHOLDER/$(date -u '+Published %F %H:%M:%S UTC')/g" $WEB_PAGE_JS
 
         working-directory: ${{ env.WORK_DIR }}
 
