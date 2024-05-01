@@ -228,8 +228,8 @@ class Schemius {
 
   static matchChar(opening) {
     const closing = Schemius.matchingChars[opening];
-    Schemius.terminal.insert(opening);
-    Schemius.terminal.insert(closing);
+    Schemius.terminal.cmd().insert(opening);
+    Schemius.terminal.cmd().insert(closing);
     Schemius.dispatchKeyEvent("ArrowLeft");
   }
 
