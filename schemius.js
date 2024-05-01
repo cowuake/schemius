@@ -19,12 +19,12 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!      [Published 2024-05-01 16:05:21 UTC]
-          Press [Ctrl + H]        to show this welcome message
-          Press [Ctrl + K]        to show essential keymap
+        Welcome to Schemius!      [Published 2024-05-01 16:22:09 UTC]
+         ---------------------------------------------------------
+          Press [Ctrl + K]        -> Show essential keymap
           (environment-bindings)  -> Show bindings in current env
-          (fact 2000)             -> If you'd like to see a big number :)
-
+          (fact 2000)             -> Big number coming!
+         ---------------------------------------------------------
         Go through the code at https://github.com/cowuake/schemius
     `;
   }
