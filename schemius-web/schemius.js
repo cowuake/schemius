@@ -301,17 +301,15 @@ class Schemius {
             return true;
         }
       }
-    } else if (e.key in Schemius.matchingChars) {
+    } else if (!Schemius.isMobile && e.key in Schemius.matchingChars) {
       Schemius.matchChar(e.key);
       return false;
-    } else if (e.key === "BACKSPACE") {
+    } else if (!Schemius.isMobile && e.key === "BACKSPACE") {
       Schemius.handleDelete();
       return false;
-    } else if (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing) {
+    } else if (Schemius.isMobile && (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing)) {
       // Handle keydown events during IME composition
-      // if (Schemius.isMobile()) {
-      //   return false;
-      // }
+      // return false;
     }
   }
 
