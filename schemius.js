@@ -218,6 +218,10 @@ class Schemius {
     const position = Schemius.terminal.get_position();
     const picker = Schemius.terminal.cmd().get();
     const [precedingChar, followingChar] = [picker[position - 1], picker[position]];
+    console.log(
+      `Going to delete '${precedingChar}' and possibly '${followingChar}', ` +
+        `starting from position ${position}.`
+    );
     const match = Schemius.matchingChars[precedingChar];
 
     Schemius.terminal.cmd().delete(-1);
