@@ -2,6 +2,7 @@ import init, { evaluate } from "./pkg/schemius_web.js";
 
 class Schemius {
   static terminal = null;
+  static testing = true;
   static xStart = null;
   static yStart = null;
 
@@ -86,7 +87,7 @@ class Schemius {
       keepSearching = fontFaces.length === 0 && currentFont !== "monospace";
     } while (keepSearching && nVisited++ < Schemius.fonts.length);
 
-    console.log("Setting font to", currentFont);
+    Schemius.log("Setting font to", currentFont);
     Schemius.setFont(currentFont);
   }
 
@@ -140,18 +141,24 @@ class Schemius {
 
   static switchTheme() {
     let currentTheme = Schemius.getTheme();
-    console.log("Previous theme", currentTheme);
+    Schemius.log("Previous theme", currentTheme);
     let index = Schemius.themes.findIndex(
       (theme) => JSON.stringify(theme) === JSON.stringify(currentTheme)
     );
     index = ++index % Schemius.themes.length;
     currentTheme = Schemius.themes[index];
-    console.log("Setting theme to", currentTheme);
+    Schemius.log("Setting theme to", currentTheme);
     Schemius.setTheme(currentTheme);
   }
 
   static isMobile() {
     return Schemius.terminal.hasClass("terminal-mobile");
+  }
+
+  static log(message) {
+    if (Schemius.testing) {
+      console.log(message);
+    }
   }
 
   static checkMobile() {
@@ -211,14 +218,15 @@ class Schemius {
     const closing = Schemius.matchingChars[opening];
     Schemius.terminal.insert(opening);
     Schemius.terminal.insert(closing);
-    Schemius.dispatchKeyEvent("ArrowLeft");
+    const currentPosition = Schemius.terminal.get_position();
+    Schemius.terminal.set_position(currentPosition - 1);
   }
 
   static handleDelete() {
     const position = Schemius.terminal.get_position();
     const picker = Schemius.terminal.cmd().get();
     const [precedingChar, followingChar] = [picker[position - 1], picker[position]];
-    console.log(
+    Schemius.log(
       `Going to delete '${precedingChar}' and possibly '${followingChar}', ` +
         `starting from position ${position}.`
     );
@@ -235,7 +243,10 @@ class Schemius {
   }
 
   static handleKeyDown(e) {
-    console.log("Keydown event", e.key, e.keyCode, e.ctrlKey, e.shiftKey, e.altKey, e.metaKey);
+    Schemius.log(
+      `Keydown - key: ${e.key}, keyCode: ${e.keyCode}, ` +
+        `ctrl: ${e.ctrlKey}, shift: ${e.shiftKey}, alt: ${e.altKey}, meta: ${e.metaKey}`
+    );
     if (e.ctrlKey) {
       if (e.shiftKey) {
         switch (e.key) {
@@ -332,7 +343,7 @@ class Schemius {
       {
         greetings: Schemius.welcomeMessage,
         keydown: Schemius.handleKeyDown,
-        mobileDelete: false,
+        // mobileDelete: false,
         prompt: Schemius.prompt,
       }
     );
