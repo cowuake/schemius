@@ -209,8 +209,10 @@ class Schemius {
 
   static matchChar(opening) {
     const closing = Schemius.matchingChars[opening];
-    Schemius.terminal.insert(opening);
-    Schemius.terminal.insert(closing);
+    Schemius.terminal.trigger($.Event("keypress", { key: opening }));
+    Schemius.terminal.trigger($.Event("keypress", { key: closing }));
+    // Schemius.terminal.insert(opening);
+    // Schemius.terminal.insert(closing);
     Schemius.dispatchKeyEvent("ArrowLeft");
   }
 
