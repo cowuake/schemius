@@ -19,7 +19,7 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!      [Published 2024-05-02 08:27:19 UTC]
+        Welcome to Schemius!   [Published 2024-05-02 08:34:31 UTC]
          --------------------------------------------------------
           Press [Ctrl + K]       -> Show essential keymap
           (environment-bindings) -> Show bindings in current env
@@ -313,13 +313,13 @@ class Schemius {
             return true;
         }
       }
-    } else if (!Schemius.isMobile && e.key in Schemius.matchingChars) {
+    } else if (!Schemius.isMobile() && e.key in Schemius.matchingChars) {
       Schemius.matchChar(e.key);
       return false;
-    } else if (!Schemius.isMobile && e.key === "BACKSPACE") {
+    } else if (!Schemius.isMobile() && e.key === "BACKSPACE") {
       Schemius.handleDelete();
       return false;
-    } else if (Schemius.isMobile && (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing)) {
+    } else if (Schemius.isMobile() && (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing)) {
       // Handle keydown events during IME composition
       // return false;
     }
