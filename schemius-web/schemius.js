@@ -46,9 +46,15 @@ class Schemius {
   static get fonts() {
     return [
       "Source Code Pro",
-      "Cascadia Code",
+      "Victor Mono",
       "Fira Code",
+      "Cascadia Code",
+      "Iosevka",
+      "Hack",
       "JetBrains Mono",
+      "Droid Sans Mono",
+      "Monaco",
+      "Menlo",
       "Consolas",
       "monospace",
     ];
@@ -77,6 +83,10 @@ class Schemius {
 
   static setFont(font) {
     document.documentElement.style.setProperty("--font", font);
+    document.documentElement.style.setProperty(
+      "font-style",
+      font === "Victor Mono" ? "italic" : "normal"
+    );
     localStorage.setItem("font", font);
   }
 
@@ -85,6 +95,8 @@ class Schemius {
     let keepSearching = true;
     let nVisited = 0;
 
+    Schemius.log(`Previous font was ${currentFont}`);
+
     do {
       currentFont =
         Schemius.fonts[(Schemius.fonts.indexOf(currentFont) + 1) % Schemius.fonts.length];
@@ -92,7 +104,7 @@ class Schemius {
       keepSearching = fontFaces.length === 0 && currentFont !== "monospace";
     } while (keepSearching && nVisited++ < Schemius.fonts.length);
 
-    Schemius.log("Setting font to", currentFont);
+    Schemius.log(`Setting font to ${currentFont}`);
     Schemius.setFont(currentFont);
   }
 
