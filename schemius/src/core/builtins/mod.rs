@@ -36,17 +36,22 @@ impl Primitive {
     pub const LIST: ProcedureSignature = r_list;
     pub const SET_CAR: ProcedureSignature = r_set_car;
     pub const DISPLAY: ProcedureSignature = r_display;
-    pub const IS_CHAR: ProcedureSignature = r_is_char;
-    pub const IS_STRING: ProcedureSignature = r_is_string;
     pub const IS_BOOLEAN: ProcedureSignature = r_is_boolean;
-    pub const IS_NUMBER: ProcedureSignature = r_is_number;
+    pub const IS_CHAR: ProcedureSignature = r_is_char;
     pub const IS_EXACT: ProcedureSignature = r_is_exact;
-    pub const IS_PAIR: ProcedureSignature = r_is_pair;
-    pub const IS_SYMBOL: ProcedureSignature = r_is_symbol;
+    pub const IS_INFINITE: ProcedureSignature = r_is_infinite;
+    pub const IS_INTEGER: ProcedureSignature = r_is_integer;
     pub const IS_LIST: ProcedureSignature = r_is_list;
-    pub const IS_VECTOR: ProcedureSignature = r_is_vector;
-    pub const IS_PROCEDURE: ProcedureSignature = r_is_procedure;
+    pub const IS_NAN: ProcedureSignature = r_is_nan;
     pub const IS_NULL: ProcedureSignature = r_is_null;
+    pub const IS_NUMBER: ProcedureSignature = r_is_number;
+    pub const IS_PAIR: ProcedureSignature = r_is_pair;
+    pub const IS_PROCEDURE: ProcedureSignature = r_is_procedure;
+    pub const IS_RATIONAL: ProcedureSignature = r_is_rational;
+    pub const IS_REAL: ProcedureSignature = r_is_real;
+    pub const IS_STRING: ProcedureSignature = r_is_string;
+    pub const IS_SYMBOL: ProcedureSignature = r_is_symbol;
+    pub const IS_VECTOR: ProcedureSignature = r_is_vector;
     pub const ENVIRONMENT_BINDINGS: ProcedureSignature = r_environment_bindings;
     pub const MAKE_STRING: ProcedureSignature = r_make_string;
     pub const STRING: ProcedureSignature = r_string;
@@ -73,4 +78,5 @@ impl SpecialForm {
     pub const QUASIQUOTE: SpecialFormSignature = r_quasiquote;
     pub const SET: SpecialFormSignature = r_set;
     pub const TIME: SpecialFormSignature = r_time;
+    pub const AND: SpecialFormSignature = r_and;
 }

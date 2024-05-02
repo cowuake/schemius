@@ -5,7 +5,7 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-use num::{integer::Roots, BigInt, BigRational, ToPrimitive};
+use num::{integer::Roots, BigInt, BigRational, One, ToPrimitive};
 
 pub type NativeInt = i64;
 pub type NativeBigInt = BigInt;
@@ -315,6 +315,51 @@ impl SNumber {
         match self {
             SNumber::Int(internal) => Ok(*internal),
             other => Err(format!("Exception: {} is not a proper integer", other)),
+        }
+    }
+
+    pub fn is_integer(&self) -> bool {
+        match self {
+            SNumber::Int(_) => true,
+            SNumber::BigInt(_) => true,
+            SNumber::Rational(r) => r.denom().is_one(),
+            SNumber::Float(r) => r.fract() == 0.0,
+        }
+    }
+
+    pub fn is_real(&self) -> bool {
+        match self {
+            SNumber::Int(_) => true,
+            SNumber::BigInt(_) => true,
+            SNumber::Rational(_) => true,
+            SNumber::Float(_) => true,
+        }
+    }
+
+    pub fn is_rational(&self) -> bool {
+        match self {
+            SNumber::Int(_) => true,
+            SNumber::BigInt(_) => true,
+            SNumber::Rational(_) => true,
+            SNumber::Float(number) => match number {
+                number if number.is_infinite() => false,
+                number if number.is_nan() => false,
+                _ => true,
+            },
+        }
+    }
+
+    pub fn is_infinite(&self) -> bool {
+        match self {
+            SNumber::Float(number) => number.is_infinite(),
+            _ => false,
+        }
+    }
+
+    pub fn is_nan(&self) -> bool {
+        match self {
+            SNumber::Float(number) => number.is_nan(),
+            _ => false,
         }
     }
 }

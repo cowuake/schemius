@@ -148,3 +148,41 @@ fn interpreter_r7rs_string() {
         expression: r#"(string-set! (symbol->string 'immutable) 0 #\?)"#;
     }
 }
+
+#[test]
+fn interpreter_r7rs_numbers_is() {
+    integration_subtest_eval_to! {
+        // { expression: "(complex? 3+4i)", expected: "#t" };
+        // { expression: "(complex? 3)", expected: "#t" };
+        { expression: "(real? 3)", expected: "#t" };
+        // { expression: "(real? -2.5+0i)", expected: "#t" };
+        // { expression: "(real? -2.5+0.0i) ", expected: "#f" };
+        { expression: "(real? #e1e10)", expected: "#t" };
+        { expression: "(real? +inf.0)", expected: "#t" };
+        { expression: "(real? +nan.0)", expected: "#t" };
+        { expression: "(rational? -inf.0)", expected: "#f" };
+        { expression: "(rational? 3.5)", expected: "#t" };
+        { expression: "(rational? 6/10)", expected: "#t" };
+        { expression: "(rational? 6/3)", expected: "#t" };
+        // { expression: "(integer? 3+0i)", expected: "#t" };
+        { expression: "(integer? 3.0)", expected: "#t" };
+        { expression: "(integer? 8/4)", expected: "#t" };
+        { expression: "(exact? 3.0)", expected: "#f" };
+        { expression: "(exact? #e3.0)", expected: "#t" };
+        { expression: "(inexact? 3.)", expected: "#t" };
+        { expression: "(exact-integer? 32)", expected: "#t" };
+        { expression: "(exact-integer? 32.0)", expected: "#f" };
+        { expression: "(exact-integer? 32/5)", expected: "#f" };
+        { expression: "(finite? 3)", expected: "#t" };
+        { expression: "(finite? +inf.0)", expected: "#f" };
+        // { expression: "(finite? 3.0+inf.0i)", expected: "#f" };
+        { expression: "(infinite? 3)", expected: "#f" };
+        { expression: "(infinite? +inf.0)", expected: "#t" };
+        { expression: "(infinite? +nan.0)", expected: "#f" };
+        // { expression: "(infinite? 3.0+inf.0i)", expected: "#t" };
+        { expression: "(nan? +nan.0)", expected: "#t" };
+        { expression: "(nan? 32)", expected: "#f" };
+        // { expression: "(nan? +nan.0+5.0i)", expected: "#t" };
+        // { expression: "(nan? 1+2i) ", expected: "#f" };
+    }
+}

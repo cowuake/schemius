@@ -142,8 +142,13 @@ impl Default for Environment {
             "symbol?" => IS_SYMBOL
             "string?" => IS_STRING
             "boolean?" => IS_BOOLEAN
+            "nan?" => IS_NAN
             "number?" => IS_NUMBER
             "exact?" => IS_EXACT
+            "infinite?" => IS_INFINITE
+            "integer?" => IS_INTEGER
+            "rational?" => IS_RATIONAL
+            "real?" => IS_REAL
             "list?" => IS_LIST
             "pair?" => IS_PAIR
             "vector?" => IS_VECTOR
@@ -167,6 +172,7 @@ impl Default for Environment {
             "quote" => QUOTE
             "`" => QUASIQUOTE
             "quasiquote" => QUASIQUOTE
+            "and" => AND
             "λ" => LAMBDA
             "lambda" => LAMBDA
             "let" => LET

@@ -30,6 +30,10 @@ pub const PRELUDE: &str = r#"
     (define (cddddr x) (cdr (cdr (cdr (cdr x)))))
     (define (add1 x) (+ x 1))
     (define (sub1 x) (- x 1))
+    (define (add))
+    (define (inexact? x) (not (exact? x)))
+    (define (finite? x) (not (infinite? x)))
+    (define (exact-integer? x) (and (integer? x) (exact? x)))
 
     (define (moo) (display "There is no cow level!"))
     (define (count-to n) (if (= n 0) 'Done! (count-to (- n 1))))

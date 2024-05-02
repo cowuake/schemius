@@ -165,6 +165,71 @@ impl SExpr {
         }
     }
 
+    pub fn is_integer(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_integer() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
+    pub fn is_real(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_real() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
+    pub fn is_rational(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_rational() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
+    pub fn is_nan(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_nan() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
+    pub fn is_infinite(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_infinite() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
     pub fn is_pair(&self) -> Result<bool, String> {
         match self {
             SExpr::Pair(_) => Ok(true),
