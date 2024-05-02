@@ -313,13 +313,13 @@ class Schemius {
             return true;
         }
       }
-    } else if (!Schemius.isMobile && e.key in Schemius.matchingChars) {
+    } else if (!Schemius.isMobile() && e.key in Schemius.matchingChars) {
       Schemius.matchChar(e.key);
       return false;
-    } else if (!Schemius.isMobile && e.key === "BACKSPACE") {
+    } else if (!Schemius.isMobile() && e.key === "BACKSPACE") {
       Schemius.handleDelete();
       return false;
-    } else if (Schemius.isMobile && (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing)) {
+    } else if (Schemius.isMobile() && (e.key === "PROCESS" || e.keyCode === 229 || e.isComposing)) {
       // Handle keydown events during IME composition
       // return false;
     }
