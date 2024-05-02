@@ -27,6 +27,20 @@ fn interpreter_r7rs_conditionals() {
         { expression: "(if (> 3 2) (- 3 2) (+ 3 2))", expected: "1"};
         { expression: "(cond ((> 3 2) 'greater) ((< 3 2) 'less))", expected: "greater"};
         { expression: "(cond ((> 3 3) 'greater) ((< 3 3) 'less) else 'equal)", expected: "equal"};
+        // { expression: "(cond ((assv 'b '((a 1) (b 2))) => cadr) (else #f))", expected: "2" };
+        // { expression: "(case (* 2 3) ((2 3 5 7) 'prime) ((1 4 6 8 9) 'composite))", expected: "composite" };
+        // { expression: "(case (car '(c d)) ((a) 'a) ((b) 'b))", expected: "unspecified" };
+        // { expression: "(case (car '(c d)) ((a e i o u) 'vowel) ((w y) 'semivowel) (else => (lambda (x) x)))", expected: "c" };
+        { expression: "(and (= 2 2) (> 2 1))", expected: "#t" };
+        { expression: "(and (= 2 2) (< 2 1))", expected: "#f" };
+        { expression: "(and 1 2 'c '(f g))", expected: "(f g)" };
+        { expression: "(and)", expected: "#t" };
+        // { expression: "(or (= 2 2) (> 2 1))", expected: "#t" };
+        // { expression: "(or (= 2 2) (< 2 1))", expected: "#t" };
+        // { expression: "(or #f #f #f)", expected: "#f" };
+        // { expression: "(or (memq 'b '(a b c)) (/ 3 0))", expected: "(b c)" };
+        // { expression: "(when (= 1 1.0) (display \"1\") (display \"2\"))", expected: "unspecified" /* (and prints 12) */ };
+        // { expression: "(unless (= 1 1.0) (display \"1\") (display \"2\"))", expected: "unspecified" /* (and prints nothing) */ };
     }
 }
 
