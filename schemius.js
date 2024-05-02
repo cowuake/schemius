@@ -19,7 +19,7 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!   [Published 2024-05-02 08:34:31 UTC]
+        Welcome to Schemius!   [Published 2024-05-02 12:01:00 UTC]
          --------------------------------------------------------
           Press [Ctrl + K]       -> Show essential keymap
           (environment-bindings) -> Show bindings in current env
@@ -77,16 +77,17 @@ class Schemius {
     };
   }
 
+  static get style() {
+    return document.documentElement.style;
+  }
+
   static getFont() {
-    return document.documentElement.style.getPropertyValue("--font");
+    return Schemius.style.getPropertyValue("--font");
   }
 
   static setFont(font) {
-    document.documentElement.style.setProperty("--font", font);
-    document.documentElement.style.setProperty(
-      "font-style",
-      font === "Victor Mono" ? "italic" : "normal"
-    );
+    Schemius.style.setProperty("--font", font);
+    Schemius.style.setProperty("font-style", font === "Victor Mono" ? "italic" : "normal");
     localStorage.setItem("font", font);
   }
 
@@ -138,9 +139,9 @@ class Schemius {
   }
 
   static getTheme() {
-    const color = document.documentElement.style.getPropertyValue("--color");
-    const background = document.documentElement.style.getPropertyValue("--background");
-    const linkColor = document.documentElement.style.getPropertyValue("--link-color");
+    const color = Schemius.style.getPropertyValue("--color");
+    const background = Schemius.style.getPropertyValue("--background");
+    const linkColor = Schemius.style.getPropertyValue("--link-color");
 
     return {
       color: color,
@@ -150,9 +151,9 @@ class Schemius {
   }
 
   static setTheme(theme) {
-    document.documentElement.style.setProperty("--color", theme.color);
-    document.documentElement.style.setProperty("--background", theme.background);
-    document.documentElement.style.setProperty("--link-color", theme.linkColor);
+    Schemius.style.setProperty("--color", theme.color);
+    Schemius.style.setProperty("--background", theme.background);
+    Schemius.style.setProperty("--link-color", theme.linkColor);
     localStorage.setItem("theme", JSON.stringify(theme));
   }
 
