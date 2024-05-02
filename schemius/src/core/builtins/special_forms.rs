@@ -537,7 +537,7 @@ pub fn r_and(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
         } else {
             let result = evaluated.unwrap();
             if let SExpr::Boolean(false) = result {
-                return Ok(SExpr::Boolean(false));
+                return Ok(result);
             }
         }
     }
