@@ -173,6 +173,7 @@ impl Default for Environment {
             "`" => QUASIQUOTE
             "quasiquote" => QUASIQUOTE
             "and" => AND
+            "or" => OR
             "λ" => LAMBDA
             "lambda" => LAMBDA
             "let" => LET

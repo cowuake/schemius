@@ -35,9 +35,9 @@ fn interpreter_r7rs_conditionals() {
         { expression: "(and (= 2 2) (< 2 1))", expected: "#f" };
         { expression: "(and 1 2 'c '(f g))", expected: "(f g)" };
         { expression: "(and)", expected: "#t" };
-        // { expression: "(or (= 2 2) (> 2 1))", expected: "#t" };
-        // { expression: "(or (= 2 2) (< 2 1))", expected: "#t" };
-        // { expression: "(or #f #f #f)", expected: "#f" };
+        { expression: "(or (= 2 2) (> 2 1))", expected: "#t" };
+        { expression: "(or (= 2 2) (< 2 1))", expected: "#t" };
+        { expression: "(or #f #f #f)", expected: "#f" };
         // { expression: "(or (memq 'b '(a b c)) (/ 3 0))", expected: "(b c)" };
         // { expression: "(when (= 1 1.0) (display \"1\") (display \"2\"))", expected: "unspecified" /* (and prints 12) */ };
         // { expression: "(unless (= 1 1.0) (display \"1\") (display \"2\"))", expected: "unspecified" /* (and prints nothing) */ };

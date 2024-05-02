@@ -79,4 +79,5 @@ impl SpecialForm {
     pub const SET: SpecialFormSignature = r_set;
     pub const TIME: SpecialFormSignature = r_time;
     pub const AND: SpecialFormSignature = r_and;
+    pub const OR: SpecialFormSignature = r_or;
 }

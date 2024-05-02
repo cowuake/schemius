@@ -544,3 +544,26 @@ pub fn r_and(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 
     Ok(args.last().unwrap().clone())
 }
+
+pub fn r_or(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+    let n_args = args.len();
+    if n_args == 0 {
+        return Ok(SExpr::Boolean(true));
+    }
+
+    for arg in args.iter().take(n_args - 1) {
+        let evaluated = eval(arg, env.clone());
+        if evaluated.is_err() {
+            return evaluated;
+        } else {
+            let result = evaluated.unwrap();
+            if let SExpr::Boolean(false) = result {
+                continue;
+            } else {
+                return Ok(result);
+            }
+        }
+    }
+
+    Ok(args.last().unwrap().clone())
+}
