@@ -127,6 +127,20 @@ fn interpreter_quoting() {
 }
 
 #[test]
+fn interpreter_conditionals() {
+    integration_subtest_eval_to! {
+        { expression: "(or 'hello #t)", expected: "hello" };
+        { expression: "(or #f 'hello)", expected: "hello" };
+        { expression: "(and 'hello #t)", expected: "#t" };
+        { expression: "(and #f 'hello)", expected: "#f" };
+        { expression: "(if #t 'hello 'world)", expected: "hello" };
+        { expression: "(if #f 'hello 'world)", expected: "world" };
+        { expression: "(if #t 'hello)", expected: "hello" };
+        // { expression: "(if #f 'hello)", expected: "" }; // TODO: should return unspecified/void without printing
+    }
+}
+
+#[test]
 fn interpreter_binding() {
     integration_subtest_eval_to! {
         { expression: "(let ((x 2) (y 3)) (* x y))", expected: "6" };

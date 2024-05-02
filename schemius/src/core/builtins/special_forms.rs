@@ -560,7 +560,7 @@ pub fn r_or(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
             if let SExpr::Boolean(false) = result {
                 continue;
             } else {
-                return Ok(result);
+                return Ok(arg.clone());
             }
         }
     }
