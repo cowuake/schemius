@@ -355,7 +355,7 @@ class Schemius {
         expression = expression.replace(/\r?\n|\r/g, " ").trim();
         if (expression) {
           if (Schemius.fakeProcedures[expression]) {
-            this.echo(Schemius.fakeProcedures[expression]());
+            Schemius.fakeProcedures[expression]();
           } else {
             try {
               this.echo(evaluate(expression));
