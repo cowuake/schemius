@@ -19,7 +19,7 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!   [Published 2024-05-14 08:14:24 UTC]
+        Welcome to Schemius!   [Published 2024-05-14 08:42:35 UTC]
          --------------------------------------------------------
           Press [Ctrl + K]       -> Show essential keymap
           (environment-bindings) -> Show bindings in current env
@@ -198,6 +198,8 @@ class Schemius {
     "(switch-font)": Schemius.switchFont,
     "(switch-theme)": Schemius.switchTheme,
     "(test!)": Schemius.switchTestMode,
+    "(clear-screen)": Schemius.clearScreen,
+    "(clc)": Schemius.clearScreen,
   };
 
   static handleTouchStart(event) {
@@ -340,6 +342,10 @@ class Schemius {
     e || Schemius.isMobile() ? setTimeout(() => apply(), 20) : apply();
   }
 
+  static clearScreen() {
+    Schemius.terminal.clear();
+  }
+
   static initTerminal() {
     Schemius.setFont(Schemius.defaultFont);
     Schemius.setTheme(Schemius.defaultTheme);
@@ -349,7 +355,7 @@ class Schemius {
         expression = expression.replace(/\r?\n|\r/g, " ").trim();
         if (expression) {
           if (Schemius.fakeProcedures[expression]) {
-            this.echo(Schemius.fakeProcedures[expression]());
+            Schemius.fakeProcedures[expression]();
           } else {
             try {
               this.echo(evaluate(expression));
