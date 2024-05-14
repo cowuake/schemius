@@ -198,6 +198,8 @@ class Schemius {
     "(switch-font)": Schemius.switchFont,
     "(switch-theme)": Schemius.switchTheme,
     "(test!)": Schemius.switchTestMode,
+    "(clear-screen)": Schemius.clearScreen,
+    "(clc)": Schemius.clearScreen,
   };
 
   static handleTouchStart(event) {
@@ -338,6 +340,10 @@ class Schemius {
       Schemius.terminal.attr("style", `--size: ${size}`);
     };
     e || Schemius.isMobile() ? setTimeout(() => apply(), 20) : apply();
+  }
+
+  static clearScreen() {
+    Schemius.terminal.clear();
   }
 
   static initTerminal() {
