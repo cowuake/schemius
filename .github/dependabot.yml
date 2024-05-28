@@ -14,7 +14,7 @@ updates:
           - 'patch'
     target-branch: 'main'
     commit-message:
-      prefix: 'Update Rust deps'
+      prefix: 'Update Cargo deps'
     labels:
       - 'cargo'
       - 'dependencies'
