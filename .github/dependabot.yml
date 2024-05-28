@@ -1,0 +1,44 @@
+version: 2
+updates:
+  - package-ecosystem: 'cargo'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+      time: '06:00'
+      timezone: 'Europe/Italy'
+    groups:
+      cargo-deps:
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+          - 'patch'
+    target-branch: 'main'
+    commit-message:
+      prefix: 'Update Rust deps'
+    labels:
+      - 'cargo'
+      - 'dependencies'
+    assignees:
+      - 'cowuake'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/' # Points to '/.github/workflows/' by default if '/' is specified
+    schedule:
+      interval: 'weekly'
+      day: 'saturday'
+      time: '06:00'
+      timezone: 'Europe/Italy'
+    groups:
+      github-actions-deps:
+        applies-to: version-updates
+        update-types:
+          - 'minor'
+          - 'patch'
+    target-branch: 'main'
+    commit-message:
+      prefix: 'Update GitHub Actions'
+    labels:
+      - 'github-actions'
+      - 'dependencies'
+    assignees:
+      - 'cowuake'
