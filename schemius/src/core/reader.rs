@@ -14,6 +14,9 @@ fn init(line: &mut String) -> String {
         static ref TOKEN_REGEX: Regex = Regex::new(
             r#"^\s*(,@|#\\\.|[\[('`,)\]]|#\(|"(?:\.|[^"])*"|;.*|[^\s\[('"`,;)\]]*)(.*)"#
         )
+        // static ref TOKEN_REGEX: Regex = Regex::new(
+        //     r#"^\s*(,@|#\\\.|[\[('`,)\]]|#\(|"(?:\.|[^"])*"|;.*|[^\s\[('"`,;)\]]*|[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?i)(.*)"#
+        // )
         .unwrap();
     }
 
@@ -184,7 +187,10 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
                             Ok(q) => SExpr::Number(SNumber::Rational(q)),
                             _ => match token.parse::<NativeFloat>() {
                                 Ok(f) => SExpr::Number(SNumber::Float(f)),
-                                _ => SExpr::Symbol(token.to_string()),
+                                _ => match token.parse::<NativeComplex>() {
+                                    Ok(c) => SExpr::Number(SNumber::Complex(c)),
+                                    _ => SExpr::Symbol(token.to_string()),
+                                },
                             },
                         },
                     },

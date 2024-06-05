@@ -5,12 +5,13 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-use num::{integer::Roots, BigInt, BigRational, One, ToPrimitive};
+use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive};
 
 pub type NativeInt = i64;
 pub type NativeBigInt = BigInt;
 pub type NativeRational = BigRational;
 pub type NativeFloat = f64;
+pub type NativeComplex = Complex<NativeFloat>;
 
 #[derive(Debug, Clone)]
 pub enum SNumber {
@@ -18,6 +19,7 @@ pub enum SNumber {
     BigInt(NativeBigInt),
     Rational(NativeRational),
     Float(NativeFloat),
+    Complex(NativeComplex),
 }
 
 pub struct NumericalConstant;
@@ -67,6 +69,13 @@ impl fmt::Display for SNumber {
             SNumber::BigInt(ref val) => write!(f, "{}", val),
             SNumber::Rational(ref val) => write!(f, "{}", val),
             SNumber::Float(ref val) => write!(f, "{:?}", val),
+            SNumber::Complex(ref val) => {
+                let mut sign_text = "";
+                if val.im >= 0.0 {
+                    sign_text = "+";
+                }
+                write!(f, "{}{}{}i", val.re, sign_text, val.im)
+            }
         }
     }
 }
@@ -84,25 +93,36 @@ macro_rules! impl_ref_op {
                         SNumber::BigInt(r) => SNumber::BigInt(l $op r),
                         SNumber::Rational(r) => SNumber::Rational(NativeRational::from(NativeBigInt::from(*l)) $op r),
                         SNumber::Float(r) => SNumber::Float(*l as NativeFloat $op r),
+                        SNumber::Complex(c) => SNumber::Complex(NativeComplex::from(*l as NativeFloat) $op c),
                     },
                     SNumber::BigInt(l) => match other {
                         SNumber::Int(r) => SNumber::BigInt(l.clone() as NativeBigInt $op r),
                         SNumber::BigInt(r) => SNumber::BigInt(l $op r),
                         SNumber::Rational(r) => SNumber::Rational(NativeRational::from(l.clone()) $op r),
                         SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() $op r),
+                        SNumber::Complex(c) => SNumber::Complex(NativeComplex::from(l.to_float().unwrap()) $op c),
                     },
                     SNumber::Rational(l) => match other {
                         SNumber::Int(r) => SNumber::Rational(l $op NativeBigInt::from(*r)),
                         SNumber::BigInt(r) => SNumber::Rational(l $op r),
                         SNumber::Rational(r) => SNumber::Rational(l $op r),
                         SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() $op r),
+                        SNumber::Complex(c) => SNumber::Complex(NativeComplex::from(l.to_float().unwrap() as NativeFloat) $op c),
                     },
                     SNumber::Float(l) => match other {
                         SNumber::Int(r) => SNumber::Float(l $op *r as NativeFloat),
                         SNumber::BigInt(r) => SNumber::Float(l $op r.to_float().unwrap()),
                         SNumber::Rational(r) => SNumber::Float(l $op r.to_float().unwrap()),
                         SNumber::Float(r) => SNumber::Float(l $op r),
+                        SNumber::Complex(c) => SNumber::Complex(NativeComplex::from(*l) $op c),
                     },
+                    SNumber::Complex(l) => match other {
+                        SNumber::Int(r) => SNumber::Complex(l $op NativeComplex::new(*r as NativeFloat, 0.0)),
+                        SNumber::BigInt(r) => SNumber::Complex(l $op NativeComplex::new(r.to_float().unwrap(), 0.0)),
+                        SNumber::Rational(r) => SNumber::Complex(l $op NativeComplex::new(r.to_float().unwrap(), 0.0)),
+                        SNumber::Float(r) => SNumber::Complex(l $op NativeComplex::new(*r, 0.0)),
+                        SNumber::Complex(r) => SNumber::Complex(l $op r),
+                    }
                 }
             }
         }
@@ -132,6 +152,7 @@ impl Div for &SNumber {
                     SNumber::Rational(NativeRational::from(NativeBigInt::from(*l)) / r)
                 }
                 SNumber::Float(r) => SNumber::Float(*l as NativeFloat / r),
+                SNumber::Complex(c) => SNumber::Complex(NativeComplex::from(*l as NativeFloat) / c),
             },
             SNumber::BigInt(l) => match other {
                 SNumber::Int(r) => {
@@ -140,18 +161,36 @@ impl Div for &SNumber {
                 SNumber::BigInt(r) => SNumber::Rational(NativeRational::new(l.clone(), r.clone())),
                 SNumber::Rational(r) => SNumber::Rational(NativeRational::from(l.clone()) / r),
                 SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() / r),
+                SNumber::Complex(c) => {
+                    SNumber::Complex(NativeComplex::from(l.to_float().unwrap()) / c)
+                }
             },
             SNumber::Rational(l) => match other {
                 SNumber::Int(r) => SNumber::Rational(l / NativeBigInt::from(*r)),
                 SNumber::BigInt(r) => SNumber::Rational(l / r),
                 SNumber::Rational(r) => SNumber::Rational(l / r),
                 SNumber::Float(r) => SNumber::Float(l.to_float().unwrap() / r),
+                SNumber::Complex(c) => {
+                    SNumber::Complex(NativeComplex::from(l.to_float().unwrap() as NativeFloat) / c)
+                }
             },
             SNumber::Float(l) => match other {
                 SNumber::Int(r) => SNumber::Float(l / *r as NativeFloat),
                 SNumber::BigInt(r) => SNumber::Float(l / r.to_float().unwrap()),
                 SNumber::Rational(r) => SNumber::Float(l / r.to_float().unwrap()),
                 SNumber::Float(r) => SNumber::Float(l / r),
+                SNumber::Complex(c) => SNumber::Complex(NativeComplex::from(*l) / c),
+            },
+            SNumber::Complex(l) => match other {
+                SNumber::Int(r) => SNumber::Complex(l / NativeComplex::new(*r as NativeFloat, 0.0)),
+                SNumber::BigInt(r) => {
+                    SNumber::Complex(l / NativeComplex::new(r.to_float().unwrap(), 0.0))
+                }
+                SNumber::Rational(r) => {
+                    SNumber::Complex(l / NativeComplex::new(r.to_float().unwrap(), 0.0))
+                }
+                SNumber::Float(r) => SNumber::Complex(l / NativeComplex::new(*r, 0.0)),
+                SNumber::Complex(r) => SNumber::Complex(l / r),
             },
         }
     }
@@ -167,25 +206,33 @@ macro_rules! impl_partial_eq_ord_op {
                     SNumber::BigInt(r) => NativeBigInt::from(*l) $op *r,
                     SNumber::Rational(r) => NativeRational::new(NativeBigInt::from(*l), NativeBigInt::from(1 as NativeInt)) $op *r,
                     SNumber::Float(r) => (*l as NativeFloat) $op *r,
+                    SNumber::Complex(_) => false,
                 },
                 SNumber::BigInt(l) => match other {
                     SNumber::Int(r) => *l $op NativeBigInt::from(*r),
                     SNumber::BigInt(r) => l $op r,
                     SNumber::Rational(r) => NativeRational::new(l.clone(), NativeBigInt::from(1 as NativeInt)) $op *r,
                     SNumber::Float(r) => l.to_float().unwrap() $op *r,
+                    SNumber::Complex(_) => false,
                 },
                 SNumber::Rational(l) => match other {
                     SNumber::Int(r) => *l $op NativeRational::new(NativeBigInt::from(*r), NativeBigInt::from(1 as NativeInt)),
                     SNumber::BigInt(r) => *l $op NativeRational::new(r.clone(), NativeBigInt::from(1 as NativeInt)),
                     SNumber::Rational(r) => l $op r,
                     SNumber::Float(r) => l.to_float().unwrap() $op *r,
+                    SNumber::Complex(_) => false,
                 },
                 SNumber::Float(l) => match other {
                     SNumber::Int(r) => *l $op *r as NativeFloat,
                     SNumber::BigInt(r) => *l $op r.to_float().unwrap(),
                     SNumber::Rational(r) => *l $op r.to_float().unwrap(),
                     SNumber::Float(r) => l $op r,
+                    SNumber::Complex(_) => false,
                 },
+                SNumber::Complex(l) => match other {
+                    SNumber::Complex(r) => l.re $op r.re && l.im $op r.im,
+                    _ => false,
+                }
             }
         }
     )*}
@@ -219,6 +266,7 @@ impl PartialOrd for SNumber {
                     NativeRational::new(NativeBigInt::from(*l), NativeBigInt::from(1 as NativeInt))
                         .cmp(&NativeRational::from_float(*r).unwrap()),
                 ),
+                SNumber::Complex(_) => None,
             },
             SNumber::BigInt(l) => match other {
                 SNumber::Int(r) => Some((*l).cmp(&NativeBigInt::from(*r))),
@@ -230,6 +278,7 @@ impl PartialOrd for SNumber {
                     NativeRational::new(l.clone(), NativeBigInt::from(1 as NativeInt))
                         .cmp(&NativeRational::from_float(*r).unwrap()),
                 ),
+                SNumber::Complex(_) => None,
             },
             SNumber::Rational(l) => match other {
                 SNumber::Int(r) => Some(l.cmp(&NativeRational::new(
@@ -241,6 +290,7 @@ impl PartialOrd for SNumber {
                 ),
                 SNumber::Rational(r) => Some(l.cmp(r)),
                 SNumber::Float(r) => Some(l.cmp(&NativeRational::from_float(*r).unwrap())),
+                SNumber::Complex(_) => None,
             },
             SNumber::Float(l) => match other {
                 SNumber::Int(r) => {
@@ -258,7 +308,9 @@ impl PartialOrd for SNumber {
                     (NativeRational::from_float(*l).unwrap())
                         .cmp(&NativeRational::from_float(*r).unwrap()),
                 ),
+                SNumber::Complex(_) => None,
             },
+            SNumber::Complex(_) => None,
         }
     }
 }
@@ -308,6 +360,9 @@ impl SNumber {
             SNumber::BigInt(_) => true,
             SNumber::Rational(_) => true,
             SNumber::Float(_) => false,
+            SNumber::Complex(c) => {
+                SNumber::Float(c.re).is_exact() && SNumber::Float(c.im).is_exact()
+            }
         }
     }
 
@@ -324,6 +379,7 @@ impl SNumber {
             SNumber::BigInt(_) => true,
             SNumber::Rational(r) => r.denom().is_one(),
             SNumber::Float(r) => r.fract() == 0.0,
+            SNumber::Complex(_) => false,
         }
     }
 
@@ -333,6 +389,7 @@ impl SNumber {
             SNumber::BigInt(_) => true,
             SNumber::Rational(_) => true,
             SNumber::Float(_) => true,
+            SNumber::Complex(_) => false,
         }
     }
 
@@ -346,6 +403,7 @@ impl SNumber {
                 number if number.is_nan() => false,
                 _ => true,
             },
+            SNumber::Complex(_) => false,
         }
     }
 
@@ -369,7 +427,7 @@ pub mod tests {
     use num::bigint::ToBigInt;
 
     use crate::core::s_expression::s_number::{
-        NativeBigInt, NativeFloat, NativeInt, NativeRational,
+        NativeBigInt, NativeComplex, NativeFloat, NativeInt, NativeRational,
     };
 
     use super::SNumber;
@@ -396,11 +454,23 @@ pub mod tests {
             rhs: SNumber::Int(2),
             expected: SNumber::Int(3)
         };
+        snumber_op_int_complex_add: {
+            operator: +,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: SNumber::Complex(3.0.into())
+        };
         snumber_op_int_int_sub: {
             operator: -,
             lhs: SNumber::Int(1),
             rhs: SNumber::Int(2),
             expected: SNumber::Int(-1)
+        };
+        snumber_op_int_complex_sub: {
+            operator: -,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: SNumber::Complex((-1.0).into())
         };
         snumber_op_int_int_mul: {
             operator: *,
@@ -408,11 +478,23 @@ pub mod tests {
             rhs: SNumber::Int(2),
             expected: SNumber::Int(2)
         };
+        snumber_op_int_complex_mul: {
+            operator: *,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: SNumber::Complex(2.0.into())
+        };
         snumber_op_int_int_div: {
             operator: /,
             lhs: SNumber::Int(1),
             rhs: SNumber::Int(2),
             expected: SNumber::Rational("1/2".parse::<NativeRational>().unwrap())
+        };
+        snumber_op_int_complex_div: {
+            operator: /,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
+            expected: SNumber::Complex(NativeComplex::new(0.4, -0.2))
         };
         snumber_op_int_int_eq: {
             operator: ==,
@@ -420,9 +502,21 @@ pub mod tests {
             rhs: SNumber::Int(2),
             expected: false
         };
+        snumber_op_complex_complex_eq: {
+            operator: ==,
+            lhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
+            rhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
+            expected: true
+        };
         snumber_op_int_int_gt: {
             operator: >,
             lhs: SNumber::Int(1),
+            rhs: SNumber::Int(2),
+            expected: false
+        };
+        snumber_op_int_complex_gt: { // TODO: Handle differently
+            operator: >,
+            lhs: SNumber::Complex(1.0.into()),
             rhs: SNumber::Int(2),
             expected: false
         };
@@ -431,6 +525,12 @@ pub mod tests {
             lhs: SNumber::Int(1),
             rhs: SNumber::Int(2),
             expected: true
+        };
+        snumber_op_int_complex_lt: { // TODO: Handle differently
+            operator: <,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: false
         };
         snumber_op_int_bigint_add: {
             operator: +,
