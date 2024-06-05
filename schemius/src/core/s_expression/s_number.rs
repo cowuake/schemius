@@ -5,7 +5,7 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
-use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive};
+use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive, Zero};
 
 pub type NativeInt = i64;
 pub type NativeBigInt = BigInt;
@@ -379,7 +379,13 @@ impl SNumber {
             SNumber::BigInt(_) => true,
             SNumber::Rational(r) => r.denom().is_one(),
             SNumber::Float(r) => r.fract() == 0.0,
-            SNumber::Complex(_) => false,
+            SNumber::Complex(c) => {
+                if c.im.is_zero() {
+                    SNumber::Float(c.re).is_integer()
+                } else {
+                    false
+                }
+            }
         }
     }
 
@@ -389,7 +395,13 @@ impl SNumber {
             SNumber::BigInt(_) => true,
             SNumber::Rational(_) => true,
             SNumber::Float(_) => true,
-            SNumber::Complex(_) => false,
+            SNumber::Complex(c) => {
+                if c.im.is_zero() {
+                    SNumber::Float(c.re).is_real()
+                } else {
+                    false
+                }
+            }
         }
     }
 
@@ -404,6 +416,27 @@ impl SNumber {
                 _ => true,
             },
             SNumber::Complex(_) => false,
+        }
+    }
+
+    pub fn is_complex(&self) -> bool {
+        match self {
+            SNumber::Int(_) => true,
+            SNumber::BigInt(_) => true,
+            SNumber::Rational(_) => true,
+            SNumber::Float(_) => true,
+            SNumber::Complex(_) => true,
+        }
+    }
+
+    pub fn is_zero(&self) -> bool {
+        // TODO: Generalize
+        match self {
+            SNumber::Int(number) => *number == 0,
+            SNumber::BigInt(number) => number.is_zero(),
+            SNumber::Rational(number) => number.is_zero(),
+            SNumber::Float(number) => *number == 0.0,
+            SNumber::Complex(number) => number == &Complex::zero(),
         }
     }
 

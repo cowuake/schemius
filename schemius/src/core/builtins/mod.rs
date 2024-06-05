@@ -38,6 +38,7 @@ impl Primitive {
     pub const DISPLAY: ProcedureSignature = r_display;
     pub const IS_BOOLEAN: ProcedureSignature = r_is_boolean;
     pub const IS_CHAR: ProcedureSignature = r_is_char;
+    pub const IS_COMPLEX: ProcedureSignature = r_is_complex;
     pub const IS_EXACT: ProcedureSignature = r_is_exact;
     pub const IS_INFINITE: ProcedureSignature = r_is_infinite;
     pub const IS_INTEGER: ProcedureSignature = r_is_integer;
@@ -52,6 +53,7 @@ impl Primitive {
     pub const IS_STRING: ProcedureSignature = r_is_string;
     pub const IS_SYMBOL: ProcedureSignature = r_is_symbol;
     pub const IS_VECTOR: ProcedureSignature = r_is_vector;
+    pub const IS_ZERO: ProcedureSignature = r_is_zero;
     pub const ENVIRONMENT_BINDINGS: ProcedureSignature = r_environment_bindings;
     pub const MAKE_STRING: ProcedureSignature = r_make_string;
     pub const STRING: ProcedureSignature = r_string;
