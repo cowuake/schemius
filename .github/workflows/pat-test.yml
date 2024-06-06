@@ -3,7 +3,7 @@ name: PAT-TEST
 on: workflow_dispatch
 
 env:
-  DUMMY_FILE: ./.github/workflows/dummy.txt
+  DUMMY_FILE: ./dummy.txt
 
 jobs:
   first-push:
