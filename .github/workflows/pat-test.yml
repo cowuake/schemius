@@ -1,4 +1,4 @@
-name: PAT-TEST
+name: PAT test (dummy file regeneration)
 
 on: workflow_dispatch
 
@@ -8,7 +8,7 @@ env:
 
 jobs:
   regenerate-dummy-file:
-    name: First push
+    name: Regenerate dummy file
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
