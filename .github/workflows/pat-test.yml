@@ -13,6 +13,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Configure Git
+        run: |
+          git config --global user.name {{ secrets.ACTIONS_USER }}
+          git config --global user.email {{ secrets.ACTIONS_EMAIL }}
+
       - name: Add dummy file
         run: |
           echo "I am a dummy file!" > $DUMMY_FILE
@@ -29,6 +34,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config --global user.name {{ secrets.ACTIONS_USER }}
+          git config --global user.email {{ secrets.ACTIONS_EMAIL }}
 
       - name: Remove dummy file
         run: |
