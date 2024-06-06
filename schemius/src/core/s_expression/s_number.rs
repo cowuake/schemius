@@ -487,23 +487,11 @@ pub mod tests {
             rhs: SNumber::Int(2),
             expected: SNumber::Int(3)
         };
-        snumber_op_int_complex_add: {
-            operator: +,
-            lhs: SNumber::Int(1),
-            rhs: SNumber::Complex(2.0.into()),
-            expected: SNumber::Complex(3.0.into())
-        };
         snumber_op_int_int_sub: {
             operator: -,
             lhs: SNumber::Int(1),
             rhs: SNumber::Int(2),
             expected: SNumber::Int(-1)
-        };
-        snumber_op_int_complex_sub: {
-            operator: -,
-            lhs: SNumber::Int(1),
-            rhs: SNumber::Complex(2.0.into()),
-            expected: SNumber::Complex((-1.0).into())
         };
         snumber_op_int_int_mul: {
             operator: *,
@@ -511,23 +499,11 @@ pub mod tests {
             rhs: SNumber::Int(2),
             expected: SNumber::Int(2)
         };
-        snumber_op_int_complex_mul: {
-            operator: *,
-            lhs: SNumber::Int(1),
-            rhs: SNumber::Complex(2.0.into()),
-            expected: SNumber::Complex(2.0.into())
-        };
         snumber_op_int_int_div: {
             operator: /,
             lhs: SNumber::Int(1),
             rhs: SNumber::Int(2),
             expected: SNumber::Rational("1/2".parse::<NativeRational>().unwrap())
-        };
-        snumber_op_int_complex_div: {
-            operator: /,
-            lhs: SNumber::Int(1),
-            rhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
-            expected: SNumber::Complex(NativeComplex::new(0.4, -0.2))
         };
         snumber_op_int_int_eq: {
             operator: ==,
@@ -535,21 +511,9 @@ pub mod tests {
             rhs: SNumber::Int(2),
             expected: false
         };
-        snumber_op_complex_complex_eq: {
-            operator: ==,
-            lhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
-            rhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
-            expected: true
-        };
         snumber_op_int_int_gt: {
             operator: >,
             lhs: SNumber::Int(1),
-            rhs: SNumber::Int(2),
-            expected: false
-        };
-        snumber_op_int_complex_gt: { // TODO: Handle differently
-            operator: >,
-            lhs: SNumber::Complex(1.0.into()),
             rhs: SNumber::Int(2),
             expected: false
         };
@@ -558,12 +522,6 @@ pub mod tests {
             lhs: SNumber::Int(1),
             rhs: SNumber::Int(2),
             expected: true
-        };
-        snumber_op_int_complex_lt: { // TODO: Handle differently
-            operator: <,
-            lhs: SNumber::Int(1),
-            rhs: SNumber::Complex(2.0.into()),
-            expected: false
         };
         snumber_op_int_bigint_add: {
             operator: +,
@@ -942,6 +900,48 @@ pub mod tests {
             lhs: SNumber::Float(0.1),
             rhs: SNumber::Float(0.1),
             expected: true
+        };
+        snumber_op_int_complex_add: {
+            operator: +,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: SNumber::Complex(3.0.into())
+        };
+        snumber_op_int_complex_sub: {
+            operator: -,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: SNumber::Complex((-1.0).into())
+        };
+        snumber_op_int_complex_mul: {
+            operator: *,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: SNumber::Complex(2.0.into())
+        };
+        snumber_op_int_complex_div: {
+            operator: /,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
+            expected: SNumber::Complex(NativeComplex::new(0.4, -0.2))
+        };
+        snumber_op_complex_complex_eq: {
+            operator: ==,
+            lhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
+            rhs: SNumber::Complex(NativeComplex::new(2.0, 1.0)),
+            expected: true
+        };
+        snumber_op_int_complex_gt: { // TODO: Handle differently
+            operator: >,
+            lhs: SNumber::Complex(1.0.into()),
+            rhs: SNumber::Int(2),
+            expected: false
+        };
+        snumber_op_int_complex_lt: { // TODO: Handle differently
+            operator: <,
+            lhs: SNumber::Int(1),
+            rhs: SNumber::Complex(2.0.into()),
+            expected: false
         };
     }
 
