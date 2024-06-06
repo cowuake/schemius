@@ -3,11 +3,11 @@ name: PAT-TEST
 on: workflow_dispatch
 
 env:
-  WASTE_DIR: ./waste
+  WASTE_DIR: ./.waste
   DUMMY_FILE: dummy.txt
 
 jobs:
-  first-push:
+  regenerate-dummy-file:
     name: First push
     runs-on: ubuntu-latest
     steps:
@@ -25,7 +25,8 @@ jobs:
         run: |
           mkdir -p $WASTE_DIR
           TARGET=$WASTE_DIR/$DUMMY_FILE
-          echo "DATE=$(date)" >> $GITHUB_ENV
+          DATE=$(date)
+          echo "DATE=$DATE" >> $GITHUB_ENV
           echo "I am a dummy file! $DATE" > $TARGET
           git add $TARGET
 
