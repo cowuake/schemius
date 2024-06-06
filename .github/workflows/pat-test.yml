@@ -15,8 +15,8 @@ jobs:
 
       - name: Add dummy file
         run: |
-          echo "I am a dummy file!" > {{ env.DUMMY_FILE }}
-          git add {{ env.DUMMY_FILE }}
+          echo "I am a dummy file!" > $DUMMY_FILE
+          git add $DUMMY_FILE
 
       - name: Commit and push changes
         run: |
@@ -32,7 +32,7 @@ jobs:
 
       - name: Remove dummy file
         run: |
-          git rm {{ env.DUMMY_FILE }}
+          git rm $DUMMY_FILE
           git add .
 
       - name: Commit and push changes
