@@ -7,10 +7,21 @@ use std::{
 
 use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive, Zero};
 
+#[cfg(not(features = "i64"))]
+#[cfg(not(features = "i128"))]
+pub type NativeInt = i32;
+#[cfg(features = "i64")]
 pub type NativeInt = i64;
+#[cfg(features = "i128")]
+pub type NativeInt = i128;
+
+#[cfg(not(features = "f64"))]
+pub type NativeFloat = f32;
+#[cfg(features = "f64")]
+pub type NativeFloat = f64;
+
 pub type NativeBigInt = BigInt;
 pub type NativeRational = BigRational;
-pub type NativeFloat = f64;
 pub type NativeComplex = Complex<NativeFloat>;
 
 #[derive(Debug, Clone)]
