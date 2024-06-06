@@ -1,0 +1,41 @@
+name: PAT-TEST
+
+on: workflow_dispatch
+
+env:
+  DUMMY_FILE: ./.github/workflows/dummy.txt
+
+jobs:
+  first-push:
+    name: First push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add dummy file
+        run: |
+          echo "I am a dummy file!" > {{ env.DUMMY_FILE }}
+          git add {{ env.DUMMY_FILE }}
+
+      - name: Commit and push changes
+        run: |
+          git commit -m "Add dummy file"
+          git push
+
+  second-push:
+    name: Second push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove dummy file
+        run: |
+          git rm {{ env.DUMMY_FILE }}
+          git add .
+
+      - name: Commit and push changes
+        run: |
+          git commit -m "Remove dummy file"
+          git push
