@@ -9,6 +9,12 @@ lazy_static = "1.4"
 num = "0.4"
 regex = "1.10"
 
+[features]
+default = ["f64", "i64"]
+f64 = []
+i64 = []
+i128 = []
+
 [profile.dev]
 opt-level = 0
 
