@@ -20,11 +20,6 @@ Schemius is an interpreter for the Scheme programming language written in Rust, 
   - **The objective**: keep the interpreter available online as an easily accessible web page providing all the essential features of the terminal application, and some additional comforts
   - **How the issue is being addressed**: Schemius' core is accessed through a minimalistic API, which compiles to WebAssembly and is made available to the [Schemius Web Client](https://cowuake.github.io/schemius/), easily reachable for everyone
 
-- **Being a journey**
-  - **The usual state of things**:
-  - **The objective**:
-  - **How the issue is being addressed**:
-
 ## Try out Schemius
 
 ### From the command line (native)
