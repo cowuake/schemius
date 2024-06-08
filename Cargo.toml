@@ -1,7 +1,3 @@
 [workspace]
-members = [
-    "schemius",
-    "schemius-native",
-    "schemius-web"
-]
+members = ["schemius", "schemius-native"]
 resolver = "2"
