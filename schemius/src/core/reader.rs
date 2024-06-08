@@ -12,7 +12,7 @@ lazy_static! {
 
 lazy_static! {
     static ref COMPLEX_POLAR_REGEX: Regex =
-        Regex::new(r"^(\d+(\.\d+)?(/?\d*(\.\d+)?)?)@(\d+(\.\d+)?(/?\d*(\.\d+)?)?)$").unwrap();
+        Regex::new(r"^(\d*(\.\d+)?(/?\d*(\.\d+)?)?)@(\d*(\.\d+)?(/?\d*(\.\d+)?)?)$").unwrap();
 }
 
 pub fn read(line: &mut String) -> SExpr {
