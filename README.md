@@ -11,14 +11,14 @@ Schemius is an interpreter for the Scheme programming language written in Rust, 
 ## Goals
 
 - **Real R7RS-small compliance**
-  - **The usual state of things**: several Scheme interpreters are declared to be R7RS-compliant, but it's easy to find some example in the official specification which will give a different outcome when executed on some of these interpreters
+  - **The usual state of things**: several Scheme interpreters are declared to be R7RS-compliant, but it's easy to find some examples in the official specification which will give a different outcome when executed on some of these interpreters
   - **The objective**: test new features against the R7RS-small specifications whenever feasible in the early steps of their implementations; implement all the features strictly required from the the standard and as many as possible of those not strictly required
   - **How the issue is being addressed**: the examples reported on the R7RS-small document are used to write integration tests for the interpreter, so that departures from the standard are captured early (won't pass continuous integration checks)
 
 - **Accessibility**
   - **The usual state of things**: most Scheme interpreters only expose their REPLs as CLI applications to be run in a terminal on a local machine, thus discouraging the casual user's interest for Scheme, especially on mobile devices
   - **The objective**: keep the interpreter available online as an easily accessible web page providing all the essential features of the terminal application, and some additional comforts
-  - **How the issue is being addressed**: Schemius' core is accessed through a minimalistic API, which compiles to WebAssembly and is made available to the [Schemius Web Client](https://cowuake.github.io/schemius/), easily reachable for everyone
+  - **How the issue is being addressed**: Schemius' core is accessed through a minimalistic API, which compiles to WebAssembly and is made available to the [Schemius Web Client](https://cowuake.github.io/schemius/), easily reachable online for everyone
 
 ## Try out Schemius
 
@@ -56,13 +56,13 @@ which will install the Schemius terminal application and make it available from 
 
 ### From the command line (Docker)
 
-If you do not want to install Rust but already have Docker installed on your machine, you can build an image spawning a terminal, running
+If you do not want to install Rust but already have Docker installed on your machine, you can build an image spawning a terminal and launching
 
 ```bash
 docker build -t schemius .
 ```
 
-and then execute the repl in a container with
+and then execute the REPL in a container with
 
 ```bash
 docker run -it schemius
@@ -81,13 +81,13 @@ The Schemius Web Client is hosted on [GitHub Pages](https://pages.github.com/) a
 > From the web client on mobile devices, you could find difficult to rely on keybinds involving modifier keys such as `Ctrl` and `Shift`. For now, you can take advantage of the following special commands (only available online):
 >
 > - `(switch-font)`: Cycle between available fonts
-> - `(switch-theme)`: Cycle between available color thems
+> - `(switch-theme)`: Cycle between available color themes
 > - `(clc)` or `(clear-screen)`: Clear the screen
 >
 
 ## Start out with the Scheme programming language
 
-An essential primer on the Scheme language will be included in the future. For now, you can refer to the [Scheme documentation](https://docs.scheme.org/). If you find the amount of material intimiting or you struggle finding the entry point of an effective and straightforward introduction, reach for [this Scheme Primer] instead.
+An essential primer on the Scheme language will be included in the future. For now, you can refer to the [Scheme documentation](https://docs.scheme.org/). If you find the amount of material intimiting or you struggle finding the entry point of an effective and straightforward introduction, reach for [this Scheme Primer](https://spritely.institute/static/papers/scheme-primer.html) instead.
 
 You will soon discover you cannot run all the Scheme code out there on Schemius because of its early development stage. Do not hesitate contacting me or opening an issue if you think some feature should be implemented soon rather the later, or if you evaluate some expression and obtain an unexpected outcome.
 
