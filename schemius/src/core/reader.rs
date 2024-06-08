@@ -4,19 +4,22 @@ use regex::Regex;
 
 use super::{accessor::Accessor, s_expression::*};
 
+lazy_static! {
+    static ref TOKEN_REGEX: Regex =
+        Regex::new(r#"^\s*(,@|#\\\.|[\[('`,)\]]|#\(|"(?:\.|[^"])*"|;.*|[^\s\[('"`,;)\]]*)(.*)"#)
+            .unwrap();
+}
+
+lazy_static! {
+    static ref COMPLEX_POLAR_REGEX: Regex = Regex::new(r"^\d+(\.\d+)?@\d+(\.\d+)?$").unwrap();
+}
+
 pub fn read(line: &mut String) -> SExpr {
     let first_token = init(line);
     advance(line, &first_token)
 }
 
 fn init(line: &mut String) -> String {
-    lazy_static! {
-        static ref TOKEN_REGEX: Regex = Regex::new(
-            r#"^\s*(,@|#\\\.|[\[('`,)\]]|#\(|"(?:\.|[^"])*"|;.*|[^\s\[('"`,;)\]]*)(.*)"#
-        )
-        .unwrap();
-    }
-
     let current_line: String = line.clone();
 
     match TOKEN_REGEX.captures(&current_line) {
@@ -184,7 +187,13 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
                             Ok(q) => SExpr::Number(SNumber::Rational(q)),
                             _ => match token.parse::<NativeFloat>() {
                                 Ok(f) => SExpr::Number(SNumber::Float(f)),
-                                _ => SExpr::Symbol(token.to_string()),
+                                _ => match token.parse::<NativeComplex>() {
+                                    Ok(c) => SExpr::Number(SNumber::Complex(c)),
+                                    _ => match COMPLEX_POLAR_REGEX.captures(token) {
+                                        Some(_) => parse_polar_complex(token),
+                                        None => SExpr::Symbol(token.to_string()),
+                                    },
+                                },
                             },
                         },
                     },
@@ -192,4 +201,12 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
             }
         }
     }
+}
+
+fn parse_polar_complex(token: &str) -> SExpr {
+    let parts: Vec<&str> = token.split('@').collect();
+    let magnitude = parts[0].parse::<NativeFloat>().unwrap();
+    let angle = parts[1].parse::<NativeFloat>().unwrap();
+
+    SExpr::Number(SNumber::Complex(NativeComplex::from_polar(magnitude, angle)))
 }

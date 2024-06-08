@@ -200,6 +200,20 @@ fn interpreter_number_comparison() {
 }
 
 #[test]
+fn interpreter_number_is_zero() {
+    integration_subtest_eval_to! {
+        { expression: "(zero? 0)", expected: "#t"};
+        { expression: "(zero? 0.0)", expected: "#t"};
+        { expression: "(zero? 0.0+0i)", expected: "#t"};
+        { expression: "(zero? 0.0+0.0i)", expected: "#t"};
+        { expression: "(zero? 0/1)", expected: "#t"};
+        { expression: "(zero? 1)", expected: "#f"};
+        { expression: "(zero? .000001)", expected: "#f"};
+        { expression: "(zero? 1/1000000000)", expected: "#f"};
+    }
+}
+
+#[test]
 fn interpreter_prefixed_numbers() {
     integration_subtest_eval_to! {
         // integers, binary representation

@@ -134,6 +134,7 @@ impl Default for Environment {
             "apply" => APPLY
             "car" => CAR
             "cdr" => CDR
+            "complex?" => IS_COMPLEX
             "cons" => CONS
             "list" => LIST
             "set-car!" => SET_CAR
@@ -165,6 +166,7 @@ impl Default for Environment {
             "string-downcase" => STRING_DOWNCASE
             "flatten" => FLATTEN
             "unflatten" => UNFLATTEN
+            "zero?" => IS_ZERO
         });
         bind_special_forms!(new_env,
         {

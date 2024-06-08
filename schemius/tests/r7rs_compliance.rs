@@ -166,11 +166,11 @@ fn interpreter_r7rs_string() {
 #[test]
 fn interpreter_r7rs_numbers_is() {
     integration_subtest_eval_to! {
-        // { expression: "(complex? 3+4i)", expected: "#t" };
-        // { expression: "(complex? 3)", expected: "#t" };
+        { expression: "(complex? 3+4i)", expected: "#t" };
+        { expression: "(complex? 3)", expected: "#t" };
         { expression: "(real? 3)", expected: "#t" };
-        // { expression: "(real? -2.5+0i)", expected: "#t" };
-        // { expression: "(real? -2.5+0.0i) ", expected: "#f" };
+        { expression: "(real? -2.5+0i)", expected: "#t" };
+        // { expression: "(real? -2.5+0.0i) ", expected: "#f" }; // CHECK: Is this nonsense?
         { expression: "(real? #e1e10)", expected: "#t" };
         { expression: "(real? +inf.0)", expected: "#t" };
         { expression: "(real? +nan.0)", expected: "#t" };
@@ -178,7 +178,7 @@ fn interpreter_r7rs_numbers_is() {
         { expression: "(rational? 3.5)", expected: "#t" };
         { expression: "(rational? 6/10)", expected: "#t" };
         { expression: "(rational? 6/3)", expected: "#t" };
-        // { expression: "(integer? 3+0i)", expected: "#t" };
+        { expression: "(integer? 3+0i)", expected: "#t" };
         { expression: "(integer? 3.0)", expected: "#t" };
         { expression: "(integer? 8/4)", expected: "#t" };
         { expression: "(exact? 3.0)", expected: "#f" };

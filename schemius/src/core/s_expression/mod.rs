@@ -204,6 +204,32 @@ impl SExpr {
         }
     }
 
+    pub fn is_complex(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_complex() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
+    pub fn is_zero(&self) -> Result<bool, String> {
+        match self {
+            SExpr::Number(n) => {
+                if n.is_zero() {
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
     pub fn is_nan(&self) -> Result<bool, String> {
         match self {
             SExpr::Number(n) => {
