@@ -11,7 +11,8 @@ lazy_static! {
 }
 
 lazy_static! {
-    static ref COMPLEX_POLAR_REGEX: Regex = Regex::new(r"^\d+(\.\d+)?@\d+(\.\d+)?$").unwrap();
+    static ref COMPLEX_POLAR_REGEX: Regex =
+        Regex::new(r"^(\d+(\.\d+)?(/?\d*(\.\d+)?)?)@(\d+(\.\d+)?(/?\d*(\.\d+)?)?)$").unwrap();
 }
 
 pub fn read(line: &mut String) -> SExpr {
@@ -204,9 +205,17 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
 }
 
 fn parse_polar_complex(token: &str) -> SExpr {
-    let parts: Vec<&str> = token.split('@').collect();
-    let magnitude = parts[0].parse::<NativeFloat>().unwrap();
-    let angle = parts[1].parse::<NativeFloat>().unwrap();
+    let parts: Vec<NativeFloat> = token
+        .split('@')
+        .into_iter()
+        .map(|x| match x.parse::<NativeRational>() {
+            Ok(n) => n.to_float().unwrap(),
+            _ => x.parse::<NativeFloat>().unwrap(),
+        })
+        .collect();
+
+    let magnitude = parts[0];
+    let angle = parts[1];
 
     SExpr::Number(SNumber::Complex(NativeComplex::from_polar(magnitude, angle)))
 }
