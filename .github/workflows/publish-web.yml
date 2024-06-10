@@ -10,7 +10,9 @@ on:
     branches:
       - main
 
-  # pull_request:
+  pull_request:
+    types: [closed]
+
   push:
     branches:
       - main
@@ -34,9 +36,9 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       github.event_name == 'push' ||
-      github.event_name == 'pull_request' ||
       github.event_name == 'dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+      github.event.workflow_run.conclusion == 'success' ||
+      github.event.pull_request.merged == true
 
     steps:
       - name: Checkout
