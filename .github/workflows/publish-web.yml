@@ -57,7 +57,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts'
+          node-version: 'lts/Iron'
 
       - name: Generate final web page
         run: |
