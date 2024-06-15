@@ -21,7 +21,7 @@ updates:
     assignees:
       - 'cowuake'
 
-  - package-ecosystem: 'node'
+  - package-ecosystem: 'npm'
     directory: './schemius-web'
     schedule:
       interval: 'daily'
@@ -35,9 +35,9 @@ updates:
           - 'patch'
     target-branch: 'main'
     commit-message:
-      prefix: 'Update Node.js deps'
+      prefix: 'Update NPM deps'
     labels:
-      - 'node'
+      - 'npm'
       - 'dependencies'
     assignees:
       - 'cowuake'
