@@ -1,0 +1,28 @@
+{
+  "name": "schemius-web",
+  "version": "0.0.1",
+  "description": "Simple web client for the Schemius interpreter",
+  "main": "schemius.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cowuake/schemius.git"
+  },
+  "keywords": [
+    "scheme",
+    "r7rs",
+    "repl"
+  ],
+  "author": "Riccardo Mura",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/cowuake/schemius/issues"
+  },
+  "homepage": "https://github.com/cowuake/schemius#readme",
+  "dependencies": {
+    "jquery": "^3.7.1",
+    "jquery.terminal": "^2.42.0"
+  }
+}

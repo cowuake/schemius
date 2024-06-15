@@ -54,8 +54,14 @@ jobs:
           wasm-pack build --release --target web
         working-directory: ${{ env.WORK_DIR }}
 
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts'
+
       - name: Generate final web page
         run: |
+          npm ci
           cp $WEB_PAGE_SOURCE $WEB_PAGE
           sed -i "s/DATETIME_PLACEHOLDER/$(date -u '+Published %F %H:%M:%S UTC')/g" $WEB_PAGE_JS
 
@@ -69,6 +75,7 @@ jobs:
             ${{ env.WORK_DIR }}/${{ env.WEB_PAGE }}
             ${{ env.WORK_DIR }}/${{ env.WEB_PAGE_JS }}
             ${{ env.WORK_DIR }}/pkg
+            ${{ env.WORK_DIR }}/node_modules
           if-no-files-found: error
 
   deploy:
