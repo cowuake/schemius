@@ -1,5 +1,3 @@
-use core::borrow;
-
 use super::{
     eval,
     s_list::SList,

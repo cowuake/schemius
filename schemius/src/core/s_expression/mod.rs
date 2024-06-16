@@ -132,6 +132,13 @@ impl SExpr {
         }
     }
 
+    pub fn is_quote(&self) -> Result<bool, String> {
+        Ok(self.symbol_is("'").unwrap()
+            || self.symbol_is("quote").unwrap()
+            || self.symbol_is("`").unwrap()
+            || self.symbol_is("quasiquote").unwrap())
+    }
+
     pub fn is_string(&self) -> Result<bool, String> {
         match self {
             SExpr::String(_) => Ok(true),

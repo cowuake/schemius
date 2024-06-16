@@ -131,10 +131,23 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         let mut expanded_args = vec![];
 
                                         for arg in args.iter() {
-                                            match eval(arg, current_env.clone()) {
-                                                Ok(res) => expanded_args.push(res),
-                                                Err(e) => return Err(e),
+                                            match arg {
+                                                SExpr::List(list)
+                                                    if list
+                                                        .borrow()
+                                                        .s_car()
+                                                        .unwrap()
+                                                        .is_quote()
+                                                        .unwrap() =>
+                                                {
+                                                    expanded_args.push(arg.clone())
+                                                }
+                                                _ => match eval(arg, current_env.clone()) {
+                                                    Ok(res) => expanded_args.push(res),
+                                                    Err(e) => return Err(e),
+                                                },
                                             }
+                                            /////////////////////////////
                                         }
 
                                         let lambda_env =
