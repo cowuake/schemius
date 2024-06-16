@@ -147,7 +147,6 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                                     Err(e) => return Err(e),
                                                 },
                                             }
-                                            /////////////////////////////
                                         }
 
                                         let lambda_env =
