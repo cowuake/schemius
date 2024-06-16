@@ -55,6 +55,7 @@ impl Primitive {
     pub const IS_VECTOR: ProcedureSignature = r_is_vector;
     pub const IS_ZERO: ProcedureSignature = r_is_zero;
     pub const ENVIRONMENT_BINDINGS: ProcedureSignature = r_environment_bindings;
+    pub const REVERSE: ProcedureSignature = r_reverse;
     pub const MAKE_STRING: ProcedureSignature = r_make_string;
     pub const STRING: ProcedureSignature = r_string;
     pub const STRING_APPEND: ProcedureSignature = r_string_append;

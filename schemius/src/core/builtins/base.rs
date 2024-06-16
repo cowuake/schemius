@@ -1,12 +1,13 @@
 use super::{
     eval,
+    s_list::SList,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     Accessor, SExpr, SchemeEnvironment, SchemeList,
 };
 
 pub fn r_apply(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 2 {
-        return Err(format!("Exception in apply: expected 2 arguments, found {}", args.len()));
+    if args.s_len() != 2 {
+        return Err(format!("Exception in apply: expected 2 arguments, found {}", args.s_len()));
     }
 
     let symbol = &args[0];
@@ -28,16 +29,16 @@ pub fn r_apply(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_eval(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 1 {
-        return Err(format!("Exception in eval: expected 1 argument, found {}", args.len()));
+    if args.s_len() != 1 {
+        return Err(format!("Exception in eval: expected 1 argument, found {}", args.s_len()));
     }
 
     eval(&args[0], env.clone())
 }
 
 pub fn r_display(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 1 {
-        return Err(format!("Exception in display: expected 1 argument, found {}", args.len()));
+    if args.s_len() != 1 {
+        return Err(format!("Exception in display: expected 1 argument, found {}", args.s_len()));
     }
 
     match eval(&args[0], env.clone()) {

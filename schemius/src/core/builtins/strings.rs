@@ -1,4 +1,5 @@
 use super::{
+    s_list::SList,
     s_number::NativeInt,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     Accessor, SExpr, SchemeNumber, SchemeString,
@@ -9,10 +10,11 @@ pub fn r_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err("Exception in string: one or more arguments are not characters".to_string());
     }
 
-    match args.len() {
-        0 => {
-            Err(format!("Exception in string: expected at least 1 argument, found {}", args.len()))
-        }
+    match args.s_len() {
+        0 => Err(format!(
+            "Exception in string: expected at least 1 argument, found {}",
+            args.s_len()
+        )),
         1 => Ok(SExpr::String(SchemeString::new(args[0].to_string()))),
         2.. => {
             let mut output = String::new();
@@ -25,10 +27,11 @@ pub fn r_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_make_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 1 && args.len() != 2 {
+    let length = args.s_len();
+    if length != 1 && length != 2 {
         return Err(format!(
             "Exception in make-string: expected 1 or 2 arguments, found {}",
-            args.len()
+            length
         ));
     }
 
@@ -36,7 +39,7 @@ pub fn r_make_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         SExpr::Number(n) => {
             let n = n.to_int().unwrap();
             let mut output = String::new();
-            let character = if args.len() == 2 {
+            let character = if length == 2 {
                 match &args[1] {
                     SExpr::Char(c) => *c,
                     other => {
@@ -71,8 +74,9 @@ pub fn r_string_append(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
 }
 
 pub fn r_string_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 2 {
-        return Err(format!("Exception in string-ref: expected 2 arguments, found {}", args.len()));
+    let length = args.s_len();
+    if length != 2 {
+        return Err(format!("Exception in string-ref: expected 2 arguments, found {}", length));
     }
 
     match &args[0] {
@@ -95,7 +99,8 @@ pub fn r_string_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 3 {
+    let length = args.s_len();
+    if length != 3 {
         return Err(format!(
             "Exception in string-set!: expected 3 arguments, found {}",
             args.len()
@@ -132,11 +137,9 @@ pub fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_string_upcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 1 {
-        return Err(format!(
-            "Exception in string-upcase: expected 1 argument, found {}",
-            args.len()
-        ));
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in string-upcase: expected 1 argument, found {}", length));
     }
 
     match &args[0] {
@@ -149,11 +152,9 @@ pub fn r_string_upcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
 }
 
 pub fn r_string_downcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 1 {
-        return Err(format!(
-            "Exception in string-downcase: expected 1 argument, found {}",
-            args.len()
-        ));
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in string-downcase: expected 1 argument, found {}", length));
     }
 
     match &args[0] {
@@ -166,11 +167,9 @@ pub fn r_string_downcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutpu
 }
 
 pub fn r_string_length(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    if args.len() != 1 {
-        return Err(format!(
-            "Exception in string-length: expected 1 argument, found {}",
-            args.len()
-        ));
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in string-length: expected 1 argument, found {}", length));
     }
 
     match &args[0] {

@@ -47,7 +47,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                 }
             }
             SExpr::List(list) => {
-                if list.borrow().len() > 0 {
+                if list.borrow().s_len() > 0 {
                     let first = eval(&list.borrow()[0], current_env.clone());
                     match first {
                         Ok(res) => match res {
@@ -124,7 +124,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         ref body,
                                         ref closure_env,
                                     ) => {
-                                        if arg_names.len() != args.len() {
+                                        if arg_names.s_len() != args.s_len() {
                                             return Err(String::from("Exception: found different lengths for arguments and their names"));
                                         }
 
