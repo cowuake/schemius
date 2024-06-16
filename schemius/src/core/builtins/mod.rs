@@ -1,18 +1,18 @@
 use super::{accessor::*, environment::*, evaluator::*, s_expression::*};
 
-mod base;
-mod booleans;
-mod lists;
-mod numbers;
+mod base_procs;
+mod boolean_procs;
+mod list_procs;
+mod number_procs;
 mod special_forms;
-mod strings;
+mod string_procs;
 
-use base::*;
-use booleans::*;
-use lists::*;
-use numbers::*;
+use base_procs::*;
+use boolean_procs::*;
+use list_procs::*;
+use number_procs::*;
 use special_forms::*;
-use strings::*;
+use string_procs::*;
 
 pub struct Primitive;
 pub struct SpecialForm;
