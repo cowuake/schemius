@@ -352,7 +352,7 @@ fn interpreter_sexpr_null() {
 }
 
 #[test]
-fn interpreter_r7rs_pair_list_procedures() {
+fn interpreter_pair_list_procedures() {
     integration_subtest_eval_to! {
         { expression: "(car '(1 2 3))", expected: "1" };
         { expression: "(cdr '(1 2 3))", expected: "(2 3)" };
@@ -360,6 +360,20 @@ fn interpreter_r7rs_pair_list_procedures() {
         { expression: "(caar '((1 2) 3 4))", expected: "1" };
         { expression: "(cdar '((1 2) 3 4))", expected: "(2)" };
         { expression: "(cddar '((1 2) 3 4))", expected: "()" };
+        { expression: "(let ((lst '(a b c))) (car lst))", expected: "a"};
+        { expression: "(let ((lst '((a) b c d))) (car lst))", expected: "(a)"};
+        { expression: "(let ((lst '(1 . 2))) (car lst))", expected: "1"};
+        { expression: "(let ((lst '((a) b c d))) (cdr lst))", expected: "(b c d)"};
+        { expression: "(let ((lst '(1 . 2))) (cdr lst))", expected: "2"};
+        { expression: "(begin (define lst '(a b c)) (car lst))", expected: "a"};
+        { expression: "(begin (define lst '((a) b c d)) (car lst))", expected: "(a)"};
+        { expression: "(begin (define lst '(1 . 2)) (car lst))", expected: "1"};
+        { expression: "(begin (define lst '((a) b c d)) (cdr lst))", expected: "(b c d)"};
+        { expression: "(begin (define lst '(1 . 2)) (cdr lst))", expected: "2"};
+        { expression: "((lambda () (define lst '((1 2) (3 4))) (car lst)))", expected: "(1 2)"};
+        { expression: "((lambda () (define lst '((1 2) (3 4))) (cdr lst)))", expected: "(3 4)"};
+        { expression: "((lambda () (define lst '((1 2) (3 4))) (caar lst)))", expected: "1"};
+        { expression: "((lambda () (define lst '((1 2) (3 4))) (cadr lst)))", expected: "3"};
     }
 
     integration_subtest_is_err! {
