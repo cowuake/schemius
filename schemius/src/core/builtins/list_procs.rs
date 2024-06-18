@@ -142,13 +142,13 @@ pub fn r_cdr(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
     }
 }
 
-pub fn r_reverse(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+pub fn r_reverse(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     let length = args.s_len();
     if length != 1 {
         return Err(format!("Exception in #<reverse>: expected 1 argument, found {}", length));
     }
 
-    match eval(&args[0], env.clone())? {
+    match &args[0] {
         SExpr::List(list) => {
             let reversed = list.borrow().s_reverse();
             Ok(SExpr::List(SchemeList::new(reversed)))
