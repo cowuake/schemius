@@ -200,3 +200,21 @@ fn interpreter_r7rs_numbers_is() {
         // { expression: "(nan? 1+2i) ", expected: "#f" };
     }
 }
+
+#[test]
+fn interpreter_r7rs_pair_list_procedures() {
+    integration_subtest_eval_to! {
+        { expression: "(car '(a b c))", expected: "a"};
+        { expression: "(car '((a) b c d))", expected: "(a)"};
+        { expression: "(car '(1 . 2))", expected: "1"};
+        { expression: "(cdr '((a) b c d))", expected: "(b c d)"};
+        { expression: "(cdr '(1 . 2))", expected: "2"};
+        { expression: "(reverse '(a b c))", expected: "(c b a)"};
+        { expression: "(reverse '(a (b c) d (e (f))))", expected: "((e (f)) d (b c) a)" };
+    }
+
+    integration_subtest_is_err! {
+        expression: "(car '())";
+        expression: "(cdr '())";
+    }
+}

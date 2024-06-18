@@ -352,6 +352,24 @@ fn interpreter_sexpr_null() {
 }
 
 #[test]
+fn interpreter_r7rs_pair_list_procedures() {
+    integration_subtest_eval_to! {
+        { expression: "(car '(1 2 3))", expected: "1" };
+        { expression: "(cdr '(1 2 3))", expected: "(2 3)" };
+        { expression: "(cadr '(1 2 3))", expected: "2" };
+        { expression: "(caar '((1 2) 3 4))", expected: "1" };
+        { expression: "(cdar '((1 2) 3 4))", expected: "(2)" };
+        { expression: "(cddar '((1 2) 3 4))", expected: "()" };
+    }
+
+    integration_subtest_is_err! {
+        expression: "(caaar '((1 2) 3 4))";
+        expression: "(caadr '((1 2) 3 4))";
+        expression: "(cdaar '((1 2) 3 4))";
+    }
+}
+
+#[test]
 fn interpreter_strings() {
     integration_subtest_eval_to! {
         { expression: r#"(string #\h #\e #\l #\l #\o)"#, expected: r#""hello""# };

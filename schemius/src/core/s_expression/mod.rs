@@ -1,10 +1,11 @@
+pub mod s_list;
 pub mod s_number;
 pub mod s_procedure;
 
 use super::accessor::*;
 use std::{fmt, result};
 
-pub use self::{s_number::*, s_procedure::*};
+pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
 
 pub type SchemeBoolean = bool;
@@ -129,6 +130,13 @@ impl SExpr {
             SExpr::Symbol(_) => Ok(true),
             _ => Ok(false),
         }
+    }
+
+    pub fn is_quote(&self) -> Result<bool, String> {
+        Ok(self.symbol_is("'").unwrap()
+            || self.symbol_is("quote").unwrap()
+            || self.symbol_is("`").unwrap()
+            || self.symbol_is("quasiquote").unwrap())
     }
 
     pub fn is_string(&self) -> Result<bool, String> {
@@ -338,7 +346,7 @@ impl SExpr {
                 pairs
                     .iter()
                     .map(|(left, right)| {
-                        if *left == 0 && *right == list.len() - 1 {
+                        if *left == 0 && *right == list.s_len() - 1 {
                             (left, right, 0)
                         } else {
                             (

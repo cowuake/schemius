@@ -2,6 +2,7 @@ use std::time::Instant;
 
 use super::{
     eval, r_eval,
+    s_list::SList,
     s_procedure::{Procedure, ProcedureArgs, ProcedureEnv, ProcedureOutput, SpecialFormOutput},
     Accessor, Environment, SExpr, SchemeEnvironment, SchemeList,
 };
@@ -20,10 +21,11 @@ fn list_args(list: &[SExpr]) -> Result<Vec<String>, String> {
 }
 
 pub fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() < 2 {
+    let length = args.s_len();
+    if length < 2 {
         return Err(format!(
             "Exception in lambda: expected at least 2 arguments, found {}",
-            args.len()
+            length
         ));
     }
 
@@ -41,7 +43,7 @@ pub fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
 pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     // TODO: Improve this mess!
-    match args.len() {
+    match args.s_len() {
         1 => Ok(SExpr::Ok),
         2.. => match &args[0] {
             SExpr::Symbol(name) => match eval(&args[1], env.clone()) {
@@ -59,7 +61,7 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 Err(e) => Err(e),
             },
             SExpr::List(list) => {
-                if list.borrow().len() == 0 {
+                if list.borrow().s_len() == 0 {
                     return Err(String::from("Exception (TODO?): deal with empty lists"));
                 }
 
@@ -67,7 +69,7 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 let mut lambda_args: Vec<SExpr> = vec![];
                 let lambda_body = &mut args[1..].to_vec();
 
-                if list.borrow().len() > 1 {
+                if list.borrow().s_len() > 1 {
                     for arg in &list.borrow()[1..] {
                         lambda_args.push(arg.clone());
                     }
@@ -95,8 +97,9 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 pub fn r_set(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() != 2 {
-        return Err(format!("Exception in set!: expected 2 arguments, found {}", args.len()));
+    let length = args.s_len();
+    if length != 2 {
+        return Err(format!("Exception in set!: expected 2 arguments, found {}", length));
     }
 
     match &args[0] {
@@ -119,10 +122,11 @@ pub fn r_set(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 pub fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() < 2 {
+    let length = args.s_len();
+    if length < 2 {
         return Err(format!(
             "Exception in let: expected at least 2 arguments, found {}",
-            args.len()
+            args.s_len()
         ));
     }
 
@@ -168,11 +172,9 @@ pub fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 pub fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() < 2 {
-        return Err(format!(
-            "Exception in let: expected at least 2 arguments, found {}",
-            args.len()
-        ));
+    let length = args.s_len();
+    if length < 2 {
+        return Err(format!("Exception in let: expected at least 2 arguments, found {}", length));
     }
 
     let mut inner_env = env;
@@ -219,16 +221,14 @@ pub fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 pub fn r_if(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() != 2 && args.len() != 3 {
-        return Err(format!(
-            "Exception in if: expected two or three arguments, found {}",
-            args.len()
-        ));
+    let length = args.s_len();
+    if length != 2 && length != 3 {
+        return Err(format!("Exception in if: expected two or three arguments, found {}", length));
     }
 
     match eval(&args[0], env.clone()) {
         Ok(condition) => match condition {
-            SExpr::Boolean(false) => match args.len() {
+            SExpr::Boolean(false) => match length {
                 2 => Ok(SExpr::Ok),
                 3 => Ok(args[2].clone()),
                 _ => Err(String::from("Exception: wrong number of arguments for if")),
@@ -240,8 +240,9 @@ pub fn r_if(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 pub fn r_not(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() != 1 {
-        return Err(format!("Exception in not: expected one argument, found {}", args.len()));
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in not: expected one argument, found {}", length));
     }
 
     match eval(&args[0], env.clone()) {
@@ -257,7 +258,7 @@ pub fn r_begin(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.is_empty() {
         return Err(format!(
             "Exception in begin: expected at least 1 argument, found {}",
-            args.len()
+            args.s_len()
         ));
     }
 
@@ -274,16 +275,18 @@ pub fn r_begin(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 }
 
 pub fn r_quote(args: ProcedureArgs, _: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() != 1 {
-        return Err(format!("Exception in ': expected 1 argument, found {}", args.len()));
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in ': expected 1 argument, found {}", length));
     }
 
     Ok(args[0].clone())
 }
 
 pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
-    if args.len() != 1 {
-        return Err(format!("Exception in `: expected 1 argument, found {}", args.len()));
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in `: expected 1 argument, found {}", length));
     }
 
     match &args[0] {
@@ -373,7 +376,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                         borrowed_list[(lparen_idx + 1)..rparen_idx].to_vec();
 
                                     // The expression... Must be a non-self-evaluating one!
-                                    if raw_expr.len() == 1 {
+                                    if raw_expr.s_len() == 1 {
                                         let suspect = raw_expr.first().unwrap();
                                         let mut incriminated = false;
 
@@ -423,13 +426,13 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                     Ok(ref res) => match res {
                                         SExpr::List(internal) => {
                                             let borrowed_internal = internal.borrow();
-                                            offset -= (borrowed_internal.len() - 1) as i32;
+                                            offset -= (borrowed_internal.s_len() - 1) as i32;
 
                                             for i in (first_idx..last_idx).rev() {
                                                 borrowed_list.remove(i);
                                             }
 
-                                            for i in (0..internal.borrow().len()).rev() {
+                                            for i in (0..internal.borrow().s_len()).rev() {
                                                 borrowed_list.splice(
                                                     first_idx..first_idx,
                                                     [borrowed_internal[i].clone()],
@@ -465,22 +468,23 @@ pub fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     if args.is_empty() {
         return Err(format!(
             "Exception in cond: expected at least 1 argument, found {}",
-            args.len()
+            args.s_len()
         ));
     }
 
-    let have_else_clause = args.len() > 3
-        && match &args[args.len() - 2] {
+    let length = args.s_len();
+    let have_else_clause = length > 3
+        && match &args[length - 2] {
             SExpr::Symbol(clause) => *clause == "else",
             _ => false,
         };
 
-    let iterator = if have_else_clause { &args[0..args.len() - 2] } else { &args };
+    let iterator = if have_else_clause { &args[0..length - 2] } else { &args };
 
     for block in iterator {
         match block {
             SExpr::List(list) => {
-                if list.borrow().len() != 2 {
+                if list.borrow().s_len() != 2 {
                     return Err(String::from(
                         "Exception: malformed args provided to #<procedure cond>",
                     ));
@@ -525,7 +529,7 @@ pub fn r_time(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_and(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
-    let n_args = args.len();
+    let n_args = args.s_len();
     if n_args == 0 {
         return Ok(SExpr::Boolean(true));
     }
@@ -546,7 +550,7 @@ pub fn r_and(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_or(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
-    let n_args = args.len();
+    let n_args = args.s_len();
     if n_args == 0 {
         return Ok(SExpr::Boolean(true));
     }
