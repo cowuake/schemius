@@ -149,6 +149,7 @@ fn interpreter_binding() {
     }
 }
 
+#[ignore]
 #[test]
 fn interpreter_flattening_unflattening() {
     integration_subtest_eval_to! {

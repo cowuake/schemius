@@ -165,8 +165,8 @@ impl Default for Environment {
             "string-set!" => STRING_SET
             "string-upcase" => STRING_UPCASE
             "string-downcase" => STRING_DOWNCASE
-            "flatten" => FLATTEN
-            "unflatten" => UNFLATTEN
+            // "flatten" => FLATTEN
+            // "unflatten" => UNFLATTEN
             "zero?" => IS_ZERO
         });
         bind_special_forms!(new_env,
