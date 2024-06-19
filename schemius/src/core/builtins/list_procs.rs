@@ -93,13 +93,13 @@ pub fn r_unflatten(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     args[0].unflatten()
 }
 
-pub fn r_car(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+pub fn r_car(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     let length = args.s_len();
     if length != 1 {
         return Err(format!("Exception in car: expected 1 argument, found {}", length));
     }
 
-    match eval(&args[0], env.clone())? {
+    match &args[0] {
         SExpr::Pair(pair) => {
             let car = pair.borrow().0.clone();
             Ok(*car)
@@ -116,12 +116,12 @@ pub fn r_car(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
     }
 }
 
-pub fn r_cdr(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+pub fn r_cdr(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     if args.s_len() != 1 {
         return Err(String::from("Exception: #<special-form cdr> can take one only argument"));
     }
 
-    match eval(&args[0], env.clone())? {
+    match &args[0] {
         SExpr::Pair(pair) => {
             let cdr = pair.borrow().1.clone();
             Ok(*cdr)
@@ -131,6 +131,7 @@ pub fn r_cdr(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
             match list.s_len() {
                 1.. => {
                     let cdr = list.s_cdr().map(|x| x.clone()).collect();
+
                     Ok(SExpr::List(SchemeList::new(cdr)))
                 }
                 _ => {
