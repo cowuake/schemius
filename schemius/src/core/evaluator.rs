@@ -82,8 +82,6 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                     Procedure::Primitive(primitive) => {
                                         if primitive == Primitive::CONS
                                             || primitive == Primitive::DISPLAY
-                                            || primitive == Primitive::CAR
-                                            || primitive == Primitive::CDR
                                             || primitive == Primitive::SET_CAR
                                             || primitive == Primitive::FLATTEN
                                         {
