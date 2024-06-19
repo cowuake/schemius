@@ -83,6 +83,24 @@ impl SExpr {
         }
     }
 
+    pub fn quote(&self) -> Result<SExpr, String> {
+        Ok(SExpr::List(SchemeList::new(vec![SExpr::Symbol("quote".to_string()), self.clone()])))
+    }
+
+    pub fn unquote(&self) -> Result<SExpr, String> {
+        match self {
+            SExpr::List(list) => {
+                let borrowed_list = list.borrow();
+                if borrowed_list.first().unwrap().is_quote().unwrap() {
+                    Ok(borrowed_list[1].clone())
+                } else {
+                    Err(format!("Exception: {} is not a quoted expression", self))
+                }
+            }
+            _ => Err(format!("Exception: {} is not a list", self)),
+        }
+    }
+
     pub fn symbol_is(&self, repr: &str) -> Result<bool, String> {
         match self {
             SExpr::Symbol(val) => {

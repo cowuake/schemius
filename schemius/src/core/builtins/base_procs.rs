@@ -5,35 +5,30 @@ use super::{
     Accessor, SExpr, SchemeEnvironment, SchemeList,
 };
 
-pub fn r_apply(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+pub fn r_apply(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     if args.s_len() != 2 {
         return Err(format!("Exception in apply: expected 2 arguments, found {}", args.s_len()));
     }
 
-    let symbol = &args[0];
-    let arg_list = &args[1];
+    let proc = &args[0];
+    let args = &args[1];
+    let mut to_be_evaluated = vec![];
+    to_be_evaluated.push(proc.clone());
 
-    match eval(arg_list, env.clone()) {
-        Ok(list) => match list {
-            SExpr::List(args) => {
-                let iterator = [symbol.clone()];
-                let mut args = args.borrow().clone();
-                args.splice(0..0, iterator);
-
-                Ok(SExpr::List(SchemeList::new(args.clone())))
-            }
-            _ => Err(String::from("Exception in apply: must provide a quoted list of arguments")),
-        },
-        Err(e) => Err(e),
+    match args {
+        SExpr::List(list) => list.borrow().iter().for_each(|arg| to_be_evaluated.push(arg.clone())),
+        other => return Err(format!("Exception in #<apply>: {} is not a list", other)),
     }
+
+    Ok(SExpr::List(SchemeList::new(to_be_evaluated)))
 }
 
-pub fn r_eval(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+pub fn r_eval(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     if args.s_len() != 1 {
         return Err(format!("Exception in eval: expected 1 argument, found {}", args.s_len()));
     }
 
-    eval(&args[0], env.clone())
+    Ok(args[0].clone())
 }
 
 pub fn r_display(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
