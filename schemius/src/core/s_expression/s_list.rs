@@ -1,7 +1,9 @@
 pub trait SList<T>
 where
     T: Clone,
+    Self: Sized,
 {
+    fn s_append(lists: &[Self]) -> Self;
     fn s_car(&self) -> Option<&T>;
     fn s_cdr(&self) -> Box<dyn Iterator<Item = &T> + '_>;
     fn s_len(&self) -> usize;
@@ -12,6 +14,10 @@ impl<T> SList<T> for Vec<T>
 where
     T: Clone,
 {
+    fn s_append(lists: &[Self]) -> Self {
+        lists.iter().flat_map(|list| list.iter().cloned()).collect()
+    }
+
     fn s_car(&self) -> Option<&T> {
         self.first()
     }
@@ -32,6 +38,16 @@ where
 #[cfg(test)]
 pub mod tests_slist_vector {
     use super::*;
+
+    #[test]
+    fn test_slist_vector_append() {
+        let list1 = vec![1, 2, 3];
+        let list2 = vec![4, 5, 6];
+        let list3 = vec![7, 8, 9];
+        let lists = &[list1, list2, list3];
+        let appended = SList::s_append(lists);
+        assert_eq!(appended, vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    }
 
     #[test]
     fn test_slist_vector_car() {

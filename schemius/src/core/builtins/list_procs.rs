@@ -2,7 +2,7 @@ use super::{
     s_list::SList,
     s_number::{NativeInt, SNumber},
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
-    Accessor, SExpr, SchemeList, SchemePair,
+    Accessor, ListImplementation, SExpr, SchemeList, SchemePair,
 };
 
 pub fn r_set_car(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
@@ -136,6 +136,31 @@ pub fn r_cdr(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         }
         _ => Err(String::from("Exception: #<procedure cdr> cannot be applied to quoted symbol")),
     }
+}
+
+pub fn r_append(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
+    let length = args.s_len();
+    if length < 1 {
+        return Err(format!(
+            "Exception in #<append>: expected at least 1 arguments, found {}",
+            length
+        ));
+    }
+
+    if length == 1 {
+        return Ok(args[0].clone());
+    }
+
+    for arg in args[0..args.s_len() - 1].iter() {
+        if !arg.is_list().unwrap() {
+            return Err(format!("Exception in #<append>: expected a list, found {}", arg));
+        }
+    }
+
+    let new_list = ListImplementation::s_append(
+        args.iter().map(|x| x.as_list().unwrap()).collect::<Vec<_>>().as_slice(),
+    );
+    Ok(SExpr::List(SchemeList::new(new_list)))
 }
 
 pub fn r_reverse(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
