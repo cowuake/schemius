@@ -209,6 +209,9 @@ fn interpreter_r7rs_pair_list_procedures() {
         { expression: "(car '(1 . 2))", expected: "1"};
         { expression: "(cdr '((a) b c d))", expected: "(b c d)"};
         { expression: "(cdr '(1 . 2))", expected: "2"};
+        { expression: "(length '(a b c))", expected: "3" };
+        { expression: "(length '(a (b) (c d e)))", expected: "3" };
+        { expression: "(length '())", expected: "0" };
         { expression: "(reverse '(a b c))", expected: "(c b a)"};
         { expression: "(reverse '(a (b c) d (e (f))))", expected: "((e (f)) d (b c) a)" };
     }
