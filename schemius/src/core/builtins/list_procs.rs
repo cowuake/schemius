@@ -1,5 +1,6 @@
 use super::{
     s_list::SList,
+    s_number::{NativeInt, SNumber},
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     Accessor, SExpr, SchemeList, SchemePair,
 };
@@ -149,5 +150,20 @@ pub fn r_reverse(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
             Ok(SExpr::List(SchemeList::new(reversed)))
         }
         _ => Err(String::from("Exception in #<reverse>: expected a list")),
+    }
+}
+
+pub fn r_length(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in #<length>: expected 1 argument, found {}", length));
+    }
+
+    match args.s_car().unwrap() {
+        SExpr::List(list) => {
+            let len = list.borrow().s_len();
+            Ok(SExpr::Number(SNumber::Int(NativeInt::from(len as NativeInt))))
+        }
+        _ => Err(String::from("Exception in #<length>: expected a list")),
     }
 }
