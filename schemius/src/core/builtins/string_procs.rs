@@ -19,7 +19,7 @@ pub fn r_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         2.. => {
             let mut output = String::new();
             for arg in args {
-                output.push(arg.to_char().unwrap());
+                output.push(arg.as_char().unwrap());
             }
             Ok(SExpr::String(SchemeString::new(output)))
         }

@@ -156,6 +156,7 @@ impl Default for Environment {
             "procedure?" => IS_PROCEDURE
             "null?" => IS_NULL
             "environment-bindings" => ENVIRONMENT_BINDINGS
+            "append" => APPEND
             "length" => LENGTH
             "reverse" => REVERSE
             "string" => STRING

@@ -204,6 +204,11 @@ fn interpreter_r7rs_numbers_is() {
 #[test]
 fn interpreter_r7rs_pair_list_procedures() {
     integration_subtest_eval_to! {
+        { expression: "(append '(x) '(y))", expected: "(x y)" };
+        { expression: "(append '(a) '(b c d))", expected: "(a b c d)" };
+        { expression: "(append '(a (b)) '((c)))", expected: "(a (b) (c))" };
+        { expression: "(append '(a b) '(c . d))", expected: "(a b c . d)" };
+        { expression: "(append '() 'a)", expected: "a" };
         { expression: "(car '(a b c))", expected: "a"};
         { expression: "(car '((a) b c d))", expected: "(a)"};
         { expression: "(car '(1 . 2))", expected: "1"};

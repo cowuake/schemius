@@ -8,9 +8,11 @@ use std::{fmt, result};
 pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
 
+pub type ListImplementation = Vec<SExpr>;
+
 pub type SchemeBoolean = bool;
 pub type SchemeChar = char;
-pub type SchemeList = SAccessor<Vec<SExpr>>;
+pub type SchemeList = SAccessor<ListImplementation>;
 pub type SchemeNumber = SNumber;
 pub type SchemePair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
 pub type SchemeProcedure = Procedure;
@@ -76,7 +78,14 @@ impl fmt::Display for SExpr {
 }
 
 impl SExpr {
-    pub fn to_char(&self) -> Result<SchemeChar, String> {
+    pub fn as_list(&self) -> Result<ListImplementation, String> {
+        Ok(match self {
+            SExpr::List(list) => list.borrow().clone(),
+            _ => panic!("Exception: {} is not a list", self),
+        })
+    }
+
+    pub fn as_char(&self) -> Result<SchemeChar, String> {
         match self {
             SExpr::Char(val) => Ok(*val as SchemeChar),
             _ => panic!("Exception: {} is not a character", self),
