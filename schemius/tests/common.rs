@@ -4,10 +4,10 @@ macro_rules! integration_subtest_eval_to {
         let mut interpreter = schemius::Interpreter::default();
 
         $(
-            let res = interpreter.eval_expression_and_format(String::from($expression));
-            let expected = $expected_result;
-
-            assert_eq!(res, expected);
+            match interpreter.eval_expression_and_format(String::from($expression)) {
+                Ok(result) => assert_eq!(result, $expected_result),
+                Err(err) => panic!("Error: {}", err),
+            }
         )*
     }
 }

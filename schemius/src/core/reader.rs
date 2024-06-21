@@ -15,7 +15,7 @@ lazy_static! {
         Regex::new(r"^(\d*(\.\d+)?(/?\d*(\.\d+)?)?)@(\d*(\.\d+)?(/?\d*(\.\d+)?)?)$").unwrap();
 }
 
-pub fn read(line: &mut String) -> SExpr {
+pub fn read(line: &mut String) -> Result<SExpr, String> {
     let first_token = init(line);
     advance(line, &first_token)
 }
@@ -34,7 +34,7 @@ fn init(line: &mut String) -> String {
     }
 }
 
-fn advance(line: &mut String, string_token: &String) -> SExpr {
+fn advance(line: &mut String, string_token: &String) -> Result<SExpr, String> {
     let opening_token = string_token.as_str();
 
     match opening_token {
@@ -49,19 +49,19 @@ fn advance(line: &mut String, string_token: &String) -> SExpr {
                     if new_list.len() == 3 && token != "]" {
                         if let SExpr::Symbol(sym) = &new_list[1] {
                             if sym.as_str() == "." {
-                                return SExpr::Pair(SchemePair::new((
+                                return Ok(SExpr::Pair(SchemePair::new((
                                     Box::new(new_list[0].clone()),
                                     Box::new(new_list[2].clone()),
-                                )));
+                                ))));
                             }
                         }
                     }
 
-                    return SExpr::List(SchemeList::new(new_list));
+                    return Ok(SExpr::List(SchemeList::new(new_list)));
                 } else if opening_token == "#(" && token == ")" {
-                    return SExpr::Vector(SchemeList::new(new_list));
+                    return Ok(SExpr::Vector(SchemeList::new(new_list)));
                 } else {
-                    new_list.push(advance(line, &token));
+                    new_list.push(advance(line, &token)?);
                 }
             }
         }
@@ -69,19 +69,19 @@ fn advance(line: &mut String, string_token: &String) -> SExpr {
     }
 }
 
-fn parse_token(line: &mut String, token: &str) -> SExpr {
+fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
     match token {
-        "#t" => SExpr::Boolean(true),
-        "#f" => SExpr::Boolean(false),
-        "-nan.0" | "+nan.0" => SExpr::Number(SNumber::Float(NativeFloat::NAN)),
-        "-inf.0" => SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY)),
-        "+inf.0" => SExpr::Number(SNumber::Float(NativeFloat::INFINITY)),
+        "#t" => Ok(SExpr::Boolean(true)),
+        "#f" => Ok(SExpr::Boolean(false)),
+        "-nan.0" | "+nan.0" => Ok(SExpr::Number(SNumber::Float(NativeFloat::NAN))),
+        "-inf.0" => Ok(SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY))),
+        "+inf.0" => Ok(SExpr::Number(SNumber::Float(NativeFloat::INFINITY))),
         token if token.starts_with('"') => {
-            SExpr::String(SchemeString::new(token.get(1..token.len() - 1).unwrap().to_string()))
+            Ok(SExpr::String(SchemeString::new(token.get(1..token.len() - 1).unwrap().to_string())))
         }
         "'" | "`" | "," | ",@" => {
             let internal_token = init(line);
-            let quoted = advance(line, &internal_token);
+            let quoted = advance(line, &internal_token)?;
             let mut vec: Vec<SExpr> = vec![];
 
             let string_token = match token {
@@ -94,16 +94,16 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
 
             vec.push(SExpr::Symbol(string_token));
             vec.push(quoted);
-            SExpr::List(SchemeList::new(vec))
+            Ok(SExpr::List(SchemeList::new(vec)))
         }
         token if token.starts_with(r#"#\"#) => {
             match token.len() {
-                3 => SExpr::Char(token.chars().last().unwrap()),
+                3 => Ok(SExpr::Char(token.chars().last().unwrap())),
                 _ => {
                     // Handle invalid character token
                     // Return an appropriate value or raise an error
                     // For now, returning SExpr::Symbol(token.clone())
-                    SExpr::Symbol(token.to_string())
+                    Ok(SExpr::Symbol(token.to_string()))
                 }
             }
         }
@@ -154,45 +154,47 @@ fn parse_token(line: &mut String, token: &str) -> SExpr {
                 let number = if n_prefixes == 1 { &token[2..] } else { &token[4..] };
                 match NativeInt::from_str_radix(number, radix) {
                     Ok(n) => match is_exact {
-                        Some(true) | None => SExpr::Number(SNumber::Int(n)),
-                        Some(false) => SExpr::Number(SNumber::Float(n as NativeFloat)),
+                        Some(true) | None => Ok(SExpr::Number(SNumber::Int(n))),
+                        Some(false) => Ok(SExpr::Number(SNumber::Float(n as NativeFloat))),
                     },
                     _ => match NativeBigInt::from_str_radix(number, radix) {
                         Ok(n) => match is_exact {
-                            Some(true) | None => SExpr::Number(SNumber::BigInt(n)),
-                            Some(false) => SExpr::Number(SNumber::Float(n.to_float().unwrap())),
+                            Some(true) | None => Ok(SExpr::Number(SNumber::BigInt(n))),
+                            Some(false) => Ok(SExpr::Number(SNumber::Float(n.to_float().unwrap()))),
                         },
                         _ => match NativeRational::from_str_radix(number, radix) {
                             Ok(q) => match is_exact {
-                                Some(true) | None => SExpr::Number(SNumber::Rational(q)),
-                                Some(false) => SExpr::Number(SNumber::Float(q.to_float().unwrap())),
+                                Some(true) | None => Ok(SExpr::Number(SNumber::Rational(q))),
+                                Some(false) => {
+                                    Ok(SExpr::Number(SNumber::Float(q.to_float().unwrap())))
+                                }
                             },
                             _ => match NativeFloat::from_str_radix(number, radix) {
                                 Ok(f) => match is_exact {
-                                    Some(true) => SExpr::Number(SNumber::Rational(
+                                    Some(true) => Ok(SExpr::Number(SNumber::Rational(
                                         NativeRational::from_float(f).unwrap(),
-                                    )),
-                                    Some(false) | None => SExpr::Number(SNumber::Float(f)),
+                                    ))),
+                                    Some(false) | None => Ok(SExpr::Number(SNumber::Float(f))),
                                 },
-                                _ => SExpr::Symbol(token.to_string()),
+                                _ => Ok(SExpr::Symbol(token.to_string())),
                             },
                         },
                     },
                 }
             } else {
                 match token.parse::<NativeInt>() {
-                    Ok(n) => SExpr::Number(SNumber::Int(n)),
+                    Ok(n) => Ok(SExpr::Number(SNumber::Int(n))),
                     _ => match token.parse::<NativeBigInt>() {
-                        Ok(n) => SExpr::Number(SNumber::BigInt(n)),
+                        Ok(n) => Ok(SExpr::Number(SNumber::BigInt(n))),
                         _ => match token.parse::<NativeRational>() {
-                            Ok(q) => SExpr::Number(SNumber::Rational(q)),
+                            Ok(q) => Ok(SExpr::Number(SNumber::Rational(q))),
                             _ => match token.parse::<NativeFloat>() {
-                                Ok(f) => SExpr::Number(SNumber::Float(f)),
+                                Ok(f) => Ok(SExpr::Number(SNumber::Float(f))),
                                 _ => match token.parse::<NativeComplex>() {
-                                    Ok(c) => SExpr::Number(SNumber::Complex(c)),
+                                    Ok(c) => Ok(SExpr::Number(SNumber::Complex(c))),
                                     _ => match COMPLEX_POLAR_REGEX.captures(token) {
-                                        Some(_) => parse_polar_complex(token),
-                                        None => SExpr::Symbol(token.to_string()),
+                                        Some(_) => Ok(parse_polar_complex(token)),
+                                        None => Ok(SExpr::Symbol(token.to_string())),
                                     },
                                 },
                             },

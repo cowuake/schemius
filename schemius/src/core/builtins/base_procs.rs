@@ -31,17 +31,14 @@ pub fn r_eval(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     Ok(args[0].clone())
 }
 
-pub fn r_display(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
+pub fn r_display(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     if args.s_len() != 1 {
         return Err(format!("Exception in display: expected 1 argument, found {}", args.s_len()));
     }
 
-    match eval(&args[0], env.clone()) {
-        Ok(val) => match val {
-            SExpr::String(string) => Ok(SExpr::Symbol(string.borrow().to_string())), // Avoids double quotes
-            expr => Ok(SExpr::Symbol(format!("{}", expr))),
-        },
-        Err(e) => Err(e),
+    match &args[0] {
+        SExpr::String(string) => Ok(SExpr::Symbol(string.borrow().to_string())), // Avoids double quotes
+        expr => Ok(SExpr::Symbol(format!("{}", expr))),
     }
 }
 
