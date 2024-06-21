@@ -230,7 +230,7 @@ pub fn r_if(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         Ok(condition) => match condition {
             SExpr::Boolean(false) => match length {
                 2 => Ok(SExpr::Ok),
-                3 => Ok(args[2].clone()),
+                3 => Ok(args.s_ref(2).unwrap().clone()),
                 _ => Err(String::from("Exception: wrong number of arguments for if")),
             },
             _ => Ok(args.s_cadr().unwrap().clone()),
@@ -474,7 +474,7 @@ pub fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     let length = args.s_len();
     let have_else_clause = length > 3
-        && match &args[length - 2] {
+        && match args.s_ref(length - 2).unwrap() {
             SExpr::Symbol(clause) => *clause == "else",
             _ => false,
         };
