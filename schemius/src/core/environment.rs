@@ -159,6 +159,7 @@ impl Default for Environment {
             "append" => APPEND
             "length" => LENGTH
             "list-ref" => LIST_REF
+            "list-tail" => LIST_TAIL
             "reverse" => REVERSE
             "string" => STRING
             "make-string" => MAKE_STRING

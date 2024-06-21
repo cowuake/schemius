@@ -187,6 +187,31 @@ pub fn r_list_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     }
 }
 
+pub fn r_list_tail(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
+    let length = args.s_len();
+    if length != 2 {
+        return Err(format!("Exception in #<list-tail>: expected 2 arguments, found {}", length));
+    }
+
+    match args.s_car().unwrap() {
+        SExpr::List(list) => {
+            let index = args.s_cadr().unwrap().as_int()? as usize;
+            let borrowed = list.borrow();
+            let len = borrowed.s_len();
+
+            if index >= len {
+                return Err(format!(
+                    "Exception in #<list-tail>: index {} out of bounds for list of length {}",
+                    index, len
+                ));
+            }
+
+            Ok(SExpr::List(SchemeList::new(borrowed.s_tail(index as usize))))
+        }
+        _ => Err(String::from("Exception in #<list-tail>: expected a list")),
+    }
+}
+
 pub fn r_reverse(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     let length = args.s_len();
     if length != 1 {
