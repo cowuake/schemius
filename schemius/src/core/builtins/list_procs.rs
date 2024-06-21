@@ -12,13 +12,12 @@ pub fn r_set_car(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
     match args.s_car().unwrap() {
         SExpr::List(list) => {
-            list.borrow_mut()[0] = args[1].clone();
-
+            list.borrow_mut().set_car(args.s_cadr().unwrap().clone());
             Ok(SExpr::Unspecified)
         }
         SExpr::Pair(pair) => {
             let old_cdr = pair.borrow().1.clone();
-            pair.replace((Box::new(args[1].clone()), old_cdr));
+            pair.replace((Box::new(args.s_cadr().unwrap().clone()), old_cdr));
 
             Ok(SExpr::Unspecified)
         }
@@ -33,11 +32,11 @@ pub fn r_cons(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
     let car = args.s_car().unwrap().clone();
 
-    match &args[1] {
+    match args.s_cadr().unwrap() {
         SExpr::List(list) => {
             let mut new_list = vec![];
             new_list.push(car);
-            list.borrow().iter().for_each(|x| new_list.push(x.clone()));
+            list.borrow_mut().iter().for_each(|x| new_list.push(x.clone()));
 
             Ok(SExpr::List(SchemeList::new(new_list)))
         }
@@ -65,7 +64,7 @@ pub fn r_flatten(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in flatten: expected 1 argument, found {}", length));
     }
 
-    args[0].flatten()
+    args.s_car().unwrap().flatten()
 }
 
 pub fn r_unflatten(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
@@ -74,7 +73,7 @@ pub fn r_unflatten(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in unflatten: expected 1 argument, found {}", length));
     }
 
-    args[0].unflatten()
+    args.s_car().unwrap().unflatten()
 }
 
 pub fn r_car(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
@@ -116,7 +115,7 @@ pub fn r_cdr(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(String::from("Exception: #<special-form cdr> can take one only argument"));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::Pair(pair) => {
             let cdr = pair.borrow().1.clone();
             Ok(*cdr)
@@ -148,7 +147,7 @@ pub fn r_append(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     }
 
     if length == 1 {
-        return Ok(args[0].clone());
+        return Ok(args.s_car().unwrap().clone());
     }
 
     for arg in args[0..args.s_len() - 1].iter() {
@@ -169,7 +168,7 @@ pub fn r_reverse(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in #<reverse>: expected 1 argument, found {}", length));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::List(list) => {
             let reversed = list.borrow().s_reverse();
             Ok(SExpr::List(SchemeList::new(reversed)))

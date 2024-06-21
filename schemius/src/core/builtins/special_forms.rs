@@ -29,7 +29,7 @@ pub fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         ));
     }
 
-    let arg_names = match args[0] {
+    let arg_names = match args.s_car().unwrap() {
         SExpr::List(ref list) => match list_args(&list.borrow()) {
             Ok(names) => names,
             Err(e) => return Err(e),
@@ -45,8 +45,8 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     // TODO: Improve this mess!
     match args.s_len() {
         1 => Ok(SExpr::Ok),
-        2.. => match &args[0] {
-            SExpr::Symbol(name) => match eval(&args[1], env.clone()) {
+        2.. => match args.s_car().unwrap() {
+            SExpr::Symbol(name) => match eval(args.s_cadr().unwrap(), env.clone()) {
                 Ok(val) => {
                     let value = match val {
                         SExpr::List(list) => SExpr::List(list.clone()),
@@ -102,8 +102,8 @@ pub fn r_set(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         return Err(format!("Exception in set!: expected 2 arguments, found {}", length));
     }
 
-    match &args[0] {
-        SExpr::Symbol(name) => match eval(&args[1], env.clone()) {
+    match args.s_car().unwrap() {
+        SExpr::Symbol(name) => match eval(args.s_cadr().unwrap(), env.clone()) {
             Ok(val) => {
                 let value = match val {
                     SExpr::List(list) => SExpr::List(list.clone()),
@@ -132,13 +132,13 @@ pub fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     let let_env = Environment::new_child(env.clone());
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::List(list) => {
             for binding in list.borrow().iter() {
                 match binding {
                     SExpr::List(binding) => {
                         let borrowed_binding = binding.borrow();
-                        match &borrowed_binding[0] {
+                        match borrowed_binding.s_car().unwrap() {
                             SExpr::Symbol(symbol) => {
                                 match eval(&borrowed_binding[1], env.clone()) {
                                     Ok(expr) => {
@@ -179,7 +179,7 @@ pub fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     let mut inner_env = env;
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::List(list) => {
             for binding in list.borrow().iter() {
                 match binding {
@@ -226,14 +226,14 @@ pub fn r_if(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         return Err(format!("Exception in if: expected two or three arguments, found {}", length));
     }
 
-    match eval(&args[0], env.clone()) {
+    match eval(args.s_car().unwrap(), env.clone()) {
         Ok(condition) => match condition {
             SExpr::Boolean(false) => match length {
                 2 => Ok(SExpr::Ok),
                 3 => Ok(args[2].clone()),
                 _ => Err(String::from("Exception: wrong number of arguments for if")),
             },
-            _ => Ok(args[1].clone()),
+            _ => Ok(args.s_cadr().unwrap().clone()),
         },
         Err(e) => Err(e),
     }
@@ -245,7 +245,7 @@ pub fn r_not(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         return Err(format!("Exception in not: expected one argument, found {}", length));
     }
 
-    match eval(&args[0], env.clone()) {
+    match eval(args.s_car().unwrap(), env.clone()) {
         Ok(test) => match test {
             SExpr::Boolean(result) => Ok(SExpr::Boolean(!result)),
             _ => Ok(SExpr::Boolean(false)),
@@ -280,7 +280,7 @@ pub fn r_quote(args: ProcedureArgs, _: ProcedureEnv) -> SpecialFormOutput {
         return Err(format!("Exception in ': expected 1 argument, found {}", length));
     }
 
-    Ok(args[0].clone())
+    Ok(args.s_car().unwrap().clone())
 }
 
 pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
@@ -289,9 +289,9 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
         return Err(format!("Exception in `: expected 1 argument, found {}", length));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::List(_) | SExpr::Pair(_) => {
-            let flattened = args[0].flatten();
+            let flattened = args.s_car().unwrap().flatten();
 
             match flattened {
                 Ok(expr) => match expr {

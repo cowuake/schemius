@@ -9,8 +9,8 @@ pub fn r_apply(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in apply: expected 2 arguments, found {}", args.s_len()));
     }
 
-    let proc = &args[0];
-    let args = &args[1];
+    let proc = args.s_car().unwrap();
+    let args = args.s_cadr().unwrap();
     let mut to_be_evaluated = vec![];
     to_be_evaluated.push(proc.clone());
 
@@ -27,7 +27,7 @@ pub fn r_eval(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in eval: expected 1 argument, found {}", args.s_len()));
     }
 
-    Ok(args[0].clone())
+    Ok(args.s_car().unwrap().clone())
 }
 
 pub fn r_display(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
@@ -35,7 +35,7 @@ pub fn r_display(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in display: expected 1 argument, found {}", args.s_len()));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::String(string) => Ok(SExpr::Symbol(string.borrow().to_string())), // Avoids double quotes
         expr => Ok(SExpr::Symbol(format!("{}", expr))),
     }

@@ -5,9 +5,11 @@ where
 {
     fn s_append(lists: &[Self]) -> Self;
     fn s_car(&self) -> Option<&T>;
+    fn s_cadr(&self) -> Option<&T>;
     fn s_cdr(&self) -> Box<dyn Iterator<Item = &T> + '_>;
     fn s_len(&self) -> usize;
     fn s_reverse(&self) -> Self;
+    fn set_car(&mut self, value: T);
 }
 
 impl<T> SList<T> for Vec<T>
@@ -22,6 +24,10 @@ where
         self.first()
     }
 
+    fn s_cadr(&self) -> Option<&T> {
+        self.get(1)
+    }
+
     fn s_cdr(&self) -> Box<dyn Iterator<Item = &T> + '_> {
         Box::new(self.iter().skip(1))
     }
@@ -32,6 +38,12 @@ where
 
     fn s_reverse(&self) -> Self {
         self.iter().rev().cloned().collect()
+    }
+
+    fn set_car(&mut self, value: T) {
+        if let Some(first) = self.first_mut() {
+            *first = value;
+        }
     }
 }
 
@@ -56,6 +68,12 @@ pub mod tests_slist_vector {
     }
 
     #[test]
+    fn test_slist_vector_cadr() {
+        let list = vec![1, 2, 3, 4, 5];
+        assert_eq!(list.s_cadr(), Some(&2));
+    }
+
+    #[test]
     fn test_slist_vector_cdr() {
         let list = vec![1, 2, 3, 4, 5];
         let cdr: Vec<i32> = list.s_cdr().cloned().collect();
@@ -73,5 +91,12 @@ pub mod tests_slist_vector {
         let list = vec![1, 2, 3, 4, 5];
         let reversed = list.s_reverse();
         assert_eq!(reversed, vec![5, 4, 3, 2, 1]);
+    }
+
+    #[test]
+    fn test_slist_set_car() {
+        let mut list = vec![1, 2, 3, 4, 5];
+        list.set_car(10);
+        assert_eq!(list, vec![10, 2, 3, 4, 5]);
     }
 }

@@ -1,4 +1,5 @@
 use super::{
+    s_list::SList,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     SExpr,
 };
@@ -11,7 +12,7 @@ macro_rules! fn_is {
                     return Err(format!("Exception in {}: expected 1 argument, found {}", $name, args.len()));
                 }
 
-                match args[0].$source_fn() {
+                match args.s_car().unwrap().$source_fn() {
                     Ok(res) => Ok(SExpr::Boolean(res)),
                     Err(e) => Err(e)
                 }
