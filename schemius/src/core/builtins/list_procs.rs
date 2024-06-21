@@ -150,7 +150,7 @@ pub fn r_append(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Ok(args.s_car().unwrap().clone());
     }
 
-    for arg in args[0..args.s_len() - 1].iter() {
+    for arg in args.iter() {
         if !arg.is_list().unwrap() {
             return Err(format!("Exception in #<append>: expected a list, found {}", arg));
         }
