@@ -23,7 +23,10 @@ impl Interpreter {
         };
         let source = PRELUDE.lines().fold("".to_string(), |current, next| current + next);
         let mut prelude = source.to_string();
-        let expression = reader::read(&mut prelude);
+        let expression = match reader::read(&mut prelude) {
+            Ok(expr) => expr,
+            Err(_) => SExpr::Unspecified,
+        };
 
         match evaluator.eval(&expression) {
             Ok(_) => {
@@ -38,7 +41,7 @@ impl Interpreter {
         }
     }
 
-    fn read(&mut self, next_line: &dyn Fn(&mut Interpreter) -> String) {
+    fn read(&mut self, next_line: &dyn Fn(&mut Interpreter) -> Result<String, String>) {
         loop {
             // TODO: Handle the case of parentheses inside strings and all other similar cases
             //      -> Only parenthes used as syntax elements should be considered here
@@ -51,7 +54,7 @@ impl Interpreter {
                 break;
             }
 
-            let next = next_line(self);
+            let next = next_line(self).unwrap_or("".to_string());
 
             if next.is_empty() || next.starts_with(';') {
                 continue;
@@ -65,28 +68,20 @@ impl Interpreter {
         self.evaluator.eval(expression)
     }
 
-    fn format(&self, expression: EvalOutput) -> String {
+    fn print(&self, expression: &SExpr) {
         match expression {
-            Ok(val) => format!("{}", val),
-            Err(e) => e,
+            SExpr::Unspecified => print!("{}", SExpr::Unspecified),
+            printable => println!("{}", printable),
         }
     }
 
-    fn print(&self, expression: EvalOutput) {
-        match expression {
-            Ok(expr) => match expr {
-                SExpr::Unspecified => print!("{}", SExpr::Unspecified),
-                printable => println!("{}", printable),
-            },
-            Err(e) => println!("{}", e),
-        }
-    }
+    fn main_loop(
+        &mut self, next_line: &dyn Fn(&mut Interpreter) -> Result<String, String>,
+    ) -> Result<(), String> {
+        let mut expression: Result<SExpr, String>;
 
-    fn main_loop(&mut self, next_line: &dyn Fn(&mut Interpreter) -> String) {
-        let mut expression: SExpr;
-
-        loop {
-            self.current_expression = next_line(self);
+        Ok(loop {
+            self.current_expression = next_line(self)?;
             self.read(next_line);
 
             if self.current_expression.is_empty() || self.current_expression.starts_with(';') {
@@ -98,17 +93,17 @@ impl Interpreter {
             }
 
             expression = reader::read(&mut self.current_expression);
-            let result = self.eval(&expression);
+            let result = self.eval(&expression?)?;
 
-            self.print(result)
-        }
+            self.print(&result)
+        })
     }
 
-    pub fn run_repl(&mut self) {
-        self.main_loop(&read_line_from_repl);
+    pub fn run_repl(&mut self) -> Result<(), String> {
+        self.main_loop(&read_line_from_repl)
     }
 
-    pub fn execute_file(&mut self, path: String) {
+    pub fn execute_file(&mut self, path: String) -> Result<(), String> {
         match read_to_string(path.as_str()) {
             Ok(file) => {
                 for line in file.lines() {
@@ -116,7 +111,7 @@ impl Interpreter {
                 }
                 self.main_loop(&read_line_from_file)
             }
-            Err(_) => println!("Could not read file {}", path),
+            Err(_) => Err(format!("Could not read file {}", path)),
         }
     }
 
@@ -134,28 +129,31 @@ impl Interpreter {
         }
 
         let mut line = expression_string.clone();
-        let expression: SExpr = reader::read(&mut line);
+        let expression: SExpr = reader::read(&mut line)?;
 
         self.eval(&expression)
     }
 
-    pub fn eval_expression_no_print(&mut self, expression_string: String) {
+    pub fn eval_expression_no_print(&mut self, expression_string: String) -> Result<(), String> {
         match self.eval_expression(expression_string) {
-            Ok(_) => {}
-            _ => println!("Evaluation failed."),
-        };
+            Ok(_) => Ok(()),
+            Err(e) => Err(e),
+        }
     }
 
-    pub fn eval_expression_and_format(&mut self, expression_string: String) -> String {
-        let result = self.eval_expression(expression_string);
-
-        self.format(result)
+    pub fn eval_expression_and_format(
+        &mut self, expression_string: String,
+    ) -> Result<String, String> {
+        match self.eval_expression(expression_string) {
+            Ok(expr) => Ok(format!("{}", expr)),
+            Err(e) => Err(e),
+        }
     }
 
-    pub fn eval_expression_and_print(&mut self, expression_string: String) {
-        let result = self.eval_expression(expression_string);
-
-        self.print(result)
+    pub fn eval_expression_and_print(&mut self, expression_string: String) -> Result<(), String> {
+        let result = self.eval_expression(expression_string)?;
+        self.print(&result);
+        Ok(())
     }
 }
 
@@ -165,18 +163,18 @@ impl Default for Interpreter {
     }
 }
 
-fn read_line_from_file(interpreter: &mut Interpreter) -> String {
+fn read_line_from_file(interpreter: &mut Interpreter) -> Result<String, String> {
     if interpreter.lines.len() > interpreter.line_idx {
         let line = interpreter.lines[interpreter.line_idx].clone();
         interpreter.line_idx += 1;
 
-        line
+        Ok(line)
     } else {
-        String::from("EOF")
+        Ok(String::from("EOF"))
     }
 }
 
-fn read_line_from_repl(_: &mut Interpreter) -> String {
+fn read_line_from_repl(_: &mut Interpreter) -> Result<String, String> {
     let mut line = String::new();
 
     io::stdout().write_all(b"> ").unwrap();
@@ -186,5 +184,5 @@ fn read_line_from_repl(_: &mut Interpreter) -> String {
     line = line.strip_suffix('\n').or(line.strip_suffix('\r')).unwrap().to_string();
     line.extend([' ']);
 
-    line.trim().to_string()
+    Ok(line.trim().to_string())
 }

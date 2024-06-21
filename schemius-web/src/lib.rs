@@ -9,7 +9,10 @@ lazy_static! {
 
 #[wasm_bindgen]
 pub fn evaluate(expression: &str) -> String {
-    INTERPRETER.try_lock().unwrap().eval_expression_and_format(expression.to_string())
+    match INTERPRETER.try_lock().unwrap().eval_expression_and_format(expression.to_string()) {
+        Ok(result) => result,
+        Err(err) => err,
+    }
 }
 
 #[cfg(test)]
