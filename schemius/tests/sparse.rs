@@ -353,7 +353,7 @@ fn interpreter_sexpr_null() {
 }
 
 #[test]
-fn interpreter_pair_list_procedures() {
+fn interpreter_pair_list_procs() {
     integration_subtest_eval_to! {
         { expression: "(car '(1 2 3))", expected: "1" };
         { expression: "(cdr '(1 2 3))", expected: "(2 3)" };
@@ -381,6 +381,23 @@ fn interpreter_pair_list_procedures() {
         expression: "(caaar '((1 2) 3 4))";
         expression: "(caadr '((1 2) 3 4))";
         expression: "(cdaar '((1 2) 3 4))";
+    }
+}
+
+#[test]
+fn interpreter_pair_list_procs_2() {
+    integration_subtest_eval_to! {
+        { expression: "(cons 1 2)", expected: "(1 . 2)" };
+        // { expression: "(cons 1 (cons 2 3))", expected: "(1 2 . 3)" };
+        { expression: "(list 1 2 3)", expected: "(1 2 3)" };
+        { expression: "(list-ref '(1 2 3) 1)", expected: "2" };
+        { expression: "(list-tail '(1 2 3) 1)", expected: "(2 3)" };
+        { expression: "(reverse '(1 2 3))", expected: "(3 2 1)" };
+    }
+
+    integration_subtest_is_err! {
+        expression: "(list-ref '(1 2 3) 3)";
+        expression: "(list-tail '(1 2 3) 3)";
     }
 }
 
