@@ -78,11 +78,11 @@ impl fmt::Display for SExpr {
 }
 
 impl SExpr {
-    pub fn as_list(&self) -> Result<ListImplementation, String> {
-        Ok(match self {
-            SExpr::List(list) => list.borrow().clone(),
-            _ => panic!("Exception: {} is not a list", self),
-        })
+    pub fn as_int(&self) -> Result<NativeInt, String> {
+        match self {
+            SExpr::Number(n) => Ok(n.to_int()?),
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
     }
 
     pub fn as_char(&self) -> Result<SchemeChar, String> {
@@ -90,6 +90,13 @@ impl SExpr {
             SExpr::Char(val) => Ok(*val as SchemeChar),
             _ => panic!("Exception: {} is not a character", self),
         }
+    }
+
+    pub fn as_list(&self) -> Result<ListImplementation, String> {
+        Ok(match self {
+            SExpr::List(list) => list.borrow().clone(),
+            _ => panic!("Exception: {} is not a list", self),
+        })
     }
 
     pub fn quote(&self) -> Result<SExpr, String> {
@@ -502,5 +509,22 @@ impl SExpr {
             }
             other => Ok(other.clone()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sexpr_as_char() {
+        let sexpr = SExpr::Char('a');
+        assert_eq!(sexpr.as_char().unwrap(), 'a');
+    }
+
+    #[test]
+    fn test_sexpr_as_int() {
+        let sexpr = SExpr::Number(SNumber::Int(42));
+        assert_eq!(sexpr.as_int().unwrap(), 42);
     }
 }

@@ -8,6 +8,7 @@ where
     fn s_cadr(&self) -> Option<&T>;
     fn s_cdr(&self) -> Box<dyn Iterator<Item = &T> + '_>;
     fn s_len(&self) -> usize;
+    fn s_ref(&self, index: usize) -> Option<&T>;
     fn s_reverse(&self) -> Self;
     fn set_car(&mut self, value: T);
 }
@@ -34,6 +35,10 @@ where
 
     fn s_len(&self) -> usize {
         self.len()
+    }
+
+    fn s_ref(&self, index: usize) -> Option<&T> {
+        self.get(index)
     }
 
     fn s_reverse(&self) -> Self {
@@ -84,6 +89,12 @@ pub mod tests_slist_vector {
     fn test_slist_vector_len() {
         let list = vec![1, 2, 3, 4, 5];
         assert_eq!(list.s_len(), 5);
+    }
+
+    #[test]
+    fn test_slist_vector_ref() {
+        let list = vec![1, 2, 3, 4, 5];
+        assert_eq!(list.s_ref(2), Some(&3));
     }
 
     #[test]

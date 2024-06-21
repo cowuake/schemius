@@ -158,6 +158,7 @@ impl Default for Environment {
             "environment-bindings" => ENVIRONMENT_BINDINGS
             "append" => APPEND
             "length" => LENGTH
+            "list-ref" => LIST_REF
             "reverse" => REVERSE
             "string" => STRING
             "make-string" => MAKE_STRING

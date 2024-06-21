@@ -217,6 +217,8 @@ fn interpreter_r7rs_pair_list_procedures() {
         { expression: "(length '(a b c))", expected: "3" };
         { expression: "(length '(a (b) (c d e)))", expected: "3" };
         { expression: "(length '())", expected: "0" };
+        { expression: "(list-ref '(a b c d) 2)", expected: "c" };
+        { expression: "(list-ref '(a b c d) (exact (round 1.8)))", expected: "c" };
         { expression: "(reverse '(a b c))", expected: "(c b a)"};
         { expression: "(reverse '(a (b c) d (e (f))))", expected: "((e (f)) d (b c) a)" };
     }
