@@ -1,5 +1,4 @@
 use super::{
-    eval,
     s_list::SList,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     Accessor, SExpr, SchemeEnvironment, SchemeList,
