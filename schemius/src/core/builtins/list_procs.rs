@@ -162,6 +162,31 @@ pub fn r_append(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     Ok(SExpr::List(SchemeList::new(new_list)))
 }
 
+pub fn r_list_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
+    let length = args.s_len();
+    if length != 2 {
+        return Err(format!("Exception in #<list-ref>: expected 2 arguments, found {}", length));
+    }
+
+    match args.s_car().unwrap() {
+        SExpr::List(list) => {
+            let index = args.s_cadr().unwrap().as_int().unwrap() as usize;
+            let borrowed = list.borrow();
+            let len = borrowed.s_len();
+
+            if index >= len {
+                return Err(format!(
+                    "Exception in #<list-ref>: index {} out of bounds for list of length {}",
+                    index, len
+                ));
+            }
+
+            Ok(borrowed.s_ref(index as usize).unwrap().clone())
+        }
+        _ => Err(String::from("Exception in #<list-ref>: expected a list")),
+    }
+}
+
 pub fn r_reverse(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     let length = args.s_len();
     if length != 1 {

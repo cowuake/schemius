@@ -57,6 +57,7 @@ impl Primitive {
     pub const ENVIRONMENT_BINDINGS: ProcedureSignature = r_environment_bindings;
     pub const APPEND: ProcedureSignature = r_append;
     pub const LENGTH: ProcedureSignature = r_length;
+    pub const LIST_REF: ProcedureSignature = r_list_ref;
     pub const REVERSE: ProcedureSignature = r_reverse;
     pub const MAKE_STRING: ProcedureSignature = r_make_string;
     pub const STRING: ProcedureSignature = r_string;
