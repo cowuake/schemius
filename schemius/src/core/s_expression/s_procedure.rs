@@ -1,8 +1,8 @@
 use crate::core::environment::{EnvAccessor, Environment};
 
-use super::SExpr;
+use super::{ListImplementation, SExpr};
 
-pub type ProcedureArgs = Vec<SExpr>;
+pub type ProcedureArgs = ListImplementation;
 pub type ProcedureEnv = EnvAccessor<Environment>;
 pub type ProcedureOutput = Result<SExpr, String>;
 pub type ProcedureSignature = fn(ProcedureArgs, ProcedureEnv) -> ProcedureOutput;

@@ -75,6 +75,10 @@ impl Interpreter {
         }
     }
 
+    fn print_error(&self, error: &str) {
+        println!("{}", error);
+    }
+
     fn main_loop(
         &mut self, next_line: &dyn Fn(&mut Interpreter) -> Result<String, String>,
     ) -> Result<(), String> {
@@ -93,9 +97,10 @@ impl Interpreter {
             }
 
             expression = reader::read(&mut self.current_expression);
-            let result = self.eval(&expression?)?;
-
-            self.print(&result)
+            match self.eval(&expression?) {
+                Ok(expr) => self.print(&expr),
+                Err(e) => self.print_error(&e),
+            }
         })
     }
 
