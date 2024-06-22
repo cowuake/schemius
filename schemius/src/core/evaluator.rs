@@ -131,14 +131,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
 
                                         for arg in args.iter() {
                                             match arg {
-                                                SExpr::List(list)
-                                                    if list
-                                                        .borrow()
-                                                        .s_car()
-                                                        .unwrap()
-                                                        .is_quote()
-                                                        .unwrap() =>
-                                                {
+                                                SExpr::List(_) if arg.is_quoted().unwrap() => {
                                                     expanded_args.push(arg.clone())
                                                 }
                                                 _ => match eval(arg, current_env.clone()) {
