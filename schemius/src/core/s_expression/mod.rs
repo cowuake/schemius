@@ -173,6 +173,24 @@ impl SExpr {
             || self.symbol_is("quasiquote").unwrap())
     }
 
+    pub fn is_quoted(&self) -> Result<bool, String> {
+        match self {
+            SExpr::List(list) => {
+                let borrowed = list.borrow();
+                if borrowed.s_len() > 0 {
+                    let car = borrowed.s_car().unwrap();
+                    match car {
+                        SExpr::Symbol(_) => Ok(car.is_quote().unwrap()),
+                        _ => Ok(false),
+                    }
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Ok(false),
+        }
+    }
+
     pub fn is_string(&self) -> Result<bool, String> {
         match self {
             SExpr::String(_) => Ok(true),
@@ -526,5 +544,21 @@ mod tests {
     fn test_sexpr_as_int() {
         let sexpr = SExpr::Number(SNumber::Int(42));
         assert_eq!(sexpr.as_int().unwrap(), 42);
+    }
+
+    #[test]
+    fn test_sexpr_quote() {
+        let expression = SExpr::Number(SNumber::Int(42));
+        let quoted = expression.quote().unwrap();
+        assert!(quoted.is_list().unwrap() && quoted.is_quoted().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_unquote() {
+        let internal = SExpr::Number(SNumber::Int(42));
+        let expression =
+            SExpr::List(SchemeList::new(vec![SExpr::Symbol("quote".to_string()), internal]));
+        let unquoted = expression.unquote().unwrap();
+        assert!(unquoted.is_number().unwrap());
     }
 }
