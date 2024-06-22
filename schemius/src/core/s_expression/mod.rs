@@ -556,8 +556,7 @@ mod tests {
     #[test]
     fn test_sexpr_unquote() {
         let internal = SExpr::Number(SNumber::Int(42));
-        let expression =
-            SExpr::List(SchemeList::new(vec![SExpr::Symbol("quote".to_string()), internal]));
+        let expression = internal.quote().unwrap();
         let unquoted = expression.unquote().unwrap();
         assert!(unquoted.is_number().unwrap());
     }
