@@ -371,6 +371,10 @@ fn interpreter_pair_list_procs() {
         { expression: "(begin (define lst '(1 . 2)) (car lst))", expected: "1"};
         { expression: "(begin (define lst '((a) b c d)) (cdr lst))", expected: "(b c d)"};
         { expression: "(begin (define lst '(1 . 2)) (cdr lst))", expected: "2"};
+        { expression: "((lambda () (car '((1 2) (3 4)))))", expected: "(1 2)"};
+        { expression: "((lambda () (cdr '((1 2) (3 4)))))", expected: "((3 4))"};
+        { expression: "((lambda () (caar '((1 2) (3 4)))))", expected: "1"};
+        { expression: "((lambda () (cadr '((1 2) (3 4)))))", expected: "(3 4)"};
         { expression: "((lambda () (define lst '((1 2) (3 4))) (car lst)))", expected: "(1 2)"};
         { expression: "((lambda () (define lst '((1 2) (3 4))) (cdr lst)))", expected: "((3 4))"};
         { expression: "((lambda () (define lst '((1 2) (3 4))) (caar lst)))", expected: "1"};
