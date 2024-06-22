@@ -65,9 +65,9 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     return Err(String::from("Exception (TODO?): deal with empty lists"));
                 }
 
-                let lambda_name = &list.borrow()[0].to_string();
+                let lambda_name = list.borrow().s_car().unwrap().to_string();
                 let mut lambda_args: Vec<SExpr> = vec![];
-                let lambda_body = &mut args[1..].to_vec();
+                let lambda_body = &mut args.s_cdr().unwrap();
 
                 if list.borrow().s_len() > 1 {
                     for arg in &list.borrow()[1..] {

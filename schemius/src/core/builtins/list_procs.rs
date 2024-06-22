@@ -91,13 +91,7 @@ pub fn r_car(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
             let borrowed = list.borrow();
             if borrowed.s_len() > 0 {
                 let car = if borrowed.s_car().unwrap().is_quote().unwrap() {
-                    borrowed
-                        .s_cdr()
-                        .map(|x| x.clone())
-                        .collect::<Vec<SExpr>>()
-                        .s_car()
-                        .unwrap()
-                        .clone()
+                    borrowed.s_cdr().unwrap().s_car().unwrap().clone()
                 } else {
                     borrowed.s_car().unwrap().clone()
                 };
@@ -125,7 +119,7 @@ pub fn r_cdr(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
             match list.s_len() {
                 1.. => {
-                    let cdr: Vec<SExpr> = list.s_cdr().map(|x| x.clone()).collect();
+                    let cdr: Vec<SExpr> = list.s_cdr().unwrap();
                     Ok(SExpr::List(SchemeList::new(cdr)))
                 }
                 _ => {

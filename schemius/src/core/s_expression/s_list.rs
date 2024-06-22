@@ -6,7 +6,7 @@ where
     fn s_append(lists: &[Self]) -> Self;
     fn s_car(&self) -> Option<&T>;
     fn s_cadr(&self) -> Option<&T>;
-    fn s_cdr(&self) -> Box<dyn Iterator<Item = &T> + '_>;
+    fn s_cdr(&self) -> Option<Self>;
     fn s_len(&self) -> usize;
     fn s_ref(&self, index: usize) -> Option<&T>;
     fn s_tail(&self, k: usize) -> Self;
@@ -30,8 +30,11 @@ where
         self.get(1)
     }
 
-    fn s_cdr(&self) -> Box<dyn Iterator<Item = &T> + '_> {
-        Box::new(self.iter().skip(1))
+    fn s_cdr(&self) -> Option<Self> {
+        if self.is_empty() {
+            return None;
+        }
+        Some(self.iter().skip(1).cloned().collect())
     }
 
     fn s_len(&self) -> usize {
@@ -86,7 +89,7 @@ pub mod tests_slist_vector {
     #[test]
     fn test_slist_vector_cdr() {
         let list = vec![1, 2, 3, 4, 5];
-        let cdr: Vec<i32> = list.s_cdr().cloned().collect();
+        let cdr = list.s_cdr().unwrap();
         assert_eq!(cdr, vec![2, 3, 4, 5]);
     }
 

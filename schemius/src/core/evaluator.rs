@@ -61,11 +61,11 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
             }
             SExpr::List(list) => {
                 if list.borrow().s_len() > 0 {
-                    let first = eval(&list.borrow()[0], current_env.clone());
+                    let first = eval(list.borrow().s_car().unwrap(), current_env.clone());
                     match first {
                         Ok(res) => match res {
                             SExpr::Procedure(proc) => {
-                                let args = &list.borrow()[1..].to_vec();
+                                let args = list.borrow().s_cdr().unwrap();
 
                                 match proc {
                                     Procedure::SpecialForm(special_form) => {
