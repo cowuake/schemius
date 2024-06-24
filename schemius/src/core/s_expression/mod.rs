@@ -166,6 +166,13 @@ impl SExpr {
         }
     }
 
+    pub fn is_applyable(&self) -> Result<bool, String> {
+        match self {
+            SExpr::List(list) if list.borrow().s_car().unwrap().is_procedure()? => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
     pub fn is_quote(&self) -> Result<bool, String> {
         Ok(self.symbol_is("'").unwrap()
             || self.symbol_is("quote").unwrap()
@@ -532,6 +539,8 @@ impl SExpr {
 
 #[cfg(test)]
 mod tests {
+    use crate::core::builtins::Primitive;
+
     use super::*;
 
     #[test]
@@ -559,5 +568,21 @@ mod tests {
         let expression = internal.quote().unwrap();
         let unquoted = expression.unquote().unwrap();
         assert!(unquoted.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_procedure() {
+        let sexpr = SExpr::Procedure(Procedure::Primitive(Primitive::SUM));
+        assert!(sexpr.is_procedure().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_applyable() {
+        let sexpr = SExpr::List(SchemeList::new(vec![
+            SExpr::Procedure(Procedure::Primitive(Primitive::SUM)),
+            SExpr::Number(SNumber::Int(1)),
+            SExpr::Number(SNumber::Int(2)),
+        ]));
+        assert!(sexpr.is_applyable().unwrap());
     }
 }
