@@ -1,4 +1,5 @@
 use super::{
+    s_list::SList,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     SExpr, SNumber,
 };
@@ -12,7 +13,7 @@ macro_rules! fn_compute_sum_prod {
                 _ => {
                     let mut res = SNumber::Int($neutral);
 
-                    for arg in &args[0..] {
+                    for arg in args {
                         match arg {
                             SExpr::Number(n) => res = &res $op &n,
                             num => return Err(format!("Exception in {}: #<{}> is not a number", stringify!($op), num)),
@@ -33,7 +34,7 @@ macro_rules! fn_compute_diff_quot {
             match args.len() {
                 0 => Err(String::from("Exception: too few arguments")),
                 _ => {
-                    let mut res = match &args[0] {
+                    let mut res = match args.s_car().unwrap() {
                             SExpr::Number(num) => num.clone(),
                             num => return Err(format!("Exception in {}: #<{}> is not a number", stringify!($op), num)),
                     };

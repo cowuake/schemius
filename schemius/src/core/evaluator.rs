@@ -31,6 +31,21 @@ impl Evaluator {
     }
 }
 
+fn expand_args(args: &Vec<SExpr>, env: ProcedureEnv) -> Result<Vec<SExpr>, String> {
+    let mut expanded_args = vec![];
+
+    for arg in args.iter() {
+        match arg {
+            SExpr::List(_) if arg.is_quoted_list() == Ok(true) => {
+                expanded_args.push(arg.unquote()?)
+            }
+            _ => expanded_args.push(eval(arg, env.clone())?),
+        }
+    }
+
+    Ok(expanded_args)
+}
+
 pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
     let mut current_expression = expression.clone();
     let mut current_env = env.clone();
@@ -48,11 +63,11 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
             }
             SExpr::List(list) => {
                 if list.borrow().s_len() > 0 {
-                    let first = eval(&list.borrow()[0], current_env.clone());
+                    let first = eval(list.borrow().s_car().unwrap(), current_env.clone());
                     match first {
                         Ok(res) => match res {
                             SExpr::Procedure(proc) => {
-                                let args = &list.borrow()[1..].to_vec();
+                                let args = list.borrow().s_cdr().unwrap();
 
                                 match proc {
                                     Procedure::SpecialForm(special_form) => {
@@ -80,44 +95,17 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         }
                                     }
                                     Procedure::Primitive(primitive) => {
-                                        if primitive == Primitive::CONS
-                                            || primitive == Primitive::DISPLAY
-                                            || primitive == Primitive::CAR
-                                            || primitive == Primitive::CDR
-                                            || primitive == Primitive::SET_CAR
-                                            || primitive == Primitive::FLATTEN
+                                        let expanded_args =
+                                            expand_args(&args, current_env.clone())?;
+
+                                        if primitive != Primitive::EVAL
+                                            && primitive != Primitive::APPLY
                                         {
-                                            return match primitive(
-                                                args.to_vec(),
-                                                current_env.clone(),
-                                            ) {
-                                                Ok(res) => Ok(res),
-                                                Err(e) => Err(e),
-                                            };
-                                        } else if primitive == Primitive::APPLY {
-                                            let result = Primitive::APPLY(
-                                                args.to_vec(),
-                                                current_env.clone(),
-                                            );
-                                            match result {
-                                                Ok(expr) => {
-                                                    current_expression = expr;
-                                                    continue;
-                                                }
-                                                Err(e) => return Err(e),
-                                            }
-                                        } else {
-                                            let mut expanded_args = vec![];
-
-                                            for arg in args.iter() {
-                                                match eval(arg, current_env.clone()) {
-                                                    Ok(res) => expanded_args.push(res),
-                                                    Err(e) => return Err(e),
-                                                }
-                                            }
-
                                             return primitive(expanded_args, current_env.clone());
                                         }
+
+                                        current_expression =
+                                            primitive(expanded_args, current_env.clone())?;
                                     }
                                     Procedure::Compound(
                                         ref arg_names,
@@ -128,26 +116,8 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             return Err(String::from("Exception: found different lengths for arguments and their names"));
                                         }
 
-                                        let mut expanded_args = vec![];
-
-                                        for arg in args.iter() {
-                                            match arg {
-                                                SExpr::List(list)
-                                                    if list
-                                                        .borrow()
-                                                        .s_car()
-                                                        .unwrap()
-                                                        .is_quote()
-                                                        .unwrap() =>
-                                                {
-                                                    expanded_args.push(arg.clone())
-                                                }
-                                                _ => match eval(arg, current_env.clone()) {
-                                                    Ok(res) => expanded_args.push(res),
-                                                    Err(e) => return Err(e),
-                                                },
-                                            }
-                                        }
+                                        let expanded_args =
+                                            expand_args(&args, current_env.clone())?;
 
                                         let lambda_env =
                                             Environment::new_child(closure_env.clone());
@@ -155,17 +125,9 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         for (name, arg) in
                                             arg_names.iter().zip(expanded_args.iter())
                                         {
-                                            match eval(arg, current_env.clone()) {
-                                                Ok(val) => {
-                                                    if lambda_env
-                                                        .borrow_mut()
-                                                        .define(&name, &val)
-                                                        .is_err()
-                                                    {
-                                                        return Err(String::from("Exception: could not bind value to the procedure frame"));
-                                                    }
-                                                }
-                                                Err(e) => return Err(e),
+                                            if lambda_env.borrow_mut().define(&name, &arg).is_err()
+                                            {
+                                                return Err(String::from("Exception: could not bind value to the procedure frame"));
                                             }
                                         }
 

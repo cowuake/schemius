@@ -8,9 +8,11 @@ use std::{fmt, result};
 pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
 
+pub type ListImplementation = Vec<SExpr>;
+
 pub type SchemeBoolean = bool;
 pub type SchemeChar = char;
-pub type SchemeList = SAccessor<Vec<SExpr>>;
+pub type SchemeList = SAccessor<ListImplementation>;
 pub type SchemeNumber = SNumber;
 pub type SchemePair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
 pub type SchemeProcedure = Procedure;
@@ -76,10 +78,42 @@ impl fmt::Display for SExpr {
 }
 
 impl SExpr {
-    pub fn to_char(&self) -> Result<SchemeChar, String> {
+    pub fn as_int(&self) -> Result<NativeInt, String> {
+        match self {
+            SExpr::Number(n) => Ok(n.to_int()?),
+            _ => Err(format!("Exception: {} is not a number", self)),
+        }
+    }
+
+    pub fn as_char(&self) -> Result<SchemeChar, String> {
         match self {
             SExpr::Char(val) => Ok(*val as SchemeChar),
             _ => panic!("Exception: {} is not a character", self),
+        }
+    }
+
+    pub fn as_list(&self) -> Result<ListImplementation, String> {
+        Ok(match self {
+            SExpr::List(list) => list.borrow().clone(),
+            _ => panic!("Exception: {} is not a list", self),
+        })
+    }
+
+    pub fn quote(&self) -> Result<SExpr, String> {
+        Ok(SExpr::List(SchemeList::new(vec![SExpr::Symbol("quote".to_string()), self.clone()])))
+    }
+
+    pub fn unquote(&self) -> Result<SExpr, String> {
+        match self {
+            SExpr::List(list) => {
+                let borrowed_list = list.borrow();
+                if borrowed_list.first().unwrap().is_quote().unwrap() {
+                    Ok(borrowed_list[1].clone())
+                } else {
+                    Err(format!("Exception: {} is not a quoted expression", self))
+                }
+            }
+            _ => Err(format!("Exception: {} is not a list", self)),
         }
     }
 
@@ -132,11 +166,36 @@ impl SExpr {
         }
     }
 
+    pub fn is_applyable(&self) -> Result<bool, String> {
+        match self {
+            SExpr::List(list) if list.borrow().s_car().unwrap().is_procedure()? => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
     pub fn is_quote(&self) -> Result<bool, String> {
         Ok(self.symbol_is("'").unwrap()
             || self.symbol_is("quote").unwrap()
             || self.symbol_is("`").unwrap()
             || self.symbol_is("quasiquote").unwrap())
+    }
+
+    pub fn is_quoted_list(&self) -> Result<bool, String> {
+        match self {
+            SExpr::List(list) => {
+                let borrowed = list.borrow();
+                if borrowed.s_len() > 0 {
+                    let car = borrowed.s_car().unwrap();
+                    match car {
+                        SExpr::Symbol(_) => Ok(car.is_quote().unwrap()),
+                        _ => Ok(false),
+                    }
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => Ok(false),
+        }
     }
 
     pub fn is_string(&self) -> Result<bool, String> {
@@ -270,6 +329,10 @@ impl SExpr {
             SExpr::List(_) => Ok(true),
             _ => Ok(false),
         }
+    }
+
+    pub fn is_atom(&self) -> Result<bool, String> {
+        Ok(!self.is_pair()?)
     }
 
     pub fn is_list(&self) -> Result<bool, String> {
@@ -475,5 +538,62 @@ impl SExpr {
             }
             other => Ok(other.clone()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::builtins::Primitive;
+
+    use super::*;
+
+    #[test]
+    fn test_sexpr_as_char() {
+        let sexpr = SExpr::Char('a');
+        assert_eq!(sexpr.as_char().unwrap(), 'a');
+    }
+
+    #[test]
+    fn test_sexpr_as_int() {
+        let sexpr = SExpr::Number(SNumber::Int(42));
+        assert_eq!(sexpr.as_int().unwrap(), 42);
+    }
+
+    #[test]
+    fn test_sexpr_quote() {
+        let expression = SExpr::Number(SNumber::Int(42));
+        let quoted = expression.quote().unwrap();
+        assert!(quoted.is_list().unwrap() && quoted.is_quoted_list().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_unquote() {
+        let internal = SExpr::Number(SNumber::Int(42));
+        let expression = internal.quote().unwrap();
+        let unquoted = expression.unquote().unwrap();
+        assert!(unquoted.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_procedure() {
+        let sexpr = SExpr::Procedure(Procedure::Primitive(Primitive::SUM));
+        assert!(sexpr.is_procedure().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_applyable() {
+        let sexpr = SExpr::List(SchemeList::new(vec![
+            SExpr::Procedure(Procedure::Primitive(Primitive::SUM)),
+            SExpr::Number(SNumber::Int(1)),
+            SExpr::Number(SNumber::Int(2)),
+        ]));
+        assert!(sexpr.is_applyable().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_atom() {
+        let sexpr = SExpr::Number(SNumber::Int(NativeInt::from(3)));
+        let is_atom = sexpr.is_atom().unwrap();
+        assert!(is_atom)
     }
 }

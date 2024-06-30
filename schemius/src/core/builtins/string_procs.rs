@@ -15,11 +15,11 @@ pub fn r_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
             "Exception in string: expected at least 1 argument, found {}",
             args.s_len()
         )),
-        1 => Ok(SExpr::String(SchemeString::new(args[0].to_string()))),
+        1 => Ok(SExpr::String(SchemeString::new(args.s_car().unwrap().to_string()))),
         2.. => {
             let mut output = String::new();
             for arg in args {
-                output.push(arg.to_char().unwrap());
+                output.push(arg.as_char().unwrap());
             }
             Ok(SExpr::String(SchemeString::new(output)))
         }
@@ -35,12 +35,12 @@ pub fn r_make_string(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         ));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::Number(n) => {
             let n = n.to_int().unwrap();
             let mut output = String::new();
             let character = if length == 2 {
-                match &args[1] {
+                match args.s_cadr().unwrap() {
                     SExpr::Char(c) => *c,
                     other => {
                         return Err(format!("Exception in make-string: {} is not a char", other))
@@ -79,8 +79,8 @@ pub fn r_string_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         return Err(format!("Exception in string-ref: expected 2 arguments, found {}", length));
     }
 
-    match &args[0] {
-        SExpr::String(string) => match &args[1] {
+    match args.s_car().unwrap() {
+        SExpr::String(string) => match args.s_cadr().unwrap() {
             SExpr::Number(index) => {
                 let index = index.to_int().unwrap() as usize;
                 let is_in_range = index < string.borrow().len();
@@ -107,8 +107,8 @@ pub fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         ));
     }
 
-    match &args[0] {
-        SExpr::String(string) => match &args[1] {
+    match args.s_car().unwrap() {
+        SExpr::String(string) => match args.s_cadr().unwrap() {
             SExpr::Number(index) => {
                 let index = index.to_int().unwrap() as usize;
                 let is_in_range = index < string.borrow().len();
@@ -142,7 +142,7 @@ pub fn r_string_upcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
         return Err(format!("Exception in string-upcase: expected 1 argument, found {}", length));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::String(string) => {
             let output = string.borrow().to_uppercase();
             Ok(SExpr::String(SchemeString::new(output)))
@@ -157,7 +157,7 @@ pub fn r_string_downcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutpu
         return Err(format!("Exception in string-downcase: expected 1 argument, found {}", length));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::String(string) => {
             let output = string.borrow().to_lowercase();
             Ok(SExpr::String(SchemeString::new(output)))
@@ -172,7 +172,7 @@ pub fn r_string_length(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
         return Err(format!("Exception in string-length: expected 1 argument, found {}", length));
     }
 
-    match &args[0] {
+    match args.s_car().unwrap() {
         SExpr::String(string) => {
             let length = string.borrow().len();
             Ok(SExpr::Number(SchemeNumber::Int(length as NativeInt)))

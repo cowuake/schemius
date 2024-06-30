@@ -156,6 +156,10 @@ impl Default for Environment {
             "procedure?" => IS_PROCEDURE
             "null?" => IS_NULL
             "environment-bindings" => ENVIRONMENT_BINDINGS
+            "append" => APPEND
+            "length" => LENGTH
+            "list-ref" => LIST_REF
+            "list-tail" => LIST_TAIL
             "reverse" => REVERSE
             "string" => STRING
             "make-string" => MAKE_STRING
@@ -165,8 +169,8 @@ impl Default for Environment {
             "string-set!" => STRING_SET
             "string-upcase" => STRING_UPCASE
             "string-downcase" => STRING_DOWNCASE
-            "flatten" => FLATTEN
-            "unflatten" => UNFLATTEN
+            // "flatten" => FLATTEN
+            // "unflatten" => UNFLATTEN
             "zero?" => IS_ZERO
         });
         bind_special_forms!(new_env,
