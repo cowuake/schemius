@@ -180,7 +180,7 @@ impl SExpr {
             || self.symbol_is("quasiquote").unwrap())
     }
 
-    pub fn is_quoted(&self) -> Result<bool, String> {
+    pub fn is_quoted_list(&self) -> Result<bool, String> {
         match self {
             SExpr::List(list) => {
                 let borrowed = list.borrow();
@@ -559,7 +559,7 @@ mod tests {
     fn test_sexpr_quote() {
         let expression = SExpr::Number(SNumber::Int(42));
         let quoted = expression.quote().unwrap();
-        assert!(quoted.is_list().unwrap() && quoted.is_quoted().unwrap());
+        assert!(quoted.is_list().unwrap() && quoted.is_quoted_list().unwrap());
     }
 
     #[test]

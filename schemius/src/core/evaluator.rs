@@ -35,9 +35,11 @@ fn expand_args(args: &Vec<SExpr>, env: ProcedureEnv) -> EvalOutput {
     let mut expanded_args = vec![];
 
     for arg in args.iter() {
-        match eval(arg, env.clone()) {
-            Ok(val) => expanded_args.push(val),
-            Err(e) => return Err(e),
+        match arg {
+            SExpr::List(_) if arg.is_quoted_list() == Ok(true) => {
+                expanded_args.push(arg.unquote()?)
+            }
+            _ => expanded_args.push(eval(arg, env.clone())?),
         }
     }
 
@@ -127,26 +129,15 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             return Err(String::from("Exception: found different lengths for arguments and their names"));
                                         }
 
-                                        let mut expanded_args = vec![];
-
-                                        for arg in args.iter() {
-                                            match arg {
-                                                SExpr::List(_) if arg.is_quoted().unwrap() => {
-                                                    expanded_args.push(arg.clone())
-                                                }
-                                                _ => match eval(arg, current_env.clone()) {
-                                                    Ok(res) => expanded_args.push(res),
-                                                    Err(e) => return Err(e),
-                                                },
-                                            }
-                                        }
-
+                                        let expanded_args = expand_args(&args, current_env.clone());
+                                        println!("QUACK!");
                                         let lambda_env =
                                             Environment::new_child(closure_env.clone());
 
                                         for (name, arg) in
                                             arg_names.iter().zip(expanded_args.iter())
                                         {
+                                            println!("{} {}", name, arg);
                                             match eval(arg, current_env.clone()) {
                                                 Ok(val) => {
                                                     if lambda_env
@@ -163,13 +154,9 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
 
                                         let eval_env = Environment::new_child(lambda_env);
 
-                                        let mut new = vec![];
-                                        new.push(SExpr::Procedure(Procedure::SpecialForm(
-                                            SpecialForm::BEGIN,
-                                        )));
-                                        body.iter().for_each(|x| new.push(x.clone()));
-
-                                        current_expression = SExpr::List(SchemeList::new(new));
+                                        current_expression =
+                                            SExpr::List(SchemeList::new(body.clone()));
+                                        println!("{}", current_expression);
                                         current_env = eval_env.clone();
                                         continue;
                                     }
