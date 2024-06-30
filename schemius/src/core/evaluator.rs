@@ -31,7 +31,7 @@ impl Evaluator {
     }
 }
 
-fn expand_args(args: &Vec<SExpr>, env: ProcedureEnv) -> EvalOutput {
+fn expand_args(args: &Vec<SExpr>, env: ProcedureEnv) -> Result<Vec<SExpr>, String> {
     let mut expanded_args = vec![];
 
     for arg in args.iter() {
@@ -43,7 +43,7 @@ fn expand_args(args: &Vec<SExpr>, env: ProcedureEnv) -> EvalOutput {
         }
     }
 
-    Ok(SExpr::List(SchemeList::new(expanded_args)))
+    Ok(expanded_args)
 }
 
 pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
@@ -95,30 +95,17 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         }
                                     }
                                     Procedure::Primitive(primitive) => {
-                                        match expand_args(&args, current_env.clone()) {
-                                            Ok(result) => match result {
-                                                SExpr::List(list) => {
-                                                    if primitive != Primitive::EVAL
-                                                        && primitive != Primitive::APPLY
-                                                    {
-                                                        return primitive(
-                                                            list.borrow().to_vec(),
-                                                            current_env.clone(),
-                                                        );
-                                                    }
-                                                    current_expression = primitive(
-                                                        list.borrow().to_vec(),
-                                                        current_env.clone(),
-                                                    )?;
-                                                }
-                                                _ => {
-                                                    return Err(String::from(
-                                                        "Exception: could not expand arguments",
-                                                    ))
-                                                }
-                                            },
-                                            Err(e) => return Err(e),
+                                        let expanded_args =
+                                            expand_args(&args, current_env.clone())?;
+
+                                        if primitive != Primitive::EVAL
+                                            && primitive != Primitive::APPLY
+                                        {
+                                            return primitive(expanded_args, current_env.clone());
                                         }
+
+                                        current_expression =
+                                            primitive(expanded_args, current_env.clone())?;
                                     }
                                     Procedure::Compound(
                                         ref arg_names,
@@ -129,34 +116,30 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             return Err(String::from("Exception: found different lengths for arguments and their names"));
                                         }
 
-                                        let expanded_args = expand_args(&args, current_env.clone());
-                                        println!("QUACK!");
+                                        let expanded_args =
+                                            expand_args(&args, current_env.clone())?;
+
                                         let lambda_env =
                                             Environment::new_child(closure_env.clone());
 
                                         for (name, arg) in
                                             arg_names.iter().zip(expanded_args.iter())
                                         {
-                                            println!("{} {}", name, arg);
-                                            match eval(arg, current_env.clone()) {
-                                                Ok(val) => {
-                                                    if lambda_env
-                                                        .borrow_mut()
-                                                        .define(&name, &val)
-                                                        .is_err()
-                                                    {
-                                                        return Err(String::from("Exception: could not bind value to the procedure frame"));
-                                                    }
-                                                }
-                                                Err(e) => return Err(e),
+                                            if lambda_env.borrow_mut().define(&name, &arg).is_err()
+                                            {
+                                                return Err(String::from("Exception: could not bind value to the procedure frame"));
                                             }
                                         }
 
                                         let eval_env = Environment::new_child(lambda_env);
 
-                                        current_expression =
-                                            SExpr::List(SchemeList::new(body.clone()));
-                                        println!("{}", current_expression);
+                                        let mut new = vec![];
+                                        new.push(SExpr::Procedure(Procedure::SpecialForm(
+                                            SpecialForm::BEGIN,
+                                        )));
+                                        body.iter().for_each(|x| new.push(x.clone()));
+
+                                        current_expression = SExpr::List(SchemeList::new(new));
                                         current_env = eval_env.clone();
                                         continue;
                                     }

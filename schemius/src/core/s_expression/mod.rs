@@ -331,6 +331,10 @@ impl SExpr {
         }
     }
 
+    pub fn is_atom(&self) -> Result<bool, String> {
+        Ok(!self.is_pair()?)
+    }
+
     pub fn is_list(&self) -> Result<bool, String> {
         match self {
             SExpr::List(_) => Ok(true),
@@ -584,5 +588,12 @@ mod tests {
             SExpr::Number(SNumber::Int(2)),
         ]));
         assert!(sexpr.is_applyable().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_atom() {
+        let sexpr = SExpr::Number(SNumber::Int(NativeInt::from(3)));
+        let is_atom = sexpr.is_atom().unwrap();
+        assert!(is_atom)
     }
 }
