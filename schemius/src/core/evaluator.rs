@@ -53,7 +53,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
     loop {
         match current_expression {
             SExpr::Symbol(ref val) => {
-                return match current_env.borrow().get(val) {
+                return match current_env.access().get(val) {
                     Some(v) => Ok(v),
                     None => Err(format!(
                         "Exception: in eval: could not find a value bound to <{}>",
@@ -62,12 +62,12 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                 }
             }
             SExpr::List(list) => {
-                if list.borrow().s_len() > 0 {
-                    let first = eval(list.borrow().s_car().unwrap(), current_env.clone());
+                if list.access().s_len() > 0 {
+                    let first = eval(list.access().s_car().unwrap(), current_env.clone());
                     match first {
                         Ok(res) => match res {
                             SExpr::Procedure(proc) => {
-                                let args = list.borrow().s_cdr().unwrap();
+                                let args = list.access().s_cdr().unwrap();
 
                                 match proc {
                                     Procedure::SpecialForm(special_form) => {
@@ -125,7 +125,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                         for (name, arg) in
                                             arg_names.iter().zip(expanded_args.iter())
                                         {
-                                            if lambda_env.borrow_mut().define(&name, &arg).is_err()
+                                            if lambda_env.access_mut().define(&name, &arg).is_err()
                                             {
                                                 return Err(String::from("Exception: could not bind value to the procedure frame"));
                                             }

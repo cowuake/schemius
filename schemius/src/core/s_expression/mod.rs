@@ -51,25 +51,25 @@ impl fmt::Display for SExpr {
             SExpr::Char(val) => write!(f, "#\\{}", val),
             SExpr::Number(val) => write!(f, "{}", val),
             SExpr::Boolean(val) => write!(f, "#{}", if *val { "t" } else { "f" }),
-            SExpr::String(ref val) => write!(f, "\"{}\"", *val.borrow()),
+            SExpr::String(ref val) => write!(f, "\"{}\"", *val.access()),
             SExpr::Procedure(app) => match app {
                 Procedure::SpecialForm(_) => write!(f, "#<special form>"),
                 Procedure::Primitive(_) => write!(f, "#<primitive>"),
                 Procedure::Compound(args, _, _) => write!(f, "#<procedure ({})>", args.join(", ")),
             },
             SExpr::Pair(val) => {
-                let borrowed_val = val.borrow();
+                let borrowed_val = val.access();
                 write!(f, "({} . {})", borrowed_val.0, borrowed_val.1)
             }
             SExpr::List(ref val) => write!(
                 f,
                 "({})",
-                val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")
+                val.access().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")
             ),
             SExpr::Vector(ref val) => write!(
                 f,
                 "#({})",
-                val.borrow().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")
+                val.access().iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ")
             ),
             SExpr::Unspecified => writeln!(f),
             SExpr::Ok => write!(f, "ok"),
@@ -94,7 +94,7 @@ impl SExpr {
 
     pub fn as_list(&self) -> Result<ListImplementation, String> {
         Ok(match self {
-            SExpr::List(list) => list.borrow().clone(),
+            SExpr::List(list) => list.access().clone(),
             _ => panic!("Exception: {} is not a list", self),
         })
     }
@@ -106,7 +106,7 @@ impl SExpr {
     pub fn unquote(&self) -> Result<SExpr, String> {
         match self {
             SExpr::List(list) => {
-                let borrowed_list = list.borrow();
+                let borrowed_list = list.access();
                 if borrowed_list.first().unwrap().is_quote().unwrap() {
                     Ok(borrowed_list[1].clone())
                 } else {
@@ -168,7 +168,7 @@ impl SExpr {
 
     pub fn is_applyable(&self) -> Result<bool, String> {
         match self {
-            SExpr::List(list) if list.borrow().s_car().unwrap().is_procedure()? => Ok(true),
+            SExpr::List(list) if list.access().s_car().unwrap().is_procedure()? => Ok(true),
             _ => Ok(false),
         }
     }
@@ -183,7 +183,7 @@ impl SExpr {
     pub fn is_quoted_list(&self) -> Result<bool, String> {
         match self {
             SExpr::List(list) => {
-                let borrowed = list.borrow();
+                let borrowed = list.access();
                 if borrowed.s_len() > 0 {
                     let car = borrowed.s_car().unwrap();
                     match car {
@@ -359,7 +359,7 @@ impl SExpr {
     pub fn is_null(&self) -> result::Result<bool, String> {
         match self {
             SExpr::List(list) => {
-                if list.borrow().is_empty() {
+                if list.access().is_empty() {
                     Ok(true)
                 } else {
                     Ok(false)
@@ -372,7 +372,7 @@ impl SExpr {
     pub fn matching_brackets(&self) -> Option<Vec<(usize, usize, usize)>> {
         match self {
             SExpr::List(list) => {
-                let list = list.borrow();
+                let list = list.access();
                 if !list.first().unwrap().symbol_is("(").unwrap() {
                     return None;
                 }
@@ -430,7 +430,7 @@ impl SExpr {
     pub fn find_symbol(&self, symbol: &str) -> Option<Vec<usize>> {
         match self.flatten() {
             Ok(SExpr::List(flattened)) => {
-                let borrowed_flattened = flattened.borrow();
+                let borrowed_flattened = flattened.access();
 
                 if borrowed_flattened.first().unwrap().symbol_is("(").unwrap() {
                     return None;
@@ -459,10 +459,10 @@ impl SExpr {
                 let mut flattened = vec![];
                 flattened.push(SExpr::Symbol(String::from("(")));
 
-                list.borrow().iter().for_each(|item| match item {
+                list.access().iter().for_each(|item| match item {
                     SExpr::List(_) => {
                         if let Ok(SExpr::List(internal)) = item.flatten() {
-                            internal.borrow().iter().for_each(|x| flattened.push(x.clone()))
+                            internal.access().iter().for_each(|x| flattened.push(x.clone()))
                         }
                     }
                     other => flattened.push(other.clone()),
@@ -473,7 +473,7 @@ impl SExpr {
                 Ok(SExpr::List(SchemeList::new(flattened.clone())))
             }
             SExpr::Pair(pair) => {
-                let pair = pair.borrow();
+                let pair = pair.access();
                 SExpr::List(SchemeList::new(vec![
                     *pair.0.clone(),
                     SExpr::Symbol(".".to_string()),
@@ -490,7 +490,7 @@ impl SExpr {
         match self {
             SExpr::List(list) => {
                 let cloned = list.clone();
-                let mut unflattened = cloned.borrow_mut();
+                let mut unflattened = cloned.access_mut();
 
                 if !unflattened.first().unwrap().symbol_is("(").unwrap() {
                     return Ok(self.clone());

@@ -15,7 +15,7 @@ pub fn r_apply(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     to_be_evaluated.push(proc.clone());
 
     match args {
-        SExpr::List(list) => list.borrow().iter().for_each(|arg| to_be_evaluated.push(arg.clone())),
+        SExpr::List(list) => list.access().iter().for_each(|arg| to_be_evaluated.push(arg.clone())),
         other => return Err(format!("Exception in #<apply>: {} is not a list", other)),
     }
 
@@ -36,7 +36,7 @@ pub fn r_display(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     }
 
     match args.s_car().unwrap() {
-        SExpr::String(string) => Ok(SExpr::Symbol(string.borrow().to_string())), // Avoids double quotes
+        SExpr::String(string) => Ok(SExpr::Symbol(string.access().to_string())), // Avoids double quotes
         expr => Ok(SExpr::Symbol(format!("{}", expr))),
     }
 }
@@ -53,7 +53,7 @@ pub fn r_environment_bindings(args: ProcedureArgs, env: ProcedureEnv) -> Procedu
         ));
     }
 
-    let env_guard = env.borrow();
+    let env_guard = env.access();
     let mut bindings = env_guard.get_bindings().clone();
     bindings.sort_by(|a, b| a.0.cmp(b.0));
 

@@ -50,7 +50,7 @@ impl SchemeEnvironment for Environment {
             Ok(())
         } else {
             match self.parent {
-                Some(ref parent) => parent.borrow_mut().set(key, value),
+                Some(ref parent) => parent.access_mut().set(key, value),
                 None => Err(format!("Exception: {} is not bound", key)),
             }
         }
@@ -60,7 +60,7 @@ impl SchemeEnvironment for Environment {
         match self.table.get(key) {
             Some(val) => Some(val.clone()),
             None => match self.parent {
-                Some(ref parent) => parent.borrow().get(key),
+                Some(ref parent) => parent.access().get(key),
                 None => None,
             },
         }
@@ -73,7 +73,7 @@ impl SchemeEnvironment for Environment {
     }
 
     fn get_root(env: ProcedureEnv) -> ProcedureEnv {
-        match &env.borrow().parent {
+        match &env.access().parent {
             Some(frame) => Environment::get_root(frame.clone()),
             None => env.clone(),
         }

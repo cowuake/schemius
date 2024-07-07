@@ -65,7 +65,7 @@ pub fn r_string_append(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
 
     for arg in args {
         match arg {
-            SExpr::String(string) => output.push_str(string.borrow().as_str()),
+            SExpr::String(string) => output.push_str(string.access().as_str()),
             other => return Err(format!("Exception in string-append: {} is not a string", other)),
         }
     }
@@ -83,10 +83,10 @@ pub fn r_string_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         SExpr::String(string) => match args.s_cadr().unwrap() {
             SExpr::Number(index) => {
                 let index = index.to_int().unwrap() as usize;
-                let is_in_range = index < string.borrow().len();
+                let is_in_range = index < string.access().len();
 
                 if is_in_range {
-                    let character = string.borrow().chars().nth(index).unwrap();
+                    let character = string.access().chars().nth(index).unwrap();
                     Ok(SExpr::Char(character))
                 } else {
                     Err("Exception in string-ref: index out of range".to_string())
@@ -111,17 +111,17 @@ pub fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
         SExpr::String(string) => match args.s_cadr().unwrap() {
             SExpr::Number(index) => {
                 let index = index.to_int().unwrap() as usize;
-                let is_in_range = index < string.borrow().len();
+                let is_in_range = index < string.access().len();
 
                 if is_in_range {
                     match &args[2] {
                         SExpr::Char(character) => {
                             let replacement = character.to_string();
                             string
-                                .borrow_mut()
+                                .access_mut()
                                 .replace_range(index..index + 1, replacement.as_str());
 
-                            let output = string.borrow().clone();
+                            let output = string.access().clone();
                             Ok(SExpr::String(SchemeString::new(output)))
                         }
                         other => Err(format!("Exception in string-set!: {} is not a char", other)),
@@ -144,7 +144,7 @@ pub fn r_string_upcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
 
     match args.s_car().unwrap() {
         SExpr::String(string) => {
-            let output = string.borrow().to_uppercase();
+            let output = string.access().to_uppercase();
             Ok(SExpr::String(SchemeString::new(output)))
         }
         other => Err(format!("Exception in string-upcase: {} is not a string", other)),
@@ -159,7 +159,7 @@ pub fn r_string_downcase(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutpu
 
     match args.s_car().unwrap() {
         SExpr::String(string) => {
-            let output = string.borrow().to_lowercase();
+            let output = string.access().to_lowercase();
             Ok(SExpr::String(SchemeString::new(output)))
         }
         other => Err(format!("Exception in string-downcase: {} is not a string", other)),
@@ -174,7 +174,7 @@ pub fn r_string_length(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput 
 
     match args.s_car().unwrap() {
         SExpr::String(string) => {
-            let length = string.borrow().len();
+            let length = string.access().len();
             Ok(SExpr::Number(SchemeNumber::Int(length as NativeInt)))
         }
         other => Err(format!("Exception in string-length: {} is not a string", other)),

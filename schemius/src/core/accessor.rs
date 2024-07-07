@@ -1,53 +1,50 @@
+use core::fmt::Debug;
 use std::{
-    cell::RefCell,
+    cell::{Ref, RefCell, RefMut},
     ops::{Deref, DerefMut},
     rc::Rc,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, MutexGuard},
 };
 
-pub trait Accessor<T: Clone> {
+pub trait Accessor<T> {
     fn new(src: T) -> Self;
-    fn borrow(&self) -> impl Deref<Target = T>;
-    fn borrow_mut(&self) -> impl DerefMut<Target = T>;
+    fn access(&self) -> impl Deref<Target = T>;
+    fn access_mut(&self) -> impl DerefMut<Target = T>;
     fn replace(&self, src: T) -> T;
 }
 
-#[derive(Debug, Clone)]
-pub struct BaseAccessor<T> {
-    inner: Rc<RefCell<T>>,
-}
+#[derive(Clone, Debug)]
+pub struct BaseAccessor<T>(Rc<RefCell<T>>);
 
-#[derive(Debug, Clone)]
-pub struct ThreadSafeAccessor<T> {
-    inner: Arc<Mutex<T>>,
-}
+#[derive(Clone, Debug)]
+pub struct ThreadSafeAccessor<T>(Arc<Mutex<T>>);
 
-impl<T: Clone> Accessor<T> for BaseAccessor<T> {
+impl<T> Accessor<T> for BaseAccessor<T> {
     fn new(src: T) -> Self {
-        Self { inner: Rc::new(RefCell::new(src)) }
+        Self(Rc::new(RefCell::new(src)))
     }
-    fn borrow(&self) -> impl Deref<Target = T> {
-        self.inner.borrow()
+    fn access(&self) -> Ref<T> {
+        self.0.try_borrow().unwrap()
     }
-    fn borrow_mut(&self) -> impl DerefMut<Target = T> {
-        self.inner.borrow_mut()
+    fn access_mut(&self) -> RefMut<T> {
+        self.0.try_borrow_mut().unwrap()
     }
     fn replace(&self, src: T) -> T {
-        std::mem::replace(&mut *self.inner.borrow_mut(), src)
+        std::mem::replace(&mut *self.0.try_borrow_mut().unwrap(), src)
     }
 }
 
-impl<T: Clone> Accessor<T> for ThreadSafeAccessor<T> {
+impl<T> Accessor<T> for ThreadSafeAccessor<T> {
     fn new(src: T) -> Self {
-        Self { inner: Arc::new(Mutex::new(src)) }
+        Self(Arc::new(Mutex::new(src)))
     }
-    fn borrow(&self) -> impl Deref<Target = T> {
-        self.inner.try_lock().unwrap()
+    fn access(&self) -> MutexGuard<T> {
+        self.0.try_lock().unwrap()
     }
-    fn borrow_mut(&self) -> impl DerefMut<Target = T> {
-        self.inner.try_lock().unwrap()
+    fn access_mut(&self) -> MutexGuard<T> {
+        self.0.try_lock().unwrap()
     }
     fn replace(&self, src: T) -> T {
-        std::mem::replace(&mut *self.inner.try_lock().unwrap(), src)
+        std::mem::replace(&mut *self.0.try_lock().unwrap(), src)
     }
 }

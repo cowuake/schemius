@@ -30,7 +30,7 @@ pub fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     }
 
     let arg_names = match args.s_car().unwrap() {
-        SExpr::List(ref list) => match list_args(&list.borrow()) {
+        SExpr::List(ref list) => match list_args(&list.access()) {
             Ok(names) => names,
             Err(e) => return Err(e),
         },
@@ -53,7 +53,7 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                         other => other,
                     };
 
-                    match env.borrow_mut().define(name, &value) {
+                    match env.access_mut().define(name, &value) {
                         Ok(_) => Ok(SExpr::Ok),
                         Err(_) => Err(format!("Exception: error defining {}", name)),
                     }
@@ -61,16 +61,16 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 Err(e) => Err(e),
             },
             SExpr::List(list) => {
-                if list.borrow().s_len() == 0 {
+                if list.access().s_len() == 0 {
                     return Err(String::from("Exception (TODO?): deal with empty lists"));
                 }
 
-                let lambda_name = list.borrow().s_car().unwrap().to_string();
+                let lambda_name = list.access().s_car().unwrap().to_string();
                 let mut lambda_args: Vec<SExpr> = vec![];
                 let lambda_body = &mut args.s_cdr().unwrap();
 
-                if list.borrow().s_len() > 1 {
-                    for arg in &list.borrow()[1..] {
+                if list.access().s_len() > 1 {
+                    for arg in &list.access()[1..] {
                         lambda_args.push(arg.clone());
                     }
                 }
@@ -83,7 +83,7 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     Err(e) => return Err(e),
                 };
 
-                match env.borrow_mut().define(&lambda_name, &lambda_proc) {
+                match env.access_mut().define(&lambda_name, &lambda_proc) {
                     Ok(_) => Ok(SExpr::Ok),
                     Err(_) => Err(String::from("")),
                 }
@@ -110,7 +110,7 @@ pub fn r_set(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     other => other,
                 };
 
-                match env.borrow_mut().set(&name, &value) {
+                match env.access_mut().set(&name, &value) {
                     Ok(_) => Ok(SExpr::Ok),
                     Err(e) => Err(e),
                 }
@@ -134,15 +134,15 @@ pub fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     match args.s_car().unwrap() {
         SExpr::List(list) => {
-            for binding in list.borrow().iter() {
+            for binding in list.access().iter() {
                 match binding {
                     SExpr::List(binding) => {
-                        let borrowed_binding = binding.borrow();
+                        let borrowed_binding = binding.access();
                         match borrowed_binding.s_car().unwrap() {
                             SExpr::Symbol(symbol) => {
                                 match eval(&borrowed_binding[1], env.clone()) {
                                     Ok(expr) => {
-                                        let_env.borrow_mut().define(&symbol, &expr).unwrap()
+                                        let_env.access_mut().define(&symbol, &expr).unwrap()
                                     }
                                     Err(e) => return Err(e),
                                 }
@@ -181,17 +181,17 @@ pub fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     match args.s_car().unwrap() {
         SExpr::List(list) => {
-            for binding in list.borrow().iter() {
+            for binding in list.access().iter() {
                 match binding {
                     SExpr::List(binding) => {
-                        let borrowed_binding = binding.borrow();
+                        let borrowed_binding = binding.access();
                         match &borrowed_binding[0] {
                             SExpr::Symbol(symbol) => {
                                 match eval(&borrowed_binding[1], inner_env.clone()) {
                                     Ok(expr) => {
                                         inner_env = Environment::new_child(inner_env.clone());
                                         inner_env = Environment::new_child(inner_env.clone());
-                                        inner_env.borrow_mut().define(&symbol, &expr).unwrap();
+                                        inner_env.access_mut().define(&symbol, &expr).unwrap();
                                     }
                                     Err(e) => return Err(e),
                                 }
@@ -331,7 +331,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
 
                         // After each and every unquoting indexes will be shifted by a certain offset
                         let mut offset: i32 = 0;
-                        let mut borrowed_list = list.borrow_mut();
+                        let mut borrowed_list = list.access_mut();
 
                         loop {
                             if unquotes.is_empty() {
@@ -382,7 +382,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
 
                                         if let SExpr::Symbol(symbol) = suspect {
                                             if !env
-                                                .borrow()
+                                                .access()
                                                 .get(&symbol)
                                                 .unwrap()
                                                 .is_procedure()
@@ -409,7 +409,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                 }
                                 // Unquoting symbol or atom
                                 None => {
-                                    to_be_evaluated = list.borrow()[unquote_index + 1].clone();
+                                    to_be_evaluated = list.access()[unquote_index + 1].clone();
                                     first_idx = unquote_index - 1; // Index of the left parenthesis preceding the unquote symbol
                                     last_idx = unquote_index + 3; // Index of the right parenthesis + 1
                                 }
@@ -425,14 +425,14 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                 match evaluated {
                                     Ok(ref res) => match res {
                                         SExpr::List(internal) => {
-                                            let borrowed_internal = internal.borrow();
+                                            let borrowed_internal = internal.access();
                                             offset -= (borrowed_internal.s_len() - 1) as i32;
 
                                             for i in (first_idx..last_idx).rev() {
                                                 borrowed_list.remove(i);
                                             }
 
-                                            for i in (0..internal.borrow().s_len()).rev() {
+                                            for i in (0..internal.access().s_len()).rev() {
                                                 borrowed_list.splice(
                                                     first_idx..first_idx,
                                                     [borrowed_internal[i].clone()],
@@ -484,16 +484,16 @@ pub fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     for block in iterator {
         match block {
             SExpr::List(list) => {
-                if list.borrow().s_len() != 2 {
+                if list.access().s_len() != 2 {
                     return Err(String::from(
                         "Exception: malformed args provided to #<procedure cond>",
                     ));
                 }
-                let first = eval(&list.borrow()[0], env.clone());
+                let first = eval(&list.access()[0], env.clone());
                 match first {
                     Ok(condition) => match condition {
                         SExpr::Boolean(val) => match val {
-                            true => return Ok(list.borrow()[1].clone()),
+                            true => return Ok(list.access()[1].clone()),
                             false => continue,
                         },
                         _ => {
