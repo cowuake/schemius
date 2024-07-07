@@ -58,24 +58,6 @@ pub fn r_list(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     Ok(SExpr::List(SchemeList::new(list)))
 }
 
-pub fn r_flatten(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    let length = args.s_len();
-    if length != 1 {
-        return Err(format!("Exception in flatten: expected 1 argument, found {}", length));
-    }
-
-    args.s_car().unwrap().flatten()
-}
-
-pub fn r_unflatten(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    let length = args.s_len();
-    if length != 1 {
-        return Err(format!("Exception in unflatten: expected 1 argument, found {}", length));
-    }
-
-    args.s_car().unwrap().unflatten()
-}
-
 pub fn r_car(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     let length = args.s_len();
     if length != 1 {

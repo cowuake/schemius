@@ -68,8 +68,6 @@ impl Primitive {
     pub const STRING_REF: ProcedureSignature = r_string_ref;
     pub const STRING_SET: ProcedureSignature = r_string_set;
     pub const STRING_UPCASE: ProcedureSignature = r_string_upcase;
-    pub const FLATTEN: ProcedureSignature = r_flatten;
-    pub const UNFLATTEN: ProcedureSignature = r_unflatten;
 }
 
 impl SpecialForm {

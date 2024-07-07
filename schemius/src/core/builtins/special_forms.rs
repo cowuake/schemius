@@ -291,9 +291,9 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
 
     match args.s_car().unwrap() {
         SExpr::List(_) | SExpr::Pair(_) => {
-            let flattened = args.s_car().unwrap().flatten();
+            let list_with_parens = args.s_car().unwrap().with_explicit_parens();
 
-            match flattened {
+            match list_with_parens {
                 Ok(expr) => match expr {
                     SExpr::List(list) => {
                         let s_list = SExpr::List(list.clone());
@@ -403,7 +403,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                     }
 
                                     let expr = SExpr::List(SchemeList::new(raw_expr));
-                                    to_be_evaluated = expr.unflatten().unwrap();
+                                    to_be_evaluated = expr.without_explicit_parens().unwrap();
                                     first_idx = lparen_idx - 2; // Index of the left parenthesis preceding the unquote symbol
                                     last_idx = rparen_idx + 2; // Index of the right matching parenthesis + 1
                                 }
@@ -453,7 +453,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                             unquotes.remove(0);
                         }
 
-                        Ok(SExpr::List(list.clone()).unflatten().unwrap())
+                        SExpr::List(list.clone()).without_explicit_parens()
                     }
                     other => Ok(other.clone()),
                 },

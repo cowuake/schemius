@@ -151,17 +151,6 @@ fn interpreter_binding() {
 
 #[ignore]
 #[test]
-fn interpreter_flattening_unflattening() {
-    integration_subtest_eval_to! {
-        {
-            expression: "(unflatten (flatten `(a `(b ,(+ 1 2) ,(foo ,(+ 1 3) d) e) f)))",
-            expected: "(quasiquote (a (quasiquote (b (unquote (+ 1 2)) (unquote (foo (unquote (+ 1 3)) d)) e)) f))"
-        };
-    }
-}
-
-#[ignore]
-#[test]
 fn interpreter_quasiquotation() {
     integration_subtest_eval_to! {
         { expression: "(define x '(1 2 3))", expected: "ok" };

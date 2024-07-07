@@ -3,7 +3,7 @@ pub mod s_number;
 pub mod s_procedure;
 
 use super::accessor::*;
-use std::{fmt, result};
+use std::{fmt, result, vec};
 
 pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
@@ -428,15 +428,15 @@ impl SExpr {
     }
 
     pub fn find_symbol(&self, symbol: &str) -> Option<Vec<usize>> {
-        match self.flatten() {
-            Ok(SExpr::List(flattened)) => {
-                let borrowed_flattened = flattened.access();
+        match self.with_explicit_parens() {
+            Ok(SExpr::List(list)) => {
+                let borrowed_list = list.access();
 
-                if borrowed_flattened.first().unwrap().symbol_is("(").unwrap() {
+                if borrowed_list.first().unwrap().symbol_is("(").unwrap() {
                     return None;
                 }
 
-                let indexes: Vec<usize> = borrowed_flattened
+                let indexes: Vec<usize> = borrowed_list
                     .iter()
                     .enumerate()
                     .filter(|(_, x)| x.symbol_is(symbol).unwrap())
@@ -453,24 +453,24 @@ impl SExpr {
         }
     }
 
-    pub fn flatten(&self) -> Result<SExpr, String> {
+    pub fn with_explicit_parens(&self) -> Result<SExpr, String> {
         match self {
             SExpr::List(list) => {
-                let mut flattened = vec![];
-                flattened.push(SExpr::Symbol(String::from("(")));
+                let mut new_list = vec![];
+                new_list.push(SExpr::Symbol(String::from("(")));
 
                 list.access().iter().for_each(|item| match item {
                     SExpr::List(_) => {
-                        if let Ok(SExpr::List(internal)) = item.flatten() {
-                            internal.access().iter().for_each(|x| flattened.push(x.clone()))
+                        if let Ok(SExpr::List(internal)) = item.with_explicit_parens() {
+                            internal.access().iter().for_each(|x| new_list.push(x.clone()))
                         }
                     }
-                    other => flattened.push(other.clone()),
+                    other => new_list.push(other.clone()),
                 });
 
-                flattened.push(SExpr::Symbol(String::from(")")));
+                new_list.push(SExpr::Symbol(String::from(")")));
 
-                Ok(SExpr::List(SchemeList::new(flattened.clone())))
+                Ok(SExpr::List(SchemeList::new(new_list.clone())))
             }
             SExpr::Pair(pair) => {
                 let pair = pair.access();
@@ -479,31 +479,31 @@ impl SExpr {
                     SExpr::Symbol(".".to_string()),
                     *pair.1.clone(),
                 ]))
-                .flatten()
+                .with_explicit_parens()
             }
             other => Ok(other.clone()),
         }
     }
 
-    pub fn unflatten(&self) -> Result<SExpr, String> {
+    pub fn without_explicit_parens(&self) -> Result<SExpr, String> {
         // TODO: Deal with pairs, since flattening has been extended to them.
         match self {
             SExpr::List(list) => {
-                let cloned = list.clone();
-                let mut unflattened = cloned.access_mut();
+                let mut list_without_parens = vec![];
+                list.access().iter().for_each(|expr| list_without_parens.push(expr.clone()));
 
-                if !unflattened.first().unwrap().symbol_is("(").unwrap() {
+                if !list_without_parens.first().unwrap().symbol_is("(").unwrap() {
                     return Ok(self.clone());
                 }
 
-                unflattened.remove(0);
-                unflattened.pop();
+                list_without_parens.remove(0);
+                list_without_parens.pop();
 
                 loop {
                     let l_index;
                     let r_index;
 
-                    match unflattened
+                    match list_without_parens
                         .iter()
                         .enumerate()
                         .filter(|x| x.1.symbol_is(")").unwrap())
@@ -511,7 +511,7 @@ impl SExpr {
                         .map(|x| x.0)
                     {
                         Some(r) => {
-                            match unflattened
+                            match list_without_parens
                                 .iter()
                                 .enumerate()
                                 .filter(|x| x.1.symbol_is("(").unwrap())
@@ -529,12 +529,13 @@ impl SExpr {
                         None => break,
                     }
 
-                    let internal =
-                        SExpr::List(SchemeList::new(unflattened[(l_index + 1)..r_index].to_vec()));
-                    unflattened.splice(l_index..(r_index + 1), [internal]);
+                    let internal = SExpr::List(SchemeList::new(
+                        list_without_parens[(l_index + 1)..r_index].to_vec(),
+                    ));
+                    list_without_parens.splice(l_index..(r_index + 1), [internal]);
                 }
 
-                Ok(SExpr::List(SAccessor::new(unflattened.clone())))
+                Ok(SExpr::List(SAccessor::new(list_without_parens.clone())))
             }
             other => Ok(other.clone()),
         }
