@@ -17,7 +17,7 @@ fn interpreter_set() {
 #[test]
 fn interpreter_define_set() {
     integration_subtest_eval_to! {
-        { expression: "(begin (define x 7) (define f1 (lambda () (define x 10) x)) (define f2 (lambda () (set! x 11) x))))", expected: "ok" };
+        { expression: "(begin (define x 7) (define f1 (lambda () (define x 10) x)) (define f2 (lambda () (set! x 11) x)))", expected: "ok" };
         { expression: "(begin (f1) x)", expected: "7" };
         { expression: "(begin (f2) x)", expected: "11" };
         { expression: "(begin (lambda () (define x 12)) x)", expected: "11" };
