@@ -1,5 +1,6 @@
 {
   "name": "schemius-web",
+  "type": "module",
   "version": "0.1.0",
   "license": "MIT OR Apache-2.0",
   "files": [
@@ -7,7 +8,7 @@
     "schemius_web.js",
     "schemius_web.d.ts"
   ],
-  "module": "schemius_web.js",
+  "main": "schemius_web.js",
   "types": "schemius_web.d.ts",
   "sideEffects": [
     "./snippets/*"
