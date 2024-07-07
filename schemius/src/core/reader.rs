@@ -16,8 +16,28 @@ lazy_static! {
 }
 
 pub fn read(line: &mut String) -> Result<SExpr, String> {
+    if !has_balanced_parentheses(line) {
+        return Err("Exception: Invalid syntax: Unbalanced parentheses.".to_string());
+    }
+
     let first_token = init(line);
     advance(line, &first_token)
+}
+
+fn has_balanced_parentheses(s: &str) -> bool {
+    let mut balance = 0;
+    for c in s.chars() {
+        match c {
+            '(' | '[' => balance += 1,
+            ')' | ']' => balance -= 1,
+            _ => {}
+        }
+        if balance < 0 {
+            // If balance is negative, there are more ')' than '(' at some point.
+            return false;
+        }
+    }
+    balance == 0 // True if balanced, false otherwise.
 }
 
 fn init(line: &mut String) -> String {
@@ -220,4 +240,21 @@ fn parse_polar_complex(token: &str) -> SExpr {
     let angle = parts[1];
 
     SExpr::Number(SNumber::Complex(NativeComplex::from_polar(magnitude, angle)))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_read() {
+        let mut line = "(+ 1 2)".to_string();
+        let res = super::read(&mut line);
+        assert!(res.is_ok());
+    }
+
+    #[test]
+    fn test_read_unbalanced_parentheses() {
+        let mut line = "(+ 1 2".to_string();
+        let res = super::read(&mut line);
+        assert!(res.is_err());
+    }
 }
