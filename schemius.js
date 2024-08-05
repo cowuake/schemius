@@ -19,7 +19,7 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!   [Published 2024-08-01 05:28:05 UTC]
+        Welcome to Schemius!   [Published 2024-08-05 05:15:51 UTC]
          --------------------------------------------------------
           Press [Ctrl + K]       -> Show essential keymap
           (environment-bindings) -> Show bindings in current env
