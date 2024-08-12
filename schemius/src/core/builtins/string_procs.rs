@@ -114,7 +114,7 @@ pub fn r_string_set(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
                 let is_in_range = index < string.access().len();
 
                 if is_in_range {
-                    match &args[2] {
+                    match &args.s_ref(2).unwrap() {
                         SExpr::Char(character) => {
                             let replacement = character.to_string();
                             string

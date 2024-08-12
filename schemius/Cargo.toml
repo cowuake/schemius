@@ -14,6 +14,7 @@ default = ["f64", "i64"]
 f64 = []
 i64 = []
 i128 = []
+linked_list = []
 
 [profile.dev]
 opt-level = 0

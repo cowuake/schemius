@@ -4,7 +4,7 @@ use super::{
     eval, r_eval,
     s_list::SList,
     s_procedure::{Procedure, ProcedureArgs, ProcedureEnv, ProcedureOutput, SpecialFormOutput},
-    Accessor, Environment, SExpr, SchemeEnvironment, SchemeList,
+    Accessor, Environment, ListImplementation, SExpr, SchemeEnvironment, SchemeList,
 };
 
 fn list_args(list: &[SExpr]) -> Result<Vec<String>, String> {
@@ -37,7 +37,7 @@ pub fn r_lambda(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         _ => return Err(String::from("")),
     };
 
-    let body = args[1..].to_vec();
+    let body = args.s_cdr().unwrap();
     Ok(SExpr::Procedure(Procedure::Compound(arg_names, body, env.clone())))
 }
 
@@ -66,16 +66,17 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 }
 
                 let lambda_name = list.access().s_car().unwrap().to_string();
-                let mut lambda_args: Vec<SExpr> = vec![];
+                let mut lambda_args = ListImplementation::new();
+                let mut proc_args = ListImplementation::new();
                 let lambda_body = &mut args.s_cdr().unwrap();
 
                 if list.access().s_len() > 1 {
-                    for arg in &list.access()[1..] {
-                        lambda_args.push(arg.clone());
+                    for arg in &list.access().s_cdr().unwrap() {
+                        proc_args.push(arg.clone());
                     }
                 }
 
-                lambda_args = vec![SExpr::List(SchemeList::new(lambda_args))];
+                lambda_args = vec![SExpr::List(SchemeList::new(proc_args))];
                 lambda_args.append(lambda_body);
 
                 let lambda_proc = match r_lambda(lambda_args, env.clone()) {
@@ -140,7 +141,7 @@ pub fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                         let borrowed_binding = binding.access();
                         match borrowed_binding.s_car().unwrap() {
                             SExpr::Symbol(symbol) => {
-                                match eval(&borrowed_binding[1], env.clone()) {
+                                match eval(&borrowed_binding.s_ref(1).unwrap(), env.clone()) {
                                     Ok(expr) => {
                                         let_env.access_mut().define(&symbol, &expr).unwrap()
                                     }
@@ -161,7 +162,7 @@ pub fn r_let(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     let mut res = SExpr::Unspecified;
 
-    for body_item in &args[1..] {
+    for body_item in &args.s_cdr().unwrap() {
         match eval(body_item, let_env.clone()) {
             Ok(something) => res = something,
             Err(e) => return Err(e),
@@ -185,9 +186,9 @@ pub fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                 match binding {
                     SExpr::List(binding) => {
                         let borrowed_binding = binding.access();
-                        match &borrowed_binding[0] {
+                        match &borrowed_binding.s_car().unwrap() {
                             SExpr::Symbol(symbol) => {
-                                match eval(&borrowed_binding[1], inner_env.clone()) {
+                                match eval(&borrowed_binding.s_ref(1).unwrap(), inner_env.clone()) {
                                     Ok(expr) => {
                                         inner_env = Environment::new_child(inner_env.clone());
                                         inner_env = Environment::new_child(inner_env.clone());
@@ -210,7 +211,7 @@ pub fn r_let_star(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
 
     let mut res = SExpr::Unspecified;
 
-    for body_item in &args[1..] {
+    for body_item in &args.s_cdr().unwrap() {
         match eval(body_item, inner_env.clone()) {
             Ok(something) => res = something,
             Err(e) => return Err(e),
@@ -372,12 +373,14 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                 // Unquoting expression (list)
                                 Some((lparen_idx, rparen_idx)) => {
                                     // The final expression does not need enclosing parentheses
-                                    let raw_expr =
-                                        borrowed_list[(lparen_idx + 1)..rparen_idx].to_vec();
+                                    let raw_expr = borrowed_list
+                                        .clone()
+                                        .extract_range(lparen_idx + 1, rparen_idx)
+                                        .clone();
 
                                     // The expression... Must be a non-self-evaluating one!
                                     if raw_expr.s_len() == 1 {
-                                        let suspect = raw_expr.first().unwrap();
+                                        let suspect = raw_expr.s_car().unwrap();
                                         let mut incriminated = false;
 
                                         if let SExpr::Symbol(symbol) = suspect {
@@ -397,7 +400,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                         if incriminated {
                                             return Err(format!(
                                                 "Exception: {} is not a procedure",
-                                                raw_expr[0]
+                                                raw_expr.s_car().unwrap()
                                             ));
                                         }
                                     }
@@ -409,7 +412,8 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                 }
                                 // Unquoting symbol or atom
                                 None => {
-                                    to_be_evaluated = list.access()[unquote_index + 1].clone();
+                                    to_be_evaluated =
+                                        list.access().s_ref(unquote_index + 1).unwrap().clone();
                                     first_idx = unquote_index - 1; // Index of the left parenthesis preceding the unquote symbol
                                     last_idx = unquote_index + 3; // Index of the right parenthesis + 1
                                 }
@@ -435,7 +439,7 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                                             for i in (0..internal.access().s_len()).rev() {
                                                 borrowed_list.splice(
                                                     first_idx..first_idx,
-                                                    [borrowed_internal[i].clone()],
+                                                    [borrowed_internal.s_ref(i).unwrap().clone()],
                                                 );
                                             }
                                         }
@@ -479,7 +483,8 @@ pub fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
             _ => false,
         };
 
-    let iterator = if have_else_clause { &args[0..length - 2] } else { &args };
+    let iterator =
+        if have_else_clause { args.clone().extract_range(0, length - 2) } else { args.clone() };
 
     for block in iterator {
         match block {
@@ -489,11 +494,11 @@ pub fn r_cond(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                         "Exception: malformed args provided to #<procedure cond>",
                     ));
                 }
-                let first = eval(&list.access()[0], env.clone());
+                let first = eval(&list.access().s_car().unwrap(), env.clone());
                 match first {
                     Ok(condition) => match condition {
                         SExpr::Boolean(val) => match val {
-                            true => return Ok(list.access()[1].clone()),
+                            true => return Ok(list.access().s_ref(1).unwrap().clone()),
                             false => continue,
                         },
                         _ => {

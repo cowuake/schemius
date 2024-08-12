@@ -34,7 +34,7 @@ pub fn r_cons(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
     match args.s_cadr().unwrap() {
         SExpr::List(list) => {
-            let mut new_list = vec![];
+            let mut new_list = ListImplementation::new();
             new_list.push(car);
             list.access_mut().iter().for_each(|x| new_list.push(x.clone()));
 
@@ -49,7 +49,7 @@ pub fn r_cons(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 }
 
 pub fn r_list(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
-    let mut list: Vec<SExpr> = vec![];
+    let mut list = ListImplementation::new();
 
     for arg in args {
         list.push(arg.clone());
@@ -101,7 +101,7 @@ pub fn r_cdr(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
             match list.s_len() {
                 1.. => {
-                    let cdr: Vec<SExpr> = list.s_cdr().unwrap();
+                    let cdr = list.s_cdr().unwrap();
                     Ok(SExpr::List(SchemeList::new(cdr)))
                 }
                 _ => {

@@ -3,22 +3,29 @@ pub mod s_number;
 pub mod s_procedure;
 
 use super::accessor::*;
-use std::{fmt, result, vec};
+use std::{collections::LinkedList, fmt, result, vec};
 
 pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
 
+#[cfg(features = "linked_list")]
+pub type ListImplementation = LinkedList<SExpr>;
+
+#[cfg(not(features = "linked_list"))]
 pub type ListImplementation = Vec<SExpr>;
+
+pub type PairImplementation = (Box<SExpr>, Box<SExpr>);
+pub type VectorImplementation = Vec<SExpr>;
 
 pub type SchemeBoolean = bool;
 pub type SchemeChar = char;
 pub type SchemeList = SAccessor<ListImplementation>;
 pub type SchemeNumber = SNumber;
-pub type SchemePair = SAccessor<(Box<SExpr>, Box<SExpr>)>;
+pub type SchemePair = SAccessor<PairImplementation>;
 pub type SchemeProcedure = Procedure;
 pub type SchemeSymbol = String;
 pub type SchemeString = SAccessor<String>;
-pub type SchemeVector = SAccessor<Vec<SExpr>>;
+pub type SchemeVector = SAccessor<VectorImplementation>;
 
 #[derive(Clone, Debug)]
 pub enum SExpr {
@@ -100,15 +107,18 @@ impl SExpr {
     }
 
     pub fn quote(&self) -> Result<SExpr, String> {
-        Ok(SExpr::List(SchemeList::new(vec![SExpr::Symbol("quote".to_string()), self.clone()])))
+        Ok(SExpr::List(SchemeList::new(ListImplementation::from_iter([
+            SExpr::Symbol("quote".to_string()),
+            self.clone(),
+        ]))))
     }
 
     pub fn unquote(&self) -> Result<SExpr, String> {
         match self {
             SExpr::List(list) => {
                 let borrowed_list = list.access();
-                if borrowed_list.first().unwrap().is_quote().unwrap() {
-                    Ok(borrowed_list[1].clone())
+                if borrowed_list.s_car().unwrap().is_quote().unwrap() {
+                    Ok(borrowed_list.s_ref(1).unwrap().clone())
                 } else {
                     Err(format!("Exception: {} is not a quoted expression", self))
                 }
@@ -373,7 +383,7 @@ impl SExpr {
         match self {
             SExpr::List(list) => {
                 let list = list.access();
-                if !list.first().unwrap().symbol_is("(").unwrap() {
+                if !list.s_car().unwrap().symbol_is("(").unwrap() {
                     return None;
                 }
 
@@ -432,7 +442,7 @@ impl SExpr {
             Ok(SExpr::List(list)) => {
                 let borrowed_list = list.access();
 
-                if borrowed_list.first().unwrap().symbol_is("(").unwrap() {
+                if borrowed_list.s_car().unwrap().symbol_is("(").unwrap() {
                     return None;
                 }
 
@@ -456,7 +466,7 @@ impl SExpr {
     pub fn with_explicit_parens(&self) -> Result<SExpr, String> {
         match self {
             SExpr::List(list) => {
-                let mut new_list = vec![];
+                let mut new_list = ListImplementation::new();
                 new_list.push(SExpr::Symbol(String::from("(")));
 
                 list.access().iter().for_each(|item| match item {
@@ -474,11 +484,11 @@ impl SExpr {
             }
             SExpr::Pair(pair) => {
                 let pair = pair.access();
-                SExpr::List(SchemeList::new(vec![
+                SExpr::List(SchemeList::new(ListImplementation::from_iter([
                     *pair.0.clone(),
                     SExpr::Symbol(".".to_string()),
                     *pair.1.clone(),
-                ]))
+                ])))
                 .with_explicit_parens()
             }
             other => Ok(other.clone()),
@@ -489,7 +499,7 @@ impl SExpr {
         // TODO: Deal with pairs, since flattening has been extended to them.
         match self {
             SExpr::List(list) => {
-                let mut list_without_parens = vec![];
+                let mut list_without_parens = VectorImplementation::new();
                 list.access().iter().for_each(|expr| list_without_parens.push(expr.clone()));
 
                 if !list_without_parens.first().unwrap().symbol_is("(").unwrap() {
@@ -529,13 +539,13 @@ impl SExpr {
                         None => break,
                     }
 
-                    let internal = SExpr::List(SchemeList::new(
+                    let internal = SExpr::Vector(SchemeVector::new(
                         list_without_parens[(l_index + 1)..r_index].to_vec(),
                     ));
                     list_without_parens.splice(l_index..(r_index + 1), [internal]);
                 }
 
-                Ok(SExpr::List(SAccessor::new(list_without_parens.clone())))
+                Ok(SExpr::Vector(SAccessor::new(list_without_parens.clone())))
             }
             other => Ok(other.clone()),
         }
@@ -583,11 +593,11 @@ mod tests {
 
     #[test]
     fn test_sexpr_is_applyable() {
-        let sexpr = SExpr::List(SchemeList::new(vec![
+        let sexpr = SExpr::List(SchemeList::new(ListImplementation::from_iter([
             SExpr::Procedure(Procedure::Primitive(Primitive::SUM)),
             SExpr::Number(SNumber::Int(1)),
             SExpr::Number(SNumber::Int(2)),
-        ]));
+        ])));
         assert!(sexpr.is_applyable().unwrap());
     }
 

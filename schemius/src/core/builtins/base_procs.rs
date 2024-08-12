@@ -1,7 +1,7 @@
 use super::{
     s_list::SList,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
-    Accessor, SExpr, SchemeEnvironment, SchemeList,
+    Accessor, ListImplementation, SExpr, SchemeEnvironment, SchemeList,
 };
 
 pub fn r_apply(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
@@ -11,7 +11,7 @@ pub fn r_apply(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
 
     let proc = args.s_car().unwrap();
     let args = args.s_cadr().unwrap();
-    let mut to_be_evaluated = vec![];
+    let mut to_be_evaluated = ListImplementation::new();
     to_be_evaluated.push(proc.clone());
 
     match args {

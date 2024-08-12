@@ -59,7 +59,7 @@ fn advance(line: &mut String, string_token: &String) -> Result<SExpr, String> {
 
     match opening_token {
         "(" | "[" | "#(" => {
-            let mut new_list: Vec<SExpr> = vec![];
+            let mut new_list = VectorImplementation::new();
 
             loop {
                 let token: String = init(line);
@@ -67,19 +67,23 @@ fn advance(line: &mut String, string_token: &String) -> Result<SExpr, String> {
                 if (opening_token == "(" && token == ")") || (opening_token == "[" && token == "]")
                 {
                     if new_list.len() == 3 && token != "]" {
-                        if let SExpr::Symbol(sym) = &new_list[1] {
+                        if let SExpr::Symbol(sym) = &new_list.s_ref(1).unwrap() {
                             if sym.as_str() == "." {
                                 return Ok(SExpr::Pair(SchemePair::new((
-                                    Box::new(new_list[0].clone()),
-                                    Box::new(new_list[2].clone()),
+                                    Box::new(new_list.s_ref(0).unwrap().clone()),
+                                    Box::new(new_list.s_ref(2).unwrap().clone()),
                                 ))));
                             }
                         }
                     }
 
-                    return Ok(SExpr::List(SchemeList::new(new_list)));
+                    return Ok(SExpr::List(SchemeList::new(ListImplementation::from_iter(
+                        new_list,
+                    ))));
                 } else if opening_token == "#(" && token == ")" {
-                    return Ok(SExpr::Vector(SchemeList::new(new_list)));
+                    return Ok(SExpr::Vector(SchemeVector::new(VectorImplementation::from(
+                        new_list,
+                    ))));
                 } else {
                     new_list.push(advance(line, &token)?);
                 }
@@ -102,7 +106,7 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
         "'" | "`" | "," | ",@" => {
             let internal_token = init(line);
             let quoted = advance(line, &internal_token)?;
-            let mut vec: Vec<SExpr> = vec![];
+            let mut vec = ListImplementation::new();
 
             let string_token = match token {
                 "'" => "quote".to_string(),

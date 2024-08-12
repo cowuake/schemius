@@ -31,8 +31,8 @@ impl Evaluator {
     }
 }
 
-fn expand_args(args: &Vec<SExpr>, env: ProcedureEnv) -> Result<Vec<SExpr>, String> {
-    let mut expanded_args = vec![];
+fn expand_args(args: &ListImplementation, env: ProcedureEnv) -> Result<ListImplementation, String> {
+    let mut expanded_args = ListImplementation::new();
 
     for arg in args.iter() {
         match arg {
@@ -79,15 +79,13 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
                                             || special_form == SpecialForm::LET_STAR
                                             || special_form == SpecialForm::TIME
                                         {
-                                            let result =
-                                                special_form(args.to_vec(), current_env.clone());
+                                            let result = special_form(args, current_env.clone());
                                             return match result {
                                                 Ok(expression) => Ok(expression),
                                                 Err(e) => Err(e),
                                             };
                                         } else {
-                                            let result =
-                                                special_form(args.to_vec(), current_env.clone());
+                                            let result = special_form(args, current_env.clone());
                                             match result {
                                                 Ok(expression) => current_expression = expression,
                                                 Err(e) => return Err(e),
@@ -133,7 +131,7 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
 
                                         let eval_env = Environment::new_child(lambda_env);
 
-                                        let mut new = vec![];
+                                        let mut new = ListImplementation::new();
                                         new.push(SExpr::Procedure(Procedure::SpecialForm(
                                             SpecialForm::BEGIN,
                                         )));

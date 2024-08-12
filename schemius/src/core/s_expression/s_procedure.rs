@@ -14,5 +14,5 @@ pub type SpecialFormSignature = fn(ProcedureArgs, ProcedureEnv) -> SpecialFormOu
 pub enum Procedure {
     SpecialForm(SpecialFormSignature),
     Primitive(ProcedureSignature),
-    Compound(Vec<String>, Vec<SExpr>, ProcedureEnv),
+    Compound(Vec<String>, ListImplementation, ProcedureEnv),
 }

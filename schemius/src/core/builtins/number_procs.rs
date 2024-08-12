@@ -40,7 +40,7 @@ macro_rules! fn_compute_diff_quot {
                     };
 
                     if args.len() > 1 {
-                        for arg in &args[1..] {
+                        for arg in &args.s_cdr().unwrap() {
                             match arg {
                                 SExpr::Number(n) => res = &res $op &n,
                                 num => return Err(format!("Exception in {}: #<{}> is not a number", stringify!($op), num)),
