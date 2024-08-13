@@ -395,6 +395,24 @@ fn interpreter_pair_list_procs_2() {
 }
 
 #[test]
+fn interpreter_list_splicing() {
+    integration_subtest_eval_to! {
+        { expression: "(list-splice '(1 2 3 4 5) 0 0 '(10 11 12))", expected: "(10 11 12 1 2 3 4 5)" };
+        { expression: "(list-splice '(1 2 3 4 5) 2 2 '(10 11 12))", expected: "(1 2 10 11 12 3 4 5)" };
+        { expression: "(list-splice '(1 2 3 4 5) 4 4 '(10 11 12))", expected: "(1 2 3 4 10 11 12 5)" };
+        { expression: "(list-splice '(1 2 3 4 5) 5 5 '(10 11 12))", expected: "(1 2 3 4 5 10 11 12)" };
+        { expression: "(list-splice '(1 2 3 4 5) 1 4 '(10 11 12))", expected: "(1 10 11 12 5)" };
+        { expression: "(list-splice '(1 2 3 4 5) 2 5 '(10 11 12))", expected: "(1 2 10 11 12)" };
+    }
+
+    integration_subtest_is_err! {
+        expression: "(list-splice '(1 2 3 4 5) 6 6 '(10 11 12))";
+        expression: "(list-splice '(1 2 3 4 5) 3 2 '(10 11 12))";
+        expression: "(list-splice '(1 2 3 4 5) 2 3 '(10 11 12))";
+    }
+}
+
+#[test]
 fn interpreter_strings() {
     integration_subtest_eval_to! {
         { expression: r#"(string #\h #\e #\l #\l #\o)"#, expected: r#""hello""# };

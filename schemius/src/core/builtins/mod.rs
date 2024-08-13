@@ -58,6 +58,7 @@ impl Primitive {
     pub const APPEND: ProcedureSignature = r_append;
     pub const LENGTH: ProcedureSignature = r_length;
     pub const LIST_REF: ProcedureSignature = r_list_ref;
+    pub const LIST_SPLICE: ProcedureSignature = r_list_splice;
     pub const LIST_TAIL: ProcedureSignature = r_list_tail;
     pub const REVERSE: ProcedureSignature = r_reverse;
     pub const MAKE_STRING: ProcedureSignature = r_make_string;

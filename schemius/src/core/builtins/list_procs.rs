@@ -163,6 +163,55 @@ pub fn r_list_ref(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     }
 }
 
+pub fn r_list_splice(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
+    let length = args.s_len();
+    if length != 4 {
+        return Err(format!("Exception in #<list-splice>: expected 4 arguments, found {}", length));
+    }
+
+    match args.s_car().unwrap() {
+        SExpr::List(list) => {
+            let start = args.s_ref(1).unwrap().as_int()? as usize;
+            let end = args.s_ref(2).unwrap().as_int()? as usize;
+
+            if start > end {
+                return Err(format!(
+                    "Exception in #<list-splice>: start index {} is greater than end index {}",
+                    start, end
+                ));
+            }
+
+            let insert = args.s_ref(3).unwrap().clone();
+
+            if start != end {
+                let insert_len = insert.as_list()?.s_len();
+
+                if (insert_len) != (end - start) {
+                    return Err(format!(
+                        "Exception in #<list-splice>: length of insert list {} does not match splice length {}",
+                        insert_len,
+                        end - start
+                    ));
+                }
+            }
+
+            let borrowed = list.access();
+            let len = borrowed.s_len();
+
+            if start > len {
+                return Err(format!(
+                    "Exception in #<list-splice>: index {} out of bounds for list of length {}",
+                    start, len
+                ));
+            }
+
+            let new_list = borrowed.s_splice(insert.as_list()?.clone(), start, end);
+            Ok(SExpr::List(SchemeList::new(new_list)))
+        }
+        _ => Err(String::from("Exception in #<list-splice>: expected a list")),
+    }
+}
+
 pub fn r_list_tail(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     let length = args.s_len();
     if length != 2 {
