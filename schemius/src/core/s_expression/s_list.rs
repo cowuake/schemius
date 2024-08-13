@@ -16,6 +16,7 @@ where
     fn s_cdr(&self) -> Option<Self>;
     fn s_len(&self) -> usize;
     fn s_ref(&self, index: usize) -> Option<&T>;
+    fn s_splice(&self, insert: Self, start: usize, end: usize) -> Self;
     fn s_tail(&self, k: usize) -> Self;
     fn s_reverse(&self) -> Self;
     fn set_car(&mut self, value: T);
@@ -62,6 +63,12 @@ where
 
     fn s_ref(&self, index: usize) -> Option<&T> {
         self.get(index)
+    }
+
+    fn s_splice(&self, insert: Self, start: usize, end: usize) -> Self {
+        let mut result = self.clone();
+        result.splice(start..end, insert);
+        result
     }
 
     fn s_tail(&self, k: usize) -> Self {
@@ -114,6 +121,17 @@ where
 
     fn s_ref(&self, index: usize) -> Option<&T> {
         self.iter().nth(index)
+    }
+
+    fn s_splice(&self, insert: Self, start: usize, end: usize) -> Self {
+        let mut head = self.clone();
+        let mut tail = head.split_off(start);
+        let tail_end = tail.split_off(end - start);
+
+        head.extend(insert);
+        head.extend(tail_end);
+
+        head
     }
 
     fn s_tail(&self, k: usize) -> Self {
@@ -181,6 +199,19 @@ pub mod tests_slist_vector {
     }
 
     #[test]
+    fn test_slist_vector_splice() {
+        let list = vec![1, 2, 3, 4, 5];
+        let insert1 = vec![10, 11, 12];
+        let insert2 = vec![20, 21, 22];
+
+        let spliced1 = list.s_splice(insert1, 2, 2);
+        let spliced2 = list.s_splice(insert2, 1, 4);
+
+        assert_eq!(spliced1, vec![1, 2, 10, 11, 12, 3, 4, 5]);
+        assert_eq!(spliced2, vec![1, 20, 21, 22, 5]);
+    }
+
+    #[test]
     fn test_slist_vector_tail() {
         let list = vec![1, 2, 3, 4, 5];
         let tail = list.s_tail(2);
@@ -188,34 +219,34 @@ pub mod tests_slist_vector {
     }
 
     #[test]
-    fn test_slist_reverse() {
+    fn test_slist_vector_reverse() {
         let list = vec![1, 2, 3, 4, 5];
         let reversed = list.s_reverse();
         assert_eq!(reversed, vec![5, 4, 3, 2, 1]);
     }
 
     #[test]
-    fn test_slist_set_car() {
+    fn test_slist_vector_set_car() {
         let mut list = vec![1, 2, 3, 4, 5];
         list.set_car(10);
         assert_eq!(list, vec![10, 2, 3, 4, 5]);
     }
 
     #[test]
-    fn test_slist_push() {
+    fn test_slist_vector_push() {
         let mut list = vec![1, 2, 3, 4, 5];
         list.push(10);
         assert_eq!(list, vec![1, 2, 3, 4, 5, 10]);
     }
 
     #[test]
-    fn test_slist_last() {
+    fn test_slist_vector_last() {
         let list = vec![1, 2, 3, 4, 5];
         assert_eq!(list.last(), Some(&5));
     }
 
     #[test]
-    fn test_slist_extract_range() {
+    fn test_slist_vector_extract_range() {
         let list = vec![1, 2, 3, 4, 5];
         let extracted = list.extract_range(1, 4);
         assert_eq!(extracted, &[2, 3, 4]);
@@ -297,7 +328,27 @@ pub mod test_slist_linked_list {
     }
 
     #[test]
-    fn test_slist_push() {
+    fn test_slist_linked_list_splice() {
+        let list = LinkedList::from_iter([1, 2, 3, 4, 5]);
+        let insert1 = LinkedList::from_iter([10, 11, 12]);
+        let insert2 = LinkedList::from_iter([20, 21, 22]);
+
+        let spliced1 = list.s_splice(insert1, 2, 2);
+        let spliced2 = list.s_splice(insert2, 1, 4);
+
+        assert_eq!(spliced1, LinkedList::from_iter([1, 2, 10, 11, 12, 3, 4, 5]));
+        assert_eq!(spliced2, LinkedList::from_iter([1, 20, 21, 22, 5]));
+    }
+
+    #[test]
+    fn test_slist_linked_list_tail() {
+        let list = LinkedList::from_iter([1, 2, 3, 4, 5]);
+        let tail = list.s_tail(2);
+        assert_eq!(tail, LinkedList::from_iter([3, 4, 5]));
+    }
+
+    #[test]
+    fn test_slist_linked_list_push() {
         let mut list = LinkedList::new();
         list.push_back(1);
         list.push_back(2);
@@ -308,7 +359,7 @@ pub mod test_slist_linked_list {
     }
 
     #[test]
-    fn test_slist_last() {
+    fn test_slist_linked_list_last() {
         let mut list = LinkedList::new();
         list.push_back(1);
         list.push_back(2);
@@ -317,7 +368,7 @@ pub mod test_slist_linked_list {
     }
 
     #[test]
-    fn test_slist_extract_range() {
+    fn test_slist_linked_list_extract_range() {
         let mut list = LinkedList::new();
         list.push_back(1);
         list.push_back(2);
