@@ -5,20 +5,30 @@ use std::{
     ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign},
 };
 
+use cfg_if::cfg_if;
 use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive, Zero};
 
-#[cfg(not(feature = "i64"))]
-#[cfg(not(feature = "i128"))]
-pub type NativeInt = i32;
-#[cfg(feature = "i64")]
-pub type NativeInt = i64;
-#[cfg(feature = "i128")]
-pub type NativeInt = i128;
+cfg_if! {
+    if #[cfg(i32)] {
+        pub type NativeInt = i32;
+    } else if #[cfg(i64)] {
+        pub type NativeInt = i64;
+    } else if #[cfg(i128)] {
+        pub type NativeInt = i128;
+    } else {
+       pub type NativeInt = i64;
+    }
+}
 
-#[cfg(not(feature = "f64"))]
-pub type NativeFloat = f32;
-#[cfg(feature = "f64")]
-pub type NativeFloat = f64;
+cfg_if! {
+    if #[cfg(f32)] {
+        pub type NativeFloat = f32;
+    } else if #[cfg(f64)] {
+        pub type NativeFloat = f64;
+    } else {
+        pub type NativeFloat = f64;
+    }
+}
 
 pub type NativeBigInt = BigInt;
 pub type NativeRational = BigRational;

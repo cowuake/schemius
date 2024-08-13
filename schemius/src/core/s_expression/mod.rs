@@ -2,17 +2,21 @@ pub mod s_list;
 pub mod s_number;
 pub mod s_procedure;
 
+use cfg_if::cfg_if;
+
 use super::accessor::*;
 use std::{collections::LinkedList, fmt, result, vec};
 
 pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
 
-#[cfg(feature = "linked_list")]
-pub type ListImplementation = LinkedList<SExpr>;
-
-#[cfg(not(feature = "linked_list"))]
-pub type ListImplementation = Vec<SExpr>;
+cfg_if! {
+    if #[cfg(feature = "true_list")] {
+        pub type ListImplementation = LinkedList<SExpr>;
+    } else {
+        pub type ListImplementation = Vec<SExpr>;
+    }
+}
 
 pub type PairImplementation = (Box<SExpr>, Box<SExpr>);
 pub type VectorImplementation = Vec<SExpr>;
