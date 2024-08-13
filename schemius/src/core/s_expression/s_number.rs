@@ -7,17 +7,17 @@ use std::{
 
 use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive, Zero};
 
-#[cfg(not(features = "i64"))]
-#[cfg(not(features = "i128"))]
+#[cfg(not(feature = "i64"))]
+#[cfg(not(feature = "i128"))]
 pub type NativeInt = i32;
-#[cfg(features = "i64")]
+#[cfg(feature = "i64")]
 pub type NativeInt = i64;
-#[cfg(features = "i128")]
+#[cfg(feature = "i128")]
 pub type NativeInt = i128;
 
-#[cfg(not(features = "f64"))]
+#[cfg(not(feature = "f64"))]
 pub type NativeFloat = f32;
-#[cfg(features = "f64")]
+#[cfg(feature = "f64")]
 pub type NativeFloat = f64;
 
 pub type NativeBigInt = BigInt;

@@ -8,10 +8,10 @@ use std::{collections::LinkedList, fmt, result, vec};
 pub use self::{s_list::*, s_number::*, s_procedure::*};
 type SAccessor<T> = ThreadSafeAccessor<T>;
 
-#[cfg(features = "linked_list")]
+#[cfg(feature = "linked_list")]
 pub type ListImplementation = LinkedList<SExpr>;
 
-#[cfg(not(features = "linked_list"))]
+#[cfg(not(feature = "linked_list"))]
 pub type ListImplementation = Vec<SExpr>;
 
 pub type PairImplementation = (Box<SExpr>, Box<SExpr>);
