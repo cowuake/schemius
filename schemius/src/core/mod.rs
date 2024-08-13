@@ -1,7 +1,7 @@
-pub mod accessor;
-pub mod builtins;
-pub mod environment;
-pub mod evaluator;
+mod accessor;
+mod builtins;
+mod environment;
+mod evaluator;
 pub mod interpreter;
-pub mod reader;
-pub mod s_expression;
+mod reader;
+mod s_expression;
