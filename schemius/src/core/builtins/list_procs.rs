@@ -1,6 +1,6 @@
 use super::{
     s_list::SList,
-    s_number::{NativeInt, SNumber},
+    s_number::NativeInt,
     s_procedure::{ProcedureArgs, ProcedureEnv, ProcedureOutput},
     Accessor, ListImplementation, SExpr, SchemeList, SchemePair,
 };
