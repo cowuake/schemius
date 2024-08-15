@@ -46,6 +46,41 @@ pub enum SExpr {
     Ok,
 }
 
+macro_rules! impl_from_primitive {
+    ($($source:ident, $target:ident)*) => {
+    $(
+        impl From<$source> for SExpr {
+            fn from(val: $source) -> Self {
+                SExpr::$target(val)
+            }
+        }
+    )*}
+}
+
+macro_rules! impl_from_number {
+    ($($source:ident, $target:ident)*) => {
+    $(
+        impl From<$source> for SExpr {
+            fn from(val: $source) -> Self {
+                SExpr::Number(SNumber::$target(val))
+            }
+        }
+    )*}
+}
+
+impl_from_primitive! {
+    bool, Boolean
+    char, Char
+}
+
+impl_from_number! {
+    NativeInt, Int
+    NativeBigInt, BigInt
+    NativeRational, Rational
+    NativeComplex, Complex
+    NativeFloat, Float
+}
+
 impl fmt::Display for SExpr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -552,7 +587,7 @@ impl SExpr {
 }
 
 #[cfg(test)]
-mod tests {
+mod s_expression_tests {
     use crate::core::builtins::Primitive;
 
     use super::*;
@@ -565,20 +600,20 @@ mod tests {
 
     #[test]
     fn test_sexpr_as_int() {
-        let sexpr = SExpr::Number(SNumber::Int(42));
+        let sexpr = SExpr::from(42);
         assert_eq!(sexpr.as_int().unwrap(), 42);
     }
 
     #[test]
     fn test_sexpr_quote() {
-        let expression = SExpr::Number(SNumber::Int(42));
+        let expression = SExpr::from(42);
         let quoted = expression.quote().unwrap();
         assert!(quoted.is_list().unwrap() && quoted.is_quoted_list().unwrap());
     }
 
     #[test]
     fn test_sexpr_unquote() {
-        let internal = SExpr::Number(SNumber::Int(42));
+        let internal = SExpr::from(42);
         let expression = internal.quote().unwrap();
         let unquoted = expression.unquote().unwrap();
         assert!(unquoted.is_number().unwrap());
@@ -594,16 +629,58 @@ mod tests {
     fn test_sexpr_is_applyable() {
         let sexpr = SExpr::List(SchemeList::new(ListImplementation::from_iter([
             SExpr::Procedure(Procedure::Primitive(Primitive::SUM)),
-            SExpr::Number(SNumber::Int(1)),
-            SExpr::Number(SNumber::Int(2)),
+            SExpr::from(1),
+            SExpr::from(2),
         ])));
         assert!(sexpr.is_applyable().unwrap());
     }
 
     #[test]
     fn test_sexpr_is_atom() {
-        let sexpr = SExpr::Number(SNumber::Int(NativeInt::from(3)));
+        let sexpr = SExpr::from(3);
         let is_atom = sexpr.is_atom().unwrap();
         assert!(is_atom)
+    }
+
+    #[test]
+    fn test_sexpr_from_int() {
+        let sexpr = SExpr::from(42);
+        assert!(sexpr.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_from_big_int() {
+        let sexpr = SExpr::from(NativeBigInt::from(42));
+        assert!(sexpr.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_from_rational() {
+        let sexpr = SExpr::from(NativeRational::new(NativeBigInt::from(1), NativeBigInt::from(2)));
+        assert!(sexpr.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_from_float() {
+        let sexpr = SExpr::from(NativeFloat::from(1.0));
+        assert!(sexpr.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_from_complex() {
+        let sexpr = SExpr::from(NativeComplex::new(NativeFloat::from(1.0), NativeFloat::from(2.0)));
+        assert!(sexpr.is_number().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_from_char() {
+        let sexpr = SExpr::from('a');
+        assert!(sexpr.is_char().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_from_bool() {
+        let sexpr = SExpr::from(true);
+        assert!(sexpr.is_boolean().unwrap());
     }
 }

@@ -9,7 +9,7 @@ macro_rules! fn_compute_sum_prod {
     $(
         pub fn $fn(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
             match args.len() {
-                0 => Ok(SExpr::Number(SNumber::Int($neutral))),
+                0 => Ok(SExpr::from($neutral)),
                 _ => {
                     let mut res = SNumber::Int($neutral);
 

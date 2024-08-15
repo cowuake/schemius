@@ -261,7 +261,7 @@ pub fn r_length(args: ProcedureArgs, _: ProcedureEnv) -> ProcedureOutput {
     match args.s_car().unwrap() {
         SExpr::List(list) => {
             let len = list.access().s_len();
-            Ok(SExpr::Number(SNumber::Int(NativeInt::from(len as NativeInt))))
+            Ok(SExpr::from(len as NativeInt))
         }
         _ => Err(String::from("Exception in #<length>: expected a list")),
     }

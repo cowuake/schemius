@@ -163,14 +163,14 @@ pub fn eval(expression: &SExpr, env: ProcedureEnv) -> EvalOutput {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::s_expression::{s_number::SNumber, SExpr};
+    use crate::core::s_expression::SExpr;
 
     use super::Evaluator;
 
     #[test]
     fn evaluator_ok_int() {
         let evaluator = Evaluator::default();
-        let expression = SExpr::Number(SNumber::Int(0));
+        let expression = SExpr::from(0);
         let res = evaluator.eval(&expression);
 
         assert!(res.is_ok())

@@ -98,11 +98,9 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
     match token {
         tokens::TRUE => Ok(SExpr::Boolean(true)),
         tokens::FALSE => Ok(SExpr::Boolean(false)),
-        tokens::NEGATIVE_NAN | tokens::POSITIVE_NAN => {
-            Ok(SExpr::Number(SNumber::Float(NativeFloat::NAN)))
-        }
-        tokens::NEGATIVE_INFINITY => Ok(SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY))),
-        tokens::POSITIVE_INFINITY => Ok(SExpr::Number(SNumber::Float(NativeFloat::INFINITY))),
+        tokens::NEGATIVE_NAN | tokens::POSITIVE_NAN => Ok(SExpr::from(NativeFloat::NAN)),
+        tokens::NEGATIVE_INFINITY => Ok(SExpr::from(NativeFloat::NEG_INFINITY)),
+        tokens::POSITIVE_INFINITY => Ok(SExpr::from(NativeFloat::INFINITY)),
         token if token.starts_with('"') => {
             Ok(SExpr::String(SchemeString::new(token.get(1..token.len() - 1).unwrap().to_string())))
         }
@@ -189,27 +187,25 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
                 let number = if n_prefixes == 1 { &token[2..] } else { &token[4..] };
                 match NativeInt::from_str_radix(number, radix) {
                     Ok(n) => match is_exact {
-                        Some(true) | None => Ok(SExpr::Number(SNumber::Int(n))),
-                        Some(false) => Ok(SExpr::Number(SNumber::Float(n as NativeFloat))),
+                        Some(true) | None => Ok(SExpr::from(n)),
+                        Some(false) => Ok(SExpr::from(n as NativeFloat)),
                     },
                     _ => match NativeBigInt::from_str_radix(number, radix) {
                         Ok(n) => match is_exact {
-                            Some(true) | None => Ok(SExpr::Number(SNumber::BigInt(n))),
-                            Some(false) => Ok(SExpr::Number(SNumber::Float(n.to_float().unwrap()))),
+                            Some(true) | None => Ok(SExpr::from(n)),
+                            Some(false) => Ok(SExpr::from(n.to_float().unwrap())),
                         },
                         _ => match NativeRational::from_str_radix(number, radix) {
                             Ok(q) => match is_exact {
-                                Some(true) | None => Ok(SExpr::Number(SNumber::Rational(q))),
-                                Some(false) => {
-                                    Ok(SExpr::Number(SNumber::Float(q.to_float().unwrap())))
-                                }
+                                Some(true) | None => Ok(SExpr::from(q)),
+                                Some(false) => Ok(SExpr::from(q.to_float().unwrap())),
                             },
                             _ => match NativeFloat::from_str_radix(number, radix) {
                                 Ok(f) => match is_exact {
-                                    Some(true) => Ok(SExpr::Number(SNumber::Rational(
-                                        NativeRational::from_float(f).unwrap(),
-                                    ))),
-                                    Some(false) | None => Ok(SExpr::Number(SNumber::Float(f))),
+                                    Some(true) => {
+                                        Ok(SExpr::from(NativeRational::from_float(f).unwrap()))
+                                    }
+                                    Some(false) | None => Ok(SExpr::from(f)),
                                 },
                                 _ => Ok(SExpr::Symbol(token.to_string())),
                             },
@@ -218,15 +214,15 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
                 }
             } else {
                 match token.parse::<NativeInt>() {
-                    Ok(n) => Ok(SExpr::Number(SNumber::Int(n))),
+                    Ok(n) => Ok(SExpr::from(n)),
                     _ => match token.parse::<NativeBigInt>() {
-                        Ok(n) => Ok(SExpr::Number(SNumber::BigInt(n))),
+                        Ok(n) => Ok(SExpr::from(n)),
                         _ => match token.parse::<NativeRational>() {
-                            Ok(q) => Ok(SExpr::Number(SNumber::Rational(q))),
+                            Ok(q) => Ok(SExpr::from(q)),
                             _ => match token.parse::<NativeFloat>() {
-                                Ok(f) => Ok(SExpr::Number(SNumber::Float(f))),
+                                Ok(f) => Ok(SExpr::from(f)),
                                 _ => match token.parse::<NativeComplex>() {
-                                    Ok(c) => Ok(SExpr::Number(SNumber::Complex(c))),
+                                    Ok(c) => Ok(SExpr::from(c)),
                                     _ => match COMPLEX_POLAR_REGEX.captures(token) {
                                         Some(_) => Ok(parse_polar_complex(token)),
                                         None => Ok(SExpr::Symbol(token.to_string())),
@@ -254,7 +250,7 @@ fn parse_polar_complex(token: &str) -> SExpr {
     let magnitude = parts[0];
     let angle = parts[1];
 
-    SExpr::Number(SNumber::Complex(NativeComplex::from_polar(magnitude, angle)))
+    SExpr::from(NativeComplex::from_polar(magnitude, angle))
 }
 
 #[cfg(test)]
