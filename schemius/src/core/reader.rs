@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use num::Num;
 use regex::Regex;
 
-use super::{accessor::Accessor, s_expression::*};
+use super::{accessor::Accessor, constants::tokens, s_expression::*};
 
 lazy_static! {
     static ref TOKEN_REGEX: Regex =
@@ -27,9 +27,9 @@ pub fn read(line: &mut String) -> Result<SExpr, String> {
 fn has_balanced_parentheses(s: &str) -> bool {
     let mut balance = 0;
     for c in s.chars() {
-        match c {
-            '(' | '[' => balance += 1,
-            ')' | ']' => balance -= 1,
+        match c.to_string().as_str() {
+            tokens::OPEN_PAREN | tokens::OPEN_BRACKET => balance += 1,
+            tokens::CLOSED_PAREN | tokens::CLOSED_BRACKET => balance -= 1,
             _ => {}
         }
         if balance < 0 {
@@ -58,17 +58,18 @@ fn advance(line: &mut String, string_token: &String) -> Result<SExpr, String> {
     let opening_token = string_token.as_str();
 
     match opening_token {
-        "(" | "[" | "#(" => {
+        tokens::OPEN_PAREN | tokens::OPEN_BRACKET | tokens::VECTOR_OPEN => {
             let mut new_list = VectorImplementation::new();
 
             loop {
                 let token: String = init(line);
 
-                if (opening_token == "(" && token == ")") || (opening_token == "[" && token == "]")
+                if (opening_token == tokens::OPEN_PAREN && token == tokens::CLOSED_PAREN)
+                    || (opening_token == tokens::OPEN_BRACKET && token == tokens::CLOSED_BRACKET)
                 {
-                    if new_list.len() == 3 && token != "]" {
+                    if new_list.len() == 3 && token != tokens::CLOSED_BRACKET {
                         if let SExpr::Symbol(sym) = &new_list.s_ref(1).unwrap() {
-                            if sym.as_str() == "." {
+                            if sym.as_str() == tokens::DOT {
                                 return Ok(SExpr::Pair(SchemePair::new((
                                     Box::new(new_list.s_ref(0).unwrap().clone()),
                                     Box::new(new_list.s_ref(2).unwrap().clone()),
@@ -80,7 +81,7 @@ fn advance(line: &mut String, string_token: &String) -> Result<SExpr, String> {
                     return Ok(SExpr::List(SchemeList::new(ListImplementation::from_iter(
                         new_list,
                     ))));
-                } else if opening_token == "#(" && token == ")" {
+                } else if opening_token == tokens::VECTOR_OPEN && token == tokens::CLOSED_PAREN {
                     return Ok(SExpr::Vector(SchemeVector::new(VectorImplementation::from(
                         new_list,
                     ))));
@@ -95,24 +96,26 @@ fn advance(line: &mut String, string_token: &String) -> Result<SExpr, String> {
 
 fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
     match token {
-        "#t" => Ok(SExpr::Boolean(true)),
-        "#f" => Ok(SExpr::Boolean(false)),
-        "-nan.0" | "+nan.0" => Ok(SExpr::Number(SNumber::Float(NativeFloat::NAN))),
-        "-inf.0" => Ok(SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY))),
-        "+inf.0" => Ok(SExpr::Number(SNumber::Float(NativeFloat::INFINITY))),
+        tokens::TRUE => Ok(SExpr::Boolean(true)),
+        tokens::FALSE => Ok(SExpr::Boolean(false)),
+        tokens::NEGATIVE_NAN | tokens::POSITIVE_NAN => {
+            Ok(SExpr::Number(SNumber::Float(NativeFloat::NAN)))
+        }
+        tokens::NEGATIVE_INFINITY => Ok(SExpr::Number(SNumber::Float(NativeFloat::NEG_INFINITY))),
+        tokens::POSITIVE_INFINITY => Ok(SExpr::Number(SNumber::Float(NativeFloat::INFINITY))),
         token if token.starts_with('"') => {
             Ok(SExpr::String(SchemeString::new(token.get(1..token.len() - 1).unwrap().to_string())))
         }
-        "'" | "`" | "," | ",@" => {
+        tokens::QUOTE | tokens::QUASIQUOTE | tokens::UNQUOTE | tokens::UNQUOTE_SPLICING => {
             let internal_token = init(line);
             let quoted = advance(line, &internal_token)?;
             let mut vec = ListImplementation::new();
 
             let string_token = match token {
-                "'" => "quote".to_string(),
-                "`" => "quasiquote".to_string(),
-                "," => "unquote".to_string(),
-                ",@" => "unquote-splicing".to_string(),
+                tokens::QUOTE => tokens::QUOTE_EXPLICIT.to_string(),
+                tokens::QUASIQUOTE => tokens::QUASIQUOTE_EXPLICIT.to_string(),
+                tokens::UNQUOTE => tokens::UNQUOTE_EXPLICIT.to_string(),
+                tokens::UNQUOTE_SPLICING => tokens::UNQUOTE_SPLICING_EXPLICIT.to_string(),
                 _ => token.to_string(),
             };
 
@@ -120,7 +123,7 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
             vec.push(quoted);
             Ok(SExpr::List(SchemeList::new(vec)))
         }
-        token if token.starts_with(r#"#\"#) => {
+        token if token.starts_with(tokens::PREFIX_CHAR) => {
             match token.len() {
                 3 => Ok(SExpr::Char(token.chars().last().unwrap())),
                 _ => {
@@ -133,7 +136,7 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
         }
         _ => {
             let n_prefixes = if token.len() > 2
-                && token.chars().nth(0) == Some('#')
+                && token.chars().nth(0) == tokens::PREFIX.chars().next()
                 && token.chars().nth(1).is_some_and(|c| c.is_alphabetic())
             {
                 if token.len() > 4
@@ -150,24 +153,32 @@ fn parse_token(line: &mut String, token: &str) -> Result<SExpr, String> {
 
             let (has_prefix, radix, is_exact) = if n_prefixes == 2 {
                 match (&token[0..2], &token[2..4]) {
-                    ("#b", "#e") | ("#e", "#b") => (true, 2, Some(true)),
-                    ("#b", "#i") | ("#i", "#b") => (true, 2, Some(false)),
-                    ("#o", "#e") | ("#e", "#o") => (true, 8, Some(true)),
-                    ("#o", "#i") | ("#i", "#o") => (true, 8, Some(false)),
-                    ("#d", "#e") | ("#e", "#d") => (true, 10, Some(true)),
-                    ("#d", "#i") | ("#i", "#d") => (true, 10, Some(false)),
-                    ("#x", "#e") | ("#e", "#x") => (true, 16, Some(true)),
-                    ("#x", "#i") | ("#i", "#x") => (true, 16, Some(false)),
+                    (tokens::PREFIX_BINARY, tokens::PREFIX_EXACT)
+                    | (tokens::PREFIX_EXACT, tokens::PREFIX_BINARY) => (true, 2, Some(true)),
+                    (tokens::PREFIX_BINARY, tokens::PREFIX_INEXACT)
+                    | (tokens::PREFIX_INEXACT, tokens::PREFIX_BINARY) => (true, 2, Some(false)),
+                    (tokens::PREFIX_OCTAL, tokens::PREFIX_EXACT)
+                    | (tokens::PREFIX_EXACT, tokens::PREFIX_OCTAL) => (true, 8, Some(true)),
+                    (tokens::PREFIX_OCTAL, tokens::PREFIX_INEXACT)
+                    | (tokens::PREFIX_INEXACT, tokens::PREFIX_OCTAL) => (true, 8, Some(false)),
+                    (tokens::PREFIX_DECIMAL, tokens::PREFIX_EXACT)
+                    | (tokens::PREFIX_EXACT, tokens::PREFIX_DECIMAL) => (true, 10, Some(true)),
+                    (tokens::PREFIX_DECIMAL, tokens::PREFIX_INEXACT)
+                    | (tokens::PREFIX_INEXACT, tokens::PREFIX_DECIMAL) => (true, 10, Some(false)),
+                    (tokens::PREFIX_HEX, tokens::PREFIX_EXACT)
+                    | (tokens::PREFIX_EXACT, tokens::PREFIX_HEX) => (true, 16, Some(true)),
+                    (tokens::PREFIX_HEX, tokens::PREFIX_INEXACT)
+                    | (tokens::PREFIX_INEXACT, tokens::PREFIX_HEX) => (true, 16, Some(false)),
                     _ => (false, 10, None),
                 }
             } else if n_prefixes == 1 {
                 match &token[0..2] {
-                    "#b" => (true, 2, None),
-                    "#o" => (true, 8, None),
-                    "#d" => (true, 10, None),
-                    "#x" => (true, 16, None),
-                    "#e" => (true, 10, Some(true)),
-                    "#i" => (true, 10, Some(false)),
+                    tokens::PREFIX_BINARY => (true, 2, None),
+                    tokens::PREFIX_OCTAL => (true, 8, None),
+                    tokens::PREFIX_DECIMAL => (true, 10, None),
+                    tokens::PREFIX_HEX => (true, 16, None),
+                    tokens::PREFIX_EXACT => (true, 10, Some(true)),
+                    tokens::PREFIX_INEXACT => (true, 10, Some(false)),
                     _ => (false, 10, None),
                 }
             } else {

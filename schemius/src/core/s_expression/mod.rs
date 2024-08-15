@@ -4,7 +4,7 @@ pub mod s_procedure;
 
 use cfg_if::cfg_if;
 
-use super::accessor::*;
+use super::{accessor::*, constants::tokens};
 use std::{collections::LinkedList, fmt, result, vec};
 
 pub use self::{s_list::*, s_number::*, s_procedure::*};
@@ -46,23 +46,18 @@ pub enum SExpr {
     Ok,
 }
 
-pub struct Bracket;
-
-impl Bracket {
-    pub const LEFT_ROUND: &'static str = "(";
-    pub const LEFT_SQUARE: &'static str = "[";
-    pub const RIGHT_ROUND: &'static str = ")";
-    pub const RIGHT_SQUARE: &'static str = "]";
-}
-
 impl fmt::Display for SExpr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             SExpr::Symbol(ref val) => write!(f, "{}", val),
-            SExpr::Char(val) => write!(f, "#\\{}", val),
+            SExpr::Char(val) => write!(f, "{}{}", tokens::PREFIX_CHAR, val),
             SExpr::Number(val) => write!(f, "{}", val),
-            SExpr::Boolean(val) => write!(f, "#{}", if *val { "t" } else { "f" }),
-            SExpr::String(ref val) => write!(f, "\"{}\"", *val.access()),
+            SExpr::Boolean(val) => {
+                write!(f, "{}", if *val { tokens::TRUE } else { tokens::FALSE })
+            }
+            SExpr::String(ref val) => {
+                write!(f, "{}{}{}", tokens::PREFIX_STRING, *val.access(), tokens::SUFFIX_STRING)
+            }
             SExpr::Procedure(app) => match app {
                 Procedure::SpecialForm(_) => write!(f, "#<special form>"),
                 Procedure::Primitive(_) => write!(f, "#<primitive>"),
@@ -70,7 +65,7 @@ impl fmt::Display for SExpr {
             },
             SExpr::Pair(val) => {
                 let borrowed_val = val.access();
-                write!(f, "({} . {})", borrowed_val.0, borrowed_val.1)
+                write!(f, "({} {} {})", borrowed_val.0, tokens::DOT, borrowed_val.1)
             }
             SExpr::List(ref val) => write!(
                 f,
@@ -112,7 +107,7 @@ impl SExpr {
 
     pub fn quote(&self) -> Result<SExpr, String> {
         Ok(SExpr::List(SchemeList::new(ListImplementation::from_iter([
-            SExpr::Symbol("quote".to_string()),
+            SExpr::Symbol(tokens::QUOTE_EXPLICIT.to_string()),
             self.clone(),
         ]))))
     }
@@ -146,8 +141,8 @@ impl SExpr {
 
     #[allow(dead_code)]
     fn is_left_bracket(&self) -> Result<bool, String> {
-        if self.symbol_is(Bracket::LEFT_ROUND).unwrap()
-            || self.symbol_is(Bracket::LEFT_SQUARE).unwrap()
+        if self.symbol_is(tokens::OPEN_PAREN).unwrap()
+            || self.symbol_is(tokens::OPEN_BRACKET).unwrap()
         {
             Ok(true)
         } else {
@@ -157,8 +152,8 @@ impl SExpr {
 
     #[allow(dead_code)]
     fn is_right_bracket(&self) -> Result<bool, String> {
-        if self.symbol_is(Bracket::RIGHT_ROUND).unwrap()
-            || self.symbol_is(Bracket::RIGHT_SQUARE).unwrap()
+        if self.symbol_is(tokens::CLOSED_PAREN).unwrap()
+            || self.symbol_is(tokens::CLOSED_BRACKET).unwrap()
         {
             Ok(true)
         } else {
@@ -188,10 +183,10 @@ impl SExpr {
     }
 
     pub fn is_quote(&self) -> Result<bool, String> {
-        Ok(self.symbol_is("'").unwrap()
-            || self.symbol_is("quote").unwrap()
-            || self.symbol_is("`").unwrap()
-            || self.symbol_is("quasiquote").unwrap())
+        Ok(self.symbol_is(tokens::QUOTE).unwrap()
+            || self.symbol_is(tokens::QUOTE_EXPLICIT).unwrap()
+            || self.symbol_is(tokens::QUASIQUOTE).unwrap()
+            || self.symbol_is(tokens::QUASIQUOTE_EXPLICIT).unwrap())
     }
 
     pub fn is_quoted_list(&self) -> Result<bool, String> {
@@ -387,7 +382,7 @@ impl SExpr {
         match self {
             SExpr::List(list) => {
                 let list = list.access();
-                if !list.s_car().unwrap().symbol_is("(").unwrap() {
+                if !list.s_car().unwrap().symbol_is(tokens::OPEN_PAREN).unwrap() {
                     return None;
                 }
 
@@ -398,7 +393,7 @@ impl SExpr {
                     .enumerate()
                     .filter(|x| {
                         (pairs.is_empty() || pairs.iter().all(|(_, right)| right != &x.0))
-                            && x.1.symbol_is(")").unwrap()
+                            && x.1.symbol_is(tokens::CLOSED_PAREN).unwrap()
                     })
                     .min_by(|x, y| (x.0).cmp(&y.0))
                     .map(|x| x.0)
@@ -408,7 +403,7 @@ impl SExpr {
                         .enumerate()
                         .filter(|x| {
                             (pairs.is_empty() || pairs.iter().all(|(left, _)| left != &x.0))
-                                && x.1.symbol_is("(").unwrap()
+                                && x.1.symbol_is(tokens::OPEN_PAREN).unwrap()
                         })
                         .filter(|x| x.0 < right)
                         .max_by(|x, y| (x.0).cmp(&y.0))
@@ -446,7 +441,7 @@ impl SExpr {
             Ok(SExpr::List(list)) => {
                 let borrowed_list = list.access();
 
-                if borrowed_list.s_car().unwrap().symbol_is("(").unwrap() {
+                if borrowed_list.s_car().unwrap().symbol_is(tokens::OPEN_PAREN).unwrap() {
                     return None;
                 }
 
@@ -471,7 +466,7 @@ impl SExpr {
         match self {
             SExpr::List(list) => {
                 let mut new_list = ListImplementation::new();
-                new_list.push(SExpr::Symbol(String::from("(")));
+                new_list.push(SExpr::Symbol(String::from(tokens::OPEN_PAREN)));
 
                 list.access().iter().for_each(|item| match item {
                     SExpr::List(_) => {
@@ -482,7 +477,7 @@ impl SExpr {
                     other => new_list.push(other.clone()),
                 });
 
-                new_list.push(SExpr::Symbol(String::from(")")));
+                new_list.push(SExpr::Symbol(String::from(tokens::CLOSED_PAREN)));
 
                 Ok(SExpr::List(SchemeList::new(new_list.clone())))
             }
@@ -490,7 +485,7 @@ impl SExpr {
                 let pair = pair.access();
                 SExpr::List(SchemeList::new(ListImplementation::from_iter([
                     *pair.0.clone(),
-                    SExpr::Symbol(".".to_string()),
+                    SExpr::Symbol(tokens::DOT.to_string()),
                     *pair.1.clone(),
                 ])))
                 .with_explicit_parens()
@@ -506,7 +501,7 @@ impl SExpr {
                 let mut list_without_parens = VectorImplementation::new();
                 list.access().iter().for_each(|expr| list_without_parens.push(expr.clone()));
 
-                if !list_without_parens.first().unwrap().symbol_is("(").unwrap() {
+                if !list_without_parens.first().unwrap().symbol_is(tokens::OPEN_PAREN).unwrap() {
                     return Ok(self.clone());
                 }
 
@@ -520,7 +515,7 @@ impl SExpr {
                     match list_without_parens
                         .iter()
                         .enumerate()
-                        .filter(|x| x.1.symbol_is(")").unwrap())
+                        .filter(|x| x.1.symbol_is(tokens::CLOSED_PAREN).unwrap())
                         .min_by(|x, y| (x.0).cmp(&y.0))
                         .map(|x| x.0)
                     {
@@ -528,7 +523,7 @@ impl SExpr {
                             match list_without_parens
                                 .iter()
                                 .enumerate()
-                                .filter(|x| x.1.symbol_is("(").unwrap())
+                                .filter(|x| x.1.symbol_is(tokens::OPEN_PAREN).unwrap())
                                 .filter(|x| x.0 < r)
                                 .max_by(|x, y| (x.0).cmp(&y.0))
                                 .map(|x| x.0)

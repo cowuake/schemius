@@ -8,6 +8,8 @@ use std::{
 use cfg_if::cfg_if;
 use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive, Zero};
 
+use crate::core::constants::numbers;
+
 cfg_if! {
     if #[cfg(i32)] {
         pub type NativeInt = i32;
@@ -46,13 +48,13 @@ pub enum SNumber {
 pub struct NumericalConstant;
 
 impl NumericalConstant {
-    pub const AVOGADRO: SNumber = SNumber::Float(6.0221515e23);
-    pub const BOLTZMANN: SNumber = SNumber::Float(1.380650e23);
-    pub const EULER: SNumber = SNumber::Float(2.718281828459045);
-    pub const GOLDEN_RATIO: SNumber = SNumber::Float(1.618033988749895);
-    pub const GRAVITATIONAL_CONSTANT: SNumber = SNumber::Float(6.67300e-11);
-    pub const PI: SNumber = SNumber::Float(3.141592653589793);
-    pub const PLANCK: SNumber = SNumber::Float(6.626068e-34);
+    pub const AVOGADRO: SNumber = SNumber::Float(numbers::AVOGADRO);
+    pub const BOLTZMANN: SNumber = SNumber::Float(numbers::BOLTZMANN);
+    pub const EULER: SNumber = SNumber::Float(numbers::EULER);
+    pub const GOLDEN_RATIO: SNumber = SNumber::Float(numbers::GOLDEN_RATIO);
+    pub const GRAVITATIONAL_CONSTANT: SNumber = SNumber::Float(numbers::GRAVITATIONAL_CONSTANT);
+    pub const PI: SNumber = SNumber::Float(numbers::PI);
+    pub const PLANCK: SNumber = SNumber::Float(numbers::PLANCK);
 }
 
 pub trait NativeCasts {

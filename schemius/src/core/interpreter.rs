@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use crate::core::reader;
 use crate::scheme::prelude::PRELUDE;
 
+use super::constants::tokens;
 use super::environment::Environment;
 use super::evaluator::EvalOutput;
 use super::{evaluator::Evaluator, s_expression::SExpr};
@@ -56,7 +57,7 @@ impl Interpreter {
 
             let next = next_line(self).unwrap_or("".to_string());
 
-            if next.is_empty() || next.starts_with(';') {
+            if next.is_empty() || next.starts_with(tokens::PREFIX_COMMENT) {
                 continue;
             }
 
@@ -88,11 +89,13 @@ impl Interpreter {
             self.current_expression = next_line(self)?;
             self.read(next_line);
 
-            if self.current_expression.is_empty() || self.current_expression.starts_with(';') {
+            if self.current_expression.is_empty()
+                || self.current_expression.starts_with(tokens::PREFIX_COMMENT)
+            {
                 continue;
             }
 
-            if self.current_expression == "EOF" {
+            if self.current_expression == tokens::EOF {
                 break;
             }
 
@@ -122,10 +125,10 @@ impl Interpreter {
 
     fn is_preliminarily_validated(&self, expression_string: &str) -> bool {
         // TODO: Judge the validity of the approach and extend the function if it's worth
-        !((expression_string.trim().starts_with('(')
-            && !expression_string.trim_end().ends_with(')'))
-            || (expression_string.trim().starts_with('[')
-                && !expression_string.trim_end().ends_with(']')))
+        !((expression_string.trim().starts_with(tokens::OPEN_PAREN)
+            && !expression_string.trim_end().ends_with(tokens::CLOSED_PAREN))
+            || (expression_string.trim().starts_with(tokens::OPEN_BRACKET)
+                && !expression_string.trim_end().ends_with(tokens::CLOSED_BRACKET)))
     }
 
     pub fn eval_expression(&mut self, expression_string: String) -> EvalOutput {
@@ -175,7 +178,7 @@ fn read_line_from_file(interpreter: &mut Interpreter) -> Result<String, String> 
 
         Ok(line)
     } else {
-        Ok(String::from("EOF"))
+        Ok(String::from(tokens::EOF))
     }
 }
 

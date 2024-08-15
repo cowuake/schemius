@@ -1,5 +1,7 @@
 use std::time::Instant;
 
+use crate::core::constants::tokens;
+
 use super::{
     eval, r_eval,
     s_list::SList,
@@ -298,11 +300,12 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                 Ok(expr) => match expr {
                     SExpr::List(list) => {
                         let s_list = SExpr::List(list.clone());
-                        let quasiquotes = s_list.find_symbol("quasiquote");
+                        let quasiquotes = s_list.find_symbol(tokens::QUASIQUOTE_EXPLICIT);
                         let mapping = s_list.matching_brackets().unwrap();
 
-                        let unquotes = s_list.find_symbol("unquote");
-                        let unquotes_splicing = s_list.find_symbol("unquote-splicing");
+                        let unquotes = s_list.find_symbol(tokens::UNQUOTE_EXPLICIT);
+                        let unquotes_splicing =
+                            s_list.find_symbol(tokens::UNQUOTE_SPLICING_EXPLICIT);
                         let mut unquotes = if let Some(unquotes) = unquotes {
                             unquotes.iter().map(|x| (false, *x)).collect()
                         } else {
