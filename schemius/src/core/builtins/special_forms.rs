@@ -1,7 +1,5 @@
 use std::time::Instant;
 
-use crate::core::constants::tokens;
-
 use super::{
     eval, r_eval,
     s_list::SList,
@@ -286,188 +284,82 @@ pub fn r_quote(args: ProcedureArgs, _: ProcedureEnv) -> SpecialFormOutput {
     Ok(args.s_car().unwrap().clone())
 }
 
+fn r_unquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
+    let length = args.s_len();
+    if length != 1 {
+        return Err(format!("Exception in ,: expected 1 argument, found {}", length));
+    }
+
+    Ok(eval(args.s_car().unwrap(), env).unwrap())
+}
+
 pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
     let length = args.s_len();
     if length != 1 {
         return Err(format!("Exception in `: expected 1 argument, found {}", length));
     }
 
-    match args.s_car().unwrap() {
-        SExpr::List(_) | SExpr::Pair(_) => {
-            let list_with_parens = args.s_car().unwrap().with_explicit_parens();
+    let arg = args.s_car().unwrap();
 
-            match list_with_parens {
-                Ok(expr) => match expr {
-                    SExpr::List(list) => {
-                        let s_list = SExpr::List(list.clone());
-                        let quasiquotes = s_list.find_symbol(tokens::QUASIQUOTE_EXPLICIT);
-                        let mapping = s_list.matching_brackets().unwrap();
+    if !args.s_car().unwrap().is_list().unwrap() {
+        return Err("Exception in `: expected a list".to_string());
+    }
 
-                        let unquotes = s_list.find_symbol(tokens::UNQUOTE_EXPLICIT);
-                        let unquotes_splicing =
-                            s_list.find_symbol(tokens::UNQUOTE_SPLICING_EXPLICIT);
-                        let mut unquotes = if let Some(unquotes) = unquotes {
-                            unquotes.iter().map(|x| (false, *x)).collect()
-                        } else {
-                            vec![]
-                        };
-                        let mut unquotes_splicing = if unquotes_splicing.is_some() {
-                            unquotes_splicing.unwrap().iter().map(|x| (true, *x)).collect()
-                        } else {
-                            vec![]
-                        };
+    match arg {
+        SExpr::List(list) => {
+            let mut new_list = ListImplementation::new();
+            let current_list = list.access();
 
-                        unquotes.append(&mut unquotes_splicing);
-                        unquotes.sort_by(|x, y| x.1.cmp(&y.1));
+            for item in current_list.iter() {
+                match item {
+                    SExpr::List(inner_list) => {
+                        if inner_list.access().s_len() > 0 {
+                            if inner_list.access().s_car().unwrap().is_unquote()? {
+                                let unquoted = r_unquote(
+                                    vec![inner_list.access().s_cadr().unwrap().clone()],
+                                    env.clone(),
+                                )?;
 
-                        if quasiquotes.is_some() {
-                            let quasiquotes = quasiquotes.unwrap();
-
-                            unquotes.retain(|(_, index)| {
-                                !mapping.iter().any(|(left, right, level)| {
-                                    index > left
-                                        && index < right
-                                        && quasiquotes.iter().any(|quasi| *left == quasi + 1)
-                                        && *level > 0
-                                })
-                            });
-                        }
-
-                        // After each and every unquoting indexes will be shifted by a certain offset
-                        let mut offset: i32 = 0;
-                        let mut borrowed_list = list.access_mut();
-
-                        loop {
-                            if unquotes.is_empty() {
-                                break;
-                            }
-
-                            let paren_map = SExpr::List(list.clone()).matching_brackets();
-                            let unquote_is_splicing = unquotes[0].0;
-
-                            let apply_offset = |source: i32, offset: i32| match offset {
-                                0.. => (source - offset) as usize,
-                                _ => (source + offset) as usize,
-                            };
-                            let unquote_index = apply_offset(unquotes[0].1 as i32, offset);
-
-                            let enclosing = match paren_map {
-                                Some(ref paren_map) => {
-                                    if !paren_map
-                                        .iter()
-                                        .enumerate()
-                                        .any(|(_, (i, _, _))| *i == (unquote_index + 1))
-                                    {
-                                        None
-                                    } else {
-                                        paren_map.iter().find_map(|(opening, closing, _)| {
-                                            Some((*opening, *closing))
-                                        })
-                                    }
-                                }
-                                None => None,
-                            };
-
-                            let to_be_evaluated;
-                            let first_idx;
-                            let last_idx;
-
-                            match enclosing {
-                                // Unquoting expression (list)
-                                Some((lparen_idx, rparen_idx)) => {
-                                    // The final expression does not need enclosing parentheses
-                                    let raw_expr = borrowed_list
-                                        .clone()
-                                        .extract_range(lparen_idx + 1, rparen_idx)
-                                        .clone();
-
-                                    // The expression... Must be a non-self-evaluating one!
-                                    if raw_expr.s_len() == 1 {
-                                        let suspect = raw_expr.s_car().unwrap();
-                                        let mut incriminated = false;
-
-                                        if let SExpr::Symbol(symbol) = suspect {
-                                            if !env
-                                                .access()
-                                                .get(&symbol)
-                                                .unwrap()
-                                                .is_procedure()
-                                                .unwrap()
-                                            {
-                                                incriminated = true;
+                                if inner_list.access().s_car().unwrap().is_unquote_pure()? {
+                                    new_list.push(unquoted);
+                                } else if inner_list
+                                    .access()
+                                    .s_car()
+                                    .unwrap()
+                                    .is_unquote_splicing()?
+                                {
+                                    match unquoted {
+                                        SExpr::List(list) => {
+                                            let borrowed_list = list.access();
+                                            for item in borrowed_list.iter() {
+                                                new_list.push(item.clone());
                                             }
-                                        } else {
-                                            incriminated = true;
                                         }
-
-                                        if incriminated {
-                                            return Err(format!(
-                                                "Exception: {} is not a procedure",
-                                                raw_expr.s_car().unwrap()
-                                            ));
-                                        }
+                                        _ => new_list.push(unquoted),
                                     }
-
-                                    let expr = SExpr::List(SchemeList::new(raw_expr));
-                                    to_be_evaluated = expr.without_explicit_parens().unwrap();
-                                    first_idx = lparen_idx - 2; // Index of the left parenthesis preceding the unquote symbol
-                                    last_idx = rparen_idx + 2; // Index of the right matching parenthesis + 1
                                 }
-                                // Unquoting symbol or atom
-                                None => {
-                                    to_be_evaluated =
-                                        list.access().s_ref(unquote_index + 1).unwrap().clone();
-                                    first_idx = unquote_index - 1; // Index of the left parenthesis preceding the unquote symbol
-                                    last_idx = unquote_index + 3; // Index of the right parenthesis + 1
-                                }
-                            };
-
-                            offset += (last_idx - first_idx - 1) as i32;
-                            let evaluated: Result<SExpr, String> =
-                                eval(&to_be_evaluated, env.clone());
-
-                            if !unquote_is_splicing {
-                                borrowed_list.splice(first_idx..last_idx, evaluated);
+                            } else if inner_list.access().s_car().unwrap().is_quasiquote()? {
+                                new_list.push(SExpr::List(inner_list.clone()));
                             } else {
-                                match evaluated {
-                                    Ok(ref res) => match res {
-                                        SExpr::List(internal) => {
-                                            let borrowed_internal = internal.access();
-                                            offset -= (borrowed_internal.s_len() - 1) as i32;
-
-                                            for i in (first_idx..last_idx).rev() {
-                                                borrowed_list.remove(i);
-                                            }
-
-                                            for i in (0..internal.access().s_len()).rev() {
-                                                borrowed_list.splice(
-                                                    first_idx..first_idx,
-                                                    [borrowed_internal.s_ref(i).unwrap().clone()],
-                                                );
-                                            }
-                                        }
-                                        other => {
-                                            return Err(format!(
-                                                "Exception: ,@ followed by non-list {} -> {}",
-                                                to_be_evaluated, other
-                                            ))
-                                        }
-                                    },
-                                    Err(e) => return Err(e),
-                                }
+                                new_list.push(
+                                    r_quasiquote(
+                                        vec![SExpr::List(inner_list.clone())],
+                                        env.clone(),
+                                    )
+                                    .unwrap(),
+                                );
                             }
-
-                            unquotes.remove(0);
+                        } else {
+                            new_list.push(SExpr::List(inner_list.clone()));
                         }
-
-                        SExpr::List(list.clone()).without_explicit_parens()
                     }
-                    other => Ok(other.clone()),
-                },
-                Err(e) => Err(e),
+                    _ => new_list.push(item.clone()),
+                }
             }
+
+            Ok(SExpr::List(SchemeList::new(new_list)))
         }
-        other => Ok(other.clone()),
+        _ => Ok(arg.clone()),
     }
 }
 
@@ -578,4 +470,36 @@ pub fn r_or(args: ProcedureArgs, env: ProcedureEnv) -> ProcedureOutput {
     }
 
     Ok(args.last().unwrap().clone())
+}
+
+#[cfg(test)]
+mod special_forms_tests {
+    use crate::core::builtins::EnvAccessor;
+
+    use super::*;
+
+    #[test]
+    fn test_special_form_unquote() {
+        let env = EnvAccessor::new(Environment::new());
+        let list = SExpr::List(SchemeList::new(ListImplementation::from_iter([
+            SExpr::from(1),
+            SExpr::from(2),
+            SExpr::from(3),
+        ])));
+        let list_name = "l";
+
+        let def = env.access_mut().define(list_name, &list);
+        assert!(def.is_ok());
+
+        let args = vec![SExpr::Symbol(list_name.to_string())];
+        let res = r_unquote(args, env);
+
+        assert!(res.is_ok());
+        let res = res.unwrap().as_list().unwrap();
+        let list = list.as_list().unwrap();
+
+        assert_eq!(res.s_ref(0).unwrap().as_int(), list.s_ref(0).unwrap().as_int());
+        assert_eq!(res.s_ref(1).unwrap().as_int(), list.s_ref(1).unwrap().as_int());
+        assert_eq!(res.s_ref(2).unwrap().as_int(), list.s_ref(2).unwrap().as_int());
+    }
 }

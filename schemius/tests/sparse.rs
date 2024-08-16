@@ -149,7 +149,6 @@ fn interpreter_binding() {
     }
 }
 
-#[ignore]
 #[test]
 fn interpreter_quasiquotation() {
     integration_subtest_eval_to! {
