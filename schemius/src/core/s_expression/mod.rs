@@ -133,6 +133,13 @@ impl SExpr {
         }
     }
 
+    pub fn as_symbol(&self) -> Result<SchemeSymbol, String> {
+        match self {
+            SExpr::Symbol(val) => Ok(val.clone()),
+            _ => Err(format!("Exception: {} is not a symbol", self)),
+        }
+    }
+
     pub fn as_list(&self) -> Result<ListImplementation, String> {
         Ok(match self {
             SExpr::List(list) => list.access().clone(),
@@ -217,11 +224,29 @@ impl SExpr {
         }
     }
 
+    pub fn is_quote_pure(&self) -> Result<bool, String> {
+        Ok(self.symbol_is(tokens::QUOTE)? || self.symbol_is(tokens::QUOTE_EXPLICIT)?)
+    }
+
+    pub fn is_quasiquote(&self) -> Result<bool, String> {
+        Ok(self.symbol_is(tokens::QUASIQUOTE)? || self.symbol_is(tokens::QUASIQUOTE_EXPLICIT)?)
+    }
+
     pub fn is_quote(&self) -> Result<bool, String> {
-        Ok(self.symbol_is(tokens::QUOTE).unwrap()
-            || self.symbol_is(tokens::QUOTE_EXPLICIT).unwrap()
-            || self.symbol_is(tokens::QUASIQUOTE).unwrap()
-            || self.symbol_is(tokens::QUASIQUOTE_EXPLICIT).unwrap())
+        Ok(self.is_quote_pure()? || self.is_quasiquote()?)
+    }
+
+    pub fn is_unquote_pure(&self) -> Result<bool, String> {
+        Ok(self.symbol_is(tokens::UNQUOTE)? || self.symbol_is(tokens::UNQUOTE_EXPLICIT)?)
+    }
+
+    pub fn is_unquote_splicing(&self) -> Result<bool, String> {
+        Ok(self.symbol_is(tokens::UNQUOTE_SPLICING)?
+            || self.symbol_is(tokens::UNQUOTE_SPLICING_EXPLICIT)?)
+    }
+
+    pub fn is_unquote(&self) -> Result<bool, String> {
+        Ok(self.is_unquote_pure()? || self.is_unquote_splicing()?)
     }
 
     pub fn is_quoted_list(&self) -> Result<bool, String> {
@@ -599,6 +624,12 @@ mod s_expression_tests {
     }
 
     #[test]
+    fn test_sexpr_as_symbol() {
+        let sexpr = SExpr::Symbol("symbol".to_string());
+        assert_eq!(sexpr.as_symbol().unwrap(), "symbol");
+    }
+
+    #[test]
     fn test_sexpr_as_int() {
         let sexpr = SExpr::from(42);
         assert_eq!(sexpr.as_int().unwrap(), 42);
@@ -633,6 +664,75 @@ mod s_expression_tests {
             SExpr::from(2),
         ])));
         assert!(sexpr.is_applyable().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_quote() {
+        let quote = SExpr::Symbol(tokens::QUOTE.to_string());
+        let quote_explicit = SExpr::Symbol(tokens::QUOTE_EXPLICIT.to_string());
+        let quasiquote = SExpr::Symbol(tokens::QUASIQUOTE.to_string());
+        let quasiquote_explicit = SExpr::Symbol(tokens::QUASIQUOTE_EXPLICIT.to_string());
+        let symbol = SExpr::Symbol("symbol".to_string());
+        let number = SExpr::from(42);
+
+        assert!(quote.is_quote().unwrap());
+        assert!(quote.is_quote_pure().unwrap());
+        assert!(!quote.is_quasiquote().unwrap());
+
+        assert!(quote_explicit.is_quote().unwrap());
+        assert!(quote_explicit.is_quote_pure().unwrap());
+        assert!(!quote_explicit.is_quasiquote().unwrap());
+
+        assert!(quasiquote.is_quote().unwrap());
+        assert!(quasiquote.is_quasiquote().unwrap());
+        assert!(!quasiquote.is_quote_pure().unwrap());
+
+        assert!(quasiquote_explicit.is_quote().unwrap());
+        assert!(quasiquote_explicit.is_quasiquote().unwrap());
+        assert!(!quasiquote_explicit.is_quote_pure().unwrap());
+
+        assert!(!symbol.is_quote().unwrap());
+        assert!(!symbol.is_quote_pure().unwrap());
+        assert!(!symbol.is_quasiquote().unwrap());
+
+        assert!(!number.is_quasiquote().unwrap());
+        assert!(!number.is_quasiquote().unwrap());
+        assert!(!number.is_quasiquote().unwrap());
+    }
+
+    #[test]
+    fn test_sexpr_is_unquote() {
+        let unquote = SExpr::Symbol(tokens::UNQUOTE.to_string());
+        let unquote_explicit = SExpr::Symbol(tokens::UNQUOTE_EXPLICIT.to_string());
+        let unquote_splicing = SExpr::Symbol(tokens::UNQUOTE_SPLICING.to_string());
+        let unquote_splicing_explicit =
+            SExpr::Symbol(tokens::UNQUOTE_SPLICING_EXPLICIT.to_string());
+        let symbol = SExpr::Symbol("symbol".to_string());
+        let number = SExpr::from(42);
+
+        assert!(unquote.is_unquote().unwrap());
+        assert!(unquote.is_unquote_pure().unwrap());
+        assert!(!unquote.is_unquote_splicing().unwrap());
+
+        assert!(unquote_explicit.is_unquote().unwrap());
+        assert!(unquote_explicit.is_unquote_pure().unwrap());
+        assert!(!unquote_explicit.is_unquote_splicing().unwrap());
+
+        assert!(unquote_splicing.is_unquote().unwrap());
+        assert!(unquote_splicing.is_unquote_splicing().unwrap());
+        assert!(!unquote_splicing.is_unquote_pure().unwrap());
+
+        assert!(unquote_splicing_explicit.is_unquote().unwrap());
+        assert!(unquote_splicing_explicit.is_unquote_splicing().unwrap());
+        assert!(!unquote_splicing_explicit.is_unquote_pure().unwrap());
+
+        assert!(!symbol.is_unquote().unwrap());
+        assert!(!symbol.is_unquote_pure().unwrap());
+        assert!(!symbol.is_unquote_splicing().unwrap());
+
+        assert!(!number.is_unquote().unwrap());
+        assert!(!number.is_unquote_pure().unwrap());
+        assert!(!number.is_unquote_splicing().unwrap());
     }
 
     #[test]
