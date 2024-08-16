@@ -1,19 +1,16 @@
-use lazy_static::lazy_static;
+use super::{accessor::Accessor, constants::tokens, s_expression::*};
 use num::Num;
 use regex::Regex;
+use std::sync::LazyLock;
 
-use super::{accessor::Accessor, constants::tokens, s_expression::*};
+static TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"^\s*(,@|#\\\.|[\[('`,)\]]|#\(|"(?:\.|[^"])*"|;.*|[^\s\[('"`,;)\]]*)(.*)"#)
+        .unwrap()
+});
 
-lazy_static! {
-    static ref TOKEN_REGEX: Regex =
-        Regex::new(r#"^\s*(,@|#\\\.|[\[('`,)\]]|#\(|"(?:\.|[^"])*"|;.*|[^\s\[('"`,;)\]]*)(.*)"#)
-            .unwrap();
-}
-
-lazy_static! {
-    static ref COMPLEX_POLAR_REGEX: Regex =
-        Regex::new(r"^(\d*(\.\d+)?(/?\d*(\.\d+)?)?)@(\d*(\.\d+)?(/?\d*(\.\d+)?)?)$").unwrap();
-}
+static COMPLEX_POLAR_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(\d*(\.\d+)?(/?\d*(\.\d+)?)?)@(\d*(\.\d+)?(/?\d*(\.\d+)?)?)$").unwrap()
+});
 
 pub fn read(line: &mut String) -> Result<SExpr, String> {
     if !has_balanced_parentheses(line) {

@@ -1,11 +1,9 @@
-use lazy_static::lazy_static;
 use schemius::Interpreter;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 use wasm_bindgen::prelude::*;
 
-lazy_static! {
-    static ref INTERPRETER: Mutex<Interpreter> = Mutex::new(Interpreter::default());
-}
+static INTERPRETER: LazyLock<Mutex<Interpreter>> =
+    LazyLock::new(|| Mutex::new(Interpreter::default()));
 
 #[wasm_bindgen]
 pub fn evaluate(expression: &str) -> String {
