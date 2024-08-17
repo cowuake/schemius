@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/cowuake/schemius/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/cowuake/schemius/actions/workflows/continuous-integration.yaml)
 [![Web](https://github.com/cowuake/schemius/actions/workflows/publish-web.yml/badge.svg)](https://github.com/cowuake/schemius/actions/workflows/publish-web.yml)
-[![Coverage](https://coveralls.io/repos/github/cowuake/schemius/badge.svg)](https://coveralls.io/github/cowuake/schemius)
+[![Coverage Status](https://coveralls.io/repos/github/cowuake/schemius/badge.svg?branch=main)](https://coveralls.io/github/cowuake/schemius?branch=main)
 
 ## What is Schemius?
 
