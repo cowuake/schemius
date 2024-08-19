@@ -1,9 +1,9 @@
 use core::fmt::Debug;
 use std::{
-    cell::{Ref, RefCell, RefMut},
+    cell::RefCell,
     ops::{Deref, DerefMut},
     rc::Rc,
-    sync::{Arc, Mutex, MutexGuard},
+    sync::{Arc, Mutex},
 };
 
 pub trait Accessor<T> {
@@ -23,10 +23,10 @@ impl<T> Accessor<T> for BaseAccessor<T> {
     fn new(src: T) -> Self {
         Self(Rc::new(RefCell::new(src)))
     }
-    fn access(&self) -> Ref<T> {
+    fn access(&self) -> impl Deref<Target = T> {
         self.0.try_borrow().unwrap()
     }
-    fn access_mut(&self) -> RefMut<T> {
+    fn access_mut(&self) -> impl DerefMut<Target = T> {
         self.0.try_borrow_mut().unwrap()
     }
     fn replace(&self, src: T) -> T {
@@ -38,10 +38,10 @@ impl<T> Accessor<T> for ThreadSafeAccessor<T> {
     fn new(src: T) -> Self {
         Self(Arc::new(Mutex::new(src)))
     }
-    fn access(&self) -> MutexGuard<T> {
+    fn access(&self) -> impl Deref<Target = T> {
         self.0.try_lock().unwrap()
     }
-    fn access_mut(&self) -> MutexGuard<T> {
+    fn access_mut(&self) -> impl DerefMut<Target = T> {
         self.0.try_lock().unwrap()
     }
     fn replace(&self, src: T) -> T {
