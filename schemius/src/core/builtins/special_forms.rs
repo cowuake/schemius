@@ -7,10 +7,10 @@ use super::{
     Accessor, Environment, ListImplementation, SExpr, SchemeEnvironment, SchemeList,
 };
 
-fn list_args(list: &[SExpr]) -> Result<Vec<String>, String> {
+fn list_args(list: &ListImplementation) -> Result<Vec<String>, String> {
     let mut args: Vec<String> = vec![];
 
-    for item in list[0..].iter() {
+    for item in list.iter() {
         match item {
             SExpr::Symbol(val) => args.push(val.clone()),
             _ => return Err(String::from("Exception: found non-symbol object in list")),
@@ -76,7 +76,8 @@ pub fn r_define(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
                     }
                 }
 
-                lambda_args = vec![SExpr::List(SchemeList::new(proc_args))];
+                lambda_args =
+                    ListImplementation::from_iter([SExpr::List(SchemeList::new(proc_args))]);
                 lambda_args.append(lambda_body);
 
                 let lambda_proc = match r_lambda(lambda_args, env.clone()) {
@@ -263,16 +264,18 @@ pub fn r_begin(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         ));
     }
 
-    let splitted = args.split_last().unwrap();
+    let tail = args.last().unwrap();
+    let mut head = args.clone();
+    head.pop();
 
-    for v in splitted.1.iter() {
+    for v in head.iter() {
         match eval(v, env.clone()) {
             Ok(_) => {}
             Err(e) => return Err(e),
         };
     }
 
-    Ok(splitted.0.clone())
+    Ok(tail.clone())
 }
 
 pub fn r_quote(args: ProcedureArgs, _: ProcedureEnv) -> SpecialFormOutput {
@@ -316,7 +319,11 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                         if inner_list.access().s_len() > 0 {
                             if inner_list.access().s_car().unwrap().is_unquote()? {
                                 let unquoted = r_unquote(
-                                    vec![inner_list.access().s_cadr().unwrap().clone()],
+                                    ListImplementation::from_iter([inner_list
+                                        .access()
+                                        .s_cadr()
+                                        .unwrap()
+                                        .clone()]),
                                     env.clone(),
                                 )?;
 
@@ -343,7 +350,9 @@ pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput
                             } else {
                                 new_list.push(
                                     r_quasiquote(
-                                        vec![SExpr::List(inner_list.clone())],
+                                        ListImplementation::from_iter([SExpr::List(
+                                            inner_list.clone(),
+                                        )]),
                                         env.clone(),
                                     )
                                     .unwrap(),
@@ -491,7 +500,7 @@ mod special_forms_tests {
         let def = env.access_mut().define(list_name, &list);
         assert!(def.is_ok());
 
-        let args = vec![SExpr::Symbol(list_name.to_string())];
+        let args = ListImplementation::from_iter([SExpr::Symbol(list_name.to_string())]);
         let res = r_unquote(args, env);
 
         assert!(res.is_ok());

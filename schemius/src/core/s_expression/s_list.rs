@@ -20,6 +20,7 @@ where
     fn s_tail(&self, k: usize) -> Self;
     fn s_reverse(&self) -> Self;
     fn set_car(&mut self, value: T);
+    fn pop(&mut self) -> Option<T>;
     fn push(&mut self, value: T);
     fn last(&self) -> Option<&T> {
         self.s_ref(self.s_len() - 1)
@@ -85,6 +86,10 @@ where
         }
     }
 
+    fn pop(&mut self) -> Option<T> {
+        self.pop()
+    }
+
     fn push(&mut self, value: T) {
         self.push(value);
     }
@@ -146,6 +151,10 @@ where
         if let Some(first) = self.front_mut() {
             *first = value;
         }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        self.pop_front()
     }
 
     fn push(&mut self, value: T) {
@@ -230,6 +239,14 @@ pub mod tests_slist_vector {
         let mut list = vec![1, 2, 3, 4, 5];
         list.set_car(10);
         assert_eq!(list, vec![10, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_slist_vector_pop() {
+        let mut list = vec![1, 2, 3, 4, 5];
+        let popped = list.pop();
+        assert_eq!(list.len(), 4);
+        assert_eq!(popped, Some(5));
     }
 
     #[test]
@@ -345,6 +362,14 @@ pub mod test_slist_linked_list {
         let list = LinkedList::from_iter([1, 2, 3, 4, 5]);
         let tail = list.s_tail(2);
         assert_eq!(tail, LinkedList::from_iter([3, 4, 5]));
+    }
+
+    #[test]
+    fn test_slist_linked_list_pop() {
+        let mut list = LinkedList::from_iter([1, 2, 3, 4, 5]);
+        let popped = list.pop();
+        assert_eq!(list.len(), 4);
+        assert_eq!(popped, Some(1));
     }
 
     #[test]
