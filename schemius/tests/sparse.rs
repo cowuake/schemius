@@ -153,7 +153,8 @@ fn interpreter_binding() {
 fn interpreter_quasiquotation() {
     integration_subtest_eval_to! {
         { expression: "(define x '(1 2 3))", expected: "ok" };
-        { expression: "`(,x 3 ,pi ,(list 1 2 3 4 5))", expected: "((1 2 3) 3 3.141592653589793 (1 2 3 4 5))" };
+        { expression: "(define pi 3.14)", expected: "ok" };
+        { expression: "`(,x 3 ,pi ,(list 1 2 3 4 5))", expected: "((1 2 3) 3 3.14 (1 2 3 4 5))" };
         { expression: "`(,x ,x)", expected: "((1 2 3) (1 2 3))" };
         { expression: "`(,@x ,@x)", expected: "(1 2 3 1 2 3)" };
         { expression: "`(,x ,@x)", expected: "((1 2 3) 1 2 3)" };

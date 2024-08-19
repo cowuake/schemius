@@ -48,13 +48,14 @@ pub enum SNumber {
 pub struct NumericalConstant;
 
 impl NumericalConstant {
-    pub const AVOGADRO: SNumber = SNumber::Float(numbers::AVOGADRO);
-    pub const BOLTZMANN: SNumber = SNumber::Float(numbers::BOLTZMANN);
-    pub const EULER: SNumber = SNumber::Float(numbers::EULER);
-    pub const GOLDEN_RATIO: SNumber = SNumber::Float(numbers::GOLDEN_RATIO);
-    pub const GRAVITATIONAL_CONSTANT: SNumber = SNumber::Float(numbers::GRAVITATIONAL_CONSTANT);
-    pub const PI: SNumber = SNumber::Float(numbers::PI);
-    pub const PLANCK: SNumber = SNumber::Float(numbers::PLANCK);
+    pub const AVOGADRO: SNumber = SNumber::Float(numbers::AVOGADRO as NativeFloat);
+    pub const BOLTZMANN: SNumber = SNumber::Float(numbers::BOLTZMANN as NativeFloat);
+    pub const EULER: SNumber = SNumber::Float(numbers::EULER as NativeFloat);
+    pub const GOLDEN_RATIO: SNumber = SNumber::Float(numbers::GOLDEN_RATIO as NativeFloat);
+    pub const GRAVITATIONAL_CONSTANT: SNumber =
+        SNumber::Float(numbers::GRAVITATIONAL_CONSTANT as NativeFloat);
+    pub const PI: SNumber = SNumber::Float(numbers::PI as NativeFloat);
+    pub const PLANCK: SNumber = SNumber::Float(numbers::PLANCK as NativeFloat);
 }
 
 pub trait NativeCasts {
