@@ -19,7 +19,7 @@ class Schemius {
       ███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║╚██████╔╝███████║
       ╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝ ╚═════╝ ╚══════╝
 
-        Welcome to Schemius!   [Published 2024-08-16 10:05:58 UTC]
+        Welcome to Schemius!   [Published 2024-08-19 05:37:07 UTC]
          --------------------------------------------------------
           Press [Ctrl + K]       -> Show essential keymap
           (environment-bindings) -> Show bindings in current env
@@ -241,11 +241,18 @@ class Schemius {
     return false;
   }
 
-  static matchChar(opening) {
-    const closing = Schemius.matchingChars[opening];
-    Schemius.terminal.cmd().insert(opening);
-    Schemius.terminal.cmd().insert(closing);
-    Schemius.dispatchKeyEvent("ArrowLeft");
+  static matchEnclosingChar(openingChar) {
+    const closingChar = Schemius.matchingChars[openingChar];
+    const position = Schemius.terminal.get_position();
+    const picker = Schemius.terminal.cmd().get();
+    const followingChar = picker[position];
+
+    Schemius.terminal.cmd().insert(openingChar);
+
+    if (!followingChar || followingChar !== openingChar) {
+      Schemius.terminal.cmd().insert(closingChar);
+      Schemius.dispatchKeyEvent("ArrowLeft");
+    }
   }
 
   static handleDelete() {
@@ -317,7 +324,7 @@ class Schemius {
         }
       }
     } else if (!Schemius.isMobile() && e.key in Schemius.matchingChars) {
-      Schemius.matchChar(e.key);
+      Schemius.matchEnclosingChar(e.key);
       return false;
     } else if (!Schemius.isMobile() && e.key === "BACKSPACE") {
       Schemius.handleDelete();
