@@ -11,11 +11,11 @@ use num::{integer::Roots, BigInt, BigRational, Complex, One, ToPrimitive, Zero};
 use crate::core::constants::numbers;
 
 cfg_if! {
-    if #[cfg(i32)] {
+    if #[cfg(feature = "i32")] {
         pub type NativeInt = i32;
-    } else if #[cfg(i64)] {
+    } else if #[cfg(feature = "i64")] {
         pub type NativeInt = i64;
-    } else if #[cfg(i128)] {
+    } else if #[cfg(feature = "i128")] {
         pub type NativeInt = i128;
     } else {
        pub type NativeInt = i64;
@@ -23,9 +23,9 @@ cfg_if! {
 }
 
 cfg_if! {
-    if #[cfg(f32)] {
+    if #[cfg(feature = "f32")] {
         pub type NativeFloat = f32;
-    } else if #[cfg(f64)] {
+    } else if #[cfg(feature = "f64")] {
         pub type NativeFloat = f64;
     } else {
         pub type NativeFloat = f64;
