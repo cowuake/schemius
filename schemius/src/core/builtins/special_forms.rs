@@ -293,7 +293,7 @@ fn r_unquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
         return Err(format!("Exception in ,: expected 1 argument, found {}", length));
     }
 
-    Ok(eval(args.s_car().unwrap(), env).unwrap())
+    Ok(eval(args.s_car().unwrap(), env)?)
 }
 
 pub fn r_quasiquote(args: ProcedureArgs, env: ProcedureEnv) -> SpecialFormOutput {
