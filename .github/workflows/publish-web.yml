@@ -91,7 +91,9 @@ jobs:
           path: ${{ env.PUBLISH_DIR }}
 
       - name: Remove vicious .gitignore
-        run: rm ${{ env.PUBLISH_DIR }}/pkg/.gitignore
+        run: |
+          ls -la ${{ env.PUBLISH_DIR }}/pkg
+          rm -f ${{ env.PUBLISH_DIR }}/pkg/.gitignore
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
