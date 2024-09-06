@@ -5,27 +5,27 @@ where
     T: Clone,
     Self: Sized + IntoIterator<Item = T> + FromIterator<T>,
 {
-    fn new() -> Self {
+    fn new() -> impl SList<T> {
         Self::from_iter(std::iter::empty())
     }
-    fn s_append(lists: &[Self]) -> Self;
+    fn s_append(lists: &[Self]) -> impl SList<T>;
     fn s_car(&self) -> Option<&T> {
         self.s_ref(0)
     }
     fn s_cadr(&self) -> Option<&T>;
-    fn s_cdr(&self) -> Option<Self>;
+    fn s_cdr(&self) -> Option<impl SList<T>>;
     fn s_len(&self) -> usize;
     fn s_ref(&self, index: usize) -> Option<&T>;
-    fn s_splice(&self, insert: Self, start: usize, end: usize) -> Self;
-    fn s_tail(&self, k: usize) -> Self;
-    fn s_reverse(&self) -> Self;
+    fn s_splice(&self, insert: Self, start: usize, end: usize) -> impl SList<T>;
+    fn s_tail(&self, k: usize) -> impl SList<T>;
+    fn s_reverse(&self) -> impl SList<T>;
     fn set_car(&mut self, value: T);
     fn pop(&mut self) -> Option<T>;
     fn push(&mut self, value: T);
     fn last(&self) -> Option<&T> {
         self.s_ref(self.s_len() - 1)
     }
-    fn extract_range(self, start: usize, end: usize) -> Self {
+    fn extract_range(self, start: usize, end: usize) -> impl SList<T> {
         let mut result = Self::new();
         self.into_iter().skip(start).take(end - start).for_each(|item| {
             result.push(item);
@@ -39,8 +39,8 @@ impl<T> SList<T> for Vec<T>
 where
     T: Clone,
 {
-    fn s_append(lists: &[Self]) -> Self {
-        lists.iter().flat_map(|list| list.iter().cloned()).collect()
+    fn s_append(lists: &[Self]) -> impl SList<T> {
+        lists.iter().flat_map(|list| list.iter().cloned()).collect::<Vec<T>>()
     }
 
     fn s_car(&self) -> Option<&T> {
@@ -51,11 +51,11 @@ where
         self.get(1)
     }
 
-    fn s_cdr(&self) -> Option<Self> {
+    fn s_cdr(&self) -> Option<impl SList<T>> {
         if self.is_empty() {
             return None;
         }
-        Some(self.iter().skip(1).cloned().collect())
+        Some(self.iter().skip(1).cloned().collect::<Vec<T>>())
     }
 
     fn s_len(&self) -> usize {
@@ -66,18 +66,18 @@ where
         self.get(index)
     }
 
-    fn s_splice(&self, insert: Self, start: usize, end: usize) -> Self {
+    fn s_splice(&self, insert: Self, start: usize, end: usize) -> impl SList<T> {
         let mut result = self.clone();
         result.splice(start..end, insert);
         result
     }
 
-    fn s_tail(&self, k: usize) -> Self {
-        self.iter().skip(k).cloned().collect()
+    fn s_tail(&self, k: usize) -> impl SList<T> {
+        self.iter().skip(k).cloned().collect::<Vec<T>>()
     }
 
-    fn s_reverse(&self) -> Self {
-        self.iter().rev().cloned().collect()
+    fn s_reverse(&self) -> impl SList<T> {
+        self.iter().rev().cloned().collect::<Vec<T>>()
     }
 
     fn set_car(&mut self, value: T) {
@@ -99,8 +99,8 @@ impl<T> SList<T> for LinkedList<T>
 where
     T: Clone,
 {
-    fn s_append(lists: &[Self]) -> Self {
-        lists.iter().flat_map(|list| list.iter().cloned()).collect()
+    fn s_append(lists: &[Self]) -> impl SList<T> {
+        lists.iter().flat_map(|list| list.iter().cloned()).collect::<LinkedList<T>>()
     }
 
     fn s_car(&self) -> Option<&T> {
@@ -111,7 +111,7 @@ where
         self.iter().nth(1)
     }
 
-    fn s_cdr(&self) -> Option<Self> {
+    fn s_cdr(&self) -> Option<impl SList<T>> {
         if self.is_empty() {
             return None;
         }
@@ -128,7 +128,7 @@ where
         self.iter().nth(index)
     }
 
-    fn s_splice(&self, insert: Self, start: usize, end: usize) -> Self {
+    fn s_splice(&self, insert: Self, start: usize, end: usize) -> impl SList<T> {
         let mut head = self.clone();
         let mut tail = head.split_off(start);
         let tail_end = tail.split_off(end - start);
@@ -139,12 +139,12 @@ where
         head
     }
 
-    fn s_tail(&self, k: usize) -> Self {
-        self.iter().skip(k).cloned().collect()
+    fn s_tail(&self, k: usize) -> impl SList<T> {
+        self.iter().skip(k).cloned().collect::<LinkedList<T>>()
     }
 
-    fn s_reverse(&self) -> Self {
-        self.iter().rev().cloned().collect()
+    fn s_reverse(&self) -> impl SList<T> {
+        self.iter().rev().cloned().collect::<LinkedList<T>>()
     }
 
     fn set_car(&mut self, value: T) {
@@ -171,8 +171,8 @@ pub mod tests_slist_vector {
         let list1 = vec![1, 2, 3];
         let list2 = vec![4, 5, 6];
         let list3 = vec![7, 8, 9];
-        let lists = &[list1, list2, list3];
-        let appended = SList::s_append(lists);
+        let lists = &[list1, list2, list3].into_iter();
+        let appended = SList::s_append(lists).into_iter();
         assert_eq!(appended, vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
     }
 
@@ -213,11 +213,11 @@ pub mod tests_slist_vector {
         let insert1 = vec![10, 11, 12];
         let insert2 = vec![20, 21, 22];
 
-        let spliced1 = list.s_splice(insert1, 2, 2);
-        let spliced2 = list.s_splice(insert2, 1, 4);
+        let spliced1 = list.s_splice(insert1, 2, 2).into_iter();
+        let spliced2 = list.s_splice(insert2, 1, 4).into_iter();
 
-        assert_eq!(spliced1, vec![1, 2, 10, 11, 12, 3, 4, 5]);
-        assert_eq!(spliced2, vec![1, 20, 21, 22, 5]);
+        assert_eq!(spliced1, vec![1, 2, 10, 11, 12, 3, 4, 5].into_iter());
+        assert_eq!(spliced2, vec![1, 20, 21, 22, 5].into_iter());
     }
 
     #[test]
