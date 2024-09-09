@@ -23,6 +23,6 @@
   "homepage": "https://github.com/cowuake/schemius#readme",
   "dependencies": {
     "jquery": "^3.7.1",
-    "jquery.terminal": "^2.42.2"
+    "jquery.terminal": "^2.43.1"
   }
 }
