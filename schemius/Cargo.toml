@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 cfg-if = "1.0"
 num = "0.4"
-regex = "1.10"
+regex = "1.11"
 
 [features]
 default = ["f64", "i64"]
