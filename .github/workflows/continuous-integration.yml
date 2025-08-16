@@ -31,7 +31,7 @@ jobs:
         run: rustup toolchain list
 
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Build
         run: cargo build --verbose
